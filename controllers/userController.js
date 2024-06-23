@@ -173,6 +173,8 @@ const loadMensShowcase = async(req,res) => {
 
         const category = await Category.find().exec();
         const brand = await Brand.find().exec();
+        console.log("Going to search ")
+        const groupProducts = await Product.find({targetGroup : "Men"}).exec(); 
 
         if(category.length == 0){
             console.log("\n\n\n Category is empty\n\n\n");
@@ -181,7 +183,7 @@ const loadMensShowcase = async(req,res) => {
             console.log("\n\n\n Brand is empty\n\n\n");
         }
         
-        return res.status(200).render('mens',{category,brand}) ;
+        return res.status(200).render('mens',{category,brand,groupProducts}) ;
 
         
     }catch(error){

@@ -493,6 +493,32 @@ h4 {
   background-color: var(--ShoeShopeBlue-color);
 }
 
+.heart-icon {
+  position: absolute;
+  top: 20px;  /* Adjust this value as needed */
+  right: 20px;  /* Adjust this value as needed */
+  z-index: 10;  /* Ensure it's above other elements */
+}
+
+.heart-icon a {
+  color: #a0a0a0;  /* Adjust the color as needed */
+  font-size: 24px;  /* Adjust the size as needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;  /* Adjust the size as needed */
+  height: 38px;  /* Adjust the size as needed */
+  background-color: rgba(255, 255, 255, 0.8);  /* Optional: background for better visibility */
+  border-radius: 50%;  /* Make it a circle */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);  /* Optional: add a shadow */
+}
+
+.heart-icon a:hover {
+  background-color: rgba(255, 255, 255, 1);  /* Optional: change background on hover */
+  color: #ff6666;  /* Optional: change color on hover */
+}
+
+
 
 
 /* Fullstack Developer Ajil*/

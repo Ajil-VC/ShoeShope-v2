@@ -71,18 +71,22 @@
                                 <div class="row product-grid-4">
 
 
-
+                                <% for( let i = 0 ; i < groupProducts.length ; i++){ %>
 
                                     <div class="col-lg-4 col-md-4 col-12 col-sm-6">
                                         <div class="product-cart-wrap mb-30">
                                             <div class="product-img-action-wrap">
                                                 <div class="product-img product-img-zoom">
                                                     <a href="shop-product-right.html">
-                                                        <img class="default-img" src="assets/imgs/shop/product-1-1.jpg" alt="">
-                                                        <img class="hover-img" src="assets/imgs/shop/product-1-2.jpg" alt="">
+                                                        <img class="default-img" src="/ProductImage/<%=groupProducts[i].image[0]%>" alt="">
+                                                        <img class="hover-img" src="/ProductImage/<%=groupProducts[i].image[1]%>" alt="">
                                                     </a>
                                                 </div>
-                                        
+                                                
+                                                <div class="heart-icon ">
+                                                    <a aria-label="Add to Wishlist" href="#"><i class="fi-rs-heart"></i></a>
+                                                </div>
+
 
                                                 <div class="product-badges product-badges-position product-badges-mrg">
                                                    
@@ -91,11 +95,11 @@
                                             </div>
                                             <div class="product-content-wrap">
                                               
-                                                <h2><a href="shop-product-right.html">Colorful Pattern Shirts</a></h2>
+                                                <h2><a href="shop-product-right.html"><%=groupProducts[i].ProductName%></a></h2>
                                             
                                                 <div class="product-price">
-                                                    <span>₹ 238.85 </span>
-                                                    <span class="old-price" style="color: rgb(255, 123, 0);" >₹ 345</span>
+                                                    <span>₹ <%=groupProducts[i].salePrice%> </span>
+                                                    <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=groupProducts[i].salePrice+345%> </span>
                                                 </div>
                                                 <div class="product-action-1 show">
                                                     <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
@@ -104,6 +108,7 @@
                                         </div>
                                     </div>
 
+                                <% } %>
                                     
 
                              
@@ -802,6 +807,8 @@
                         </div>
                         <!--End tab-content-->
                     </div>
+
+
                 </div>
             </div>
         </section>
