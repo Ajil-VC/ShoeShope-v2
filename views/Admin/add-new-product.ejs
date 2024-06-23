@@ -1,0 +1,200 @@
+<%- include("../layouts/adminHeader.ejs")  %>
+    
+<!--Aside Here-->
+<%- include("../layouts/adminAside.ejs")  %>
+
+<!--Head with search bar and other options Here-->
+<%- include("../layouts/adminHead.ejs")  %>
+
+
+  
+  <!-- Modal Start here -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Crop the Image</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          
+            <!--Here is the cropper-->
+            <!--===================-->
+
+            <div class="main-container">
+                <div class="img-container" id="imageCroperContainer" >
+                    <img id="imageCroper" src=""  style="width: 600px;" >
+                </div>
+                <!-- <button id="btn-crop">Crop</button> -->
+                <div class="cropped-container">
+                    <img src="" id="output">
+                </div>
+            </div>
+
+            <!--Cropper ends here-->
+            <!--===================-->
+
+
+
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary " id="btn-crop" >Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div> <!-- Modal Ends here -->
+
+
+        <section class="content-main">
+            <div class="row">
+                <div class="col-9">
+                    <div class="content-header">
+                        <h2 class="content-title">Add New Product</h2>
+                        <div>
+                            <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Cancel</button>
+                            <button class="btn btn-md rounded font-sm hover-up" id="publishBtnForAddProduct" >Publish</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Basic</h4>
+                        </div>
+                        <div class="card-body">
+
+                            
+
+                            <!-- Check this part Im taking of method='post inorderto submit form from frontend'-->
+                            <!-- Check this part Im taking of method='post inorderto submit form from frontend'-->
+                            <form id="formForAddNewProduct" action="/admin/productslist/add_new_product" enctype='multipart/form-data' >
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Product Name</label>
+                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name="productName" >
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea placeholder="Type here" class="form-control" rows="4" id="descriptionOfProduct" name="description" ></textarea>
+                                </div>
+
+                                <input class="form-control addProduct-image-input" type="file" id="addFirstProductImage" name="image" data-field="firstImage">
+                                <input class="form-control addProduct-image-input" type="file" id="addSecondProductImage" name="image" data-field="secondImage">
+                                <input class="form-control addProduct-image-input" type="file" id="addThirdProductImage" name="image" data-field="thirdImage">
+                                 <!-- Button trigger modal -->
+                                <button type="button" class="btn btn-primary" hidden id="openModalBtn" style="width: 100%;" data-toggle="modal" data-target="#exampleModalCenter">Launch demo modal</button>
+
+                                
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="mb-4">
+                                            <label class="form-label">Regular price</label>
+                                            <div class="row gx-2">
+                                                <input placeholder="₹" name="regularPrice" id="regularPrice" type="text" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="mb-4">
+                                            <label class="form-label">Sale price</label>
+                                            <input placeholder="₹" name="salePrice" id="salePrice" type="text" class="form-control">
+                                        </div>
+                                    </div>
+
+                                
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-4">
+                                            <label class="form-label">Stock Quantity</label>
+                                            <input placeholder="Enter the Quantity" name="stockQuantity" id="stockQuantity" type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                               
+                            </form>
+
+
+
+                        </div>
+                    </div> <!-- card end// -->
+                    
+                </div>
+                <div class="col-lg-3">
+
+                    <!-- Media Starts here-->
+                    <!-- ============================-->
+                    <!-- ============================-->
+                    <!-- ============================-->
+                            
+                    <!-- <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Media</h4>
+                        </div>
+
+                        
+
+                        <div class="card-body">
+                            <div class="input-upload">
+                                <img src="assets/imgs/theme/upload.svg" alt="">
+
+                                <input class="form-control" type="file" id="addFirstProductImage" name="image">
+
+                            </div>
+                           
+                        </div>
+                    </div> -->
+                    <!-- card end// -->
+
+                    <!--Media ends here ============================-->
+                    <!-- ============================-->
+                    <!-- ============================-->
+
+
+
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Organization</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row gx-2">
+                                <div class="col-sm-6 mb-3">
+                                    <label class="form-label">Category</label> 
+                                    <select class="form-select" name="category" id="category" >
+                                        
+                                        <% for(let i = 0 ; i < categories.length ; i++){ %>
+                                            
+                                            <option> <%=categories[i].name %> </option>
+
+                                        <% } %>
+
+                                        
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <label class="form-label">Brand</label>
+                                    <select class="form-select" name="brand" id="brand" >
+
+                                        <% for(let i = 0 ; i < brand.length ; i++){ %>
+                                            
+                                            <option> <%= brand[i].name %> </option>
+
+                                        <% } %>
+                                   
+                                    </select>
+                                </div>
+                            
+                            </div> <!-- row.// -->
+                        </div>
+                    </div> <!-- card end// -->
+                </div>
+            </div>
+        </section> <!-- content-main end// -->
+
+
+
+<%- include("../layouts/adminFooter.ejs")  %>

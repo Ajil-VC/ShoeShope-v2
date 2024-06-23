@@ -1,0 +1,142 @@
+<%- include("../layouts/adminHeader.ejs")  %>
+    
+<!--Aside Here-->
+<%- include("../layouts/adminAside.ejs")  %>
+
+<!--Head with search bar and other options Here-->
+<%- include("../layouts/adminHead.ejs")  %>
+
+
+        <section class="content-main">
+
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Brand </h2>
+                    <p>Add new brand here</p>
+                </div>
+              
+            </div>
+            
+            <header class="card card-body mb-4">
+                <div class="row gx-3">
+                    <div class="col-lg-4 col-md-6 me-auto">
+                        <input type="text" placeholder="Enter brand name here" class="form-control" id="inputForBrand" >
+                    </div>
+           
+                    <div class="col-lg-2 col-6 col-md-3">
+                        <button class="btn btn-success" style="height: 45px; width: 100%; color: white;" id="btnForAddBrand" >
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </header> <!-- card-header end// -->
+
+
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Categories </h2>
+                    <p>Add, edit or delete a category</p>
+                </div>
+                <div>
+                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form action="/admin/category" method="POST" >
+
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Name</label>
+                                    <input type="text" name="category" placeholder="Type here" class="form-control" id="product_name" />
+                                </div>
+                
+                          
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea placeholder="Type here" class="form-control" name="description" ></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-primary" type="submit" >Create category</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">
+                                                <div class="form-check">
+                                                    <p>Sl</p>
+                                                </div>
+                                            </th>
+                                            <th>Name</th>
+                                            <th>ID</th>
+                                            <th>Description</th>
+                                            <th>UnList</th>
+                                       
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody id="tbodyCheckForCategories" >
+                                        
+                                        <% for(let i = 0 ; i < categoryDetails.length ; i++){ %>
+                                            
+                                            <tr>
+                                                <td class="text-center">
+                                                    <div class="form-check">
+                                                        <p><%=i+1%></p>
+                                                    </div>
+                                                </td>
+                                                <td><b><%=categoryDetails[i].name%></b></td>
+                                                <td><%=categoryDetails[i]._id%></td>
+                                                <td><%=categoryDetails[i].description%></td>
+                                                <td>
+                                                    <% if(!categoryDetails[i].isActive){ %>
+
+                                                       
+                                                        <div class="col col-check flex-grow-0">
+                                                            <div class="form-check ms-2">
+                                                                <input class="form-check-input checkbox" type="checkbox" value="" id="productListToggle" onclick="listCategory('<%=categoryDetails[i]._id%>')" >
+                                                            </div>
+                                                        </div>
+                                                        <label for="productListToggle" class="toggle"></label>
+
+                                                    <% }else{ %>
+                                                        
+                                                        <div class="col col-check flex-grow-0">
+                                                            <div class="form-check ms-2">
+                                                                <input class="form-check-input checkbox" type="checkbox"  checked value="" id="productListToggle" onclick="listCategory('<%=categoryDetails[i]._id%>')" >
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <label for="productListToggle" class="toggle"></label>
+                                            
+
+                                                    <% } %>
+                                                </td>
+                                                <td class="text-end">
+                                                    
+                                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
+                                                        <i class="material-icons md-edit"></i> Edit
+                                                    </a>
+
+                                                </td>
+                                            </tr>
+
+                                        <% } %>
+                                     
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div> <!-- .col// -->
+                    </div> <!-- .row // -->
+                </div> <!-- card body .// -->
+            </div> <!-- card .// -->
+        </section> <!-- content-main end// -->
+
+<%- include("../layouts/adminFooter.ejs")  %>
