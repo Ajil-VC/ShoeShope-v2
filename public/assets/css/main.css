@@ -1876,8 +1876,8 @@ label {
 }
 
 .dot-style-1 ul li.slick-active button {
-  background: #088178;
-  border-color: #088178;
+  background: #4A69E2;
+  border-color: #4A69E2;
 }
 
 .dot-style-1.dot-style-1-position-1 ul {
@@ -1916,13 +1916,13 @@ label {
   display: block;
   z-index: 100;
   border-radius: 50%;
-  border: 1px solid #cce7d0;
+  border: 1px solid #ccd5e7;
   -webkit-transition: all .2s ease-out;
   transition: all .2s ease-out;
   text-align: center;
   line-height: 45px;
   font-size: 14px;
-  color: #088178;
+  color: #4A69E2;
 }
 
 .slider-arrow .slider-btn.slider-prev {
@@ -1942,9 +1942,9 @@ label {
 }
 
 .slider-arrow .slider-btn:hover {
-  background-color: #088178;
+  background-color: #4A69E2;
   color: #fff;
-  border-color: #088178;
+  border-color: #4A69E2;
 }
 
 .slider-arrow.slider-arrow-2 .slider-btn {
@@ -7681,10 +7681,24 @@ span.fi-rs-apps {
   border-top: 1px solid #e2e9e1;
 }
 
+.homeBigBanner{
+  margin-top: 50px;
+  margin-bottom: 100px;
+ 
+}
+.homeSmallBanner{
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+.homeOfferSection{
+  margin-top: 20px;
+  margin-bottom: 80px;
+}
+
 #scrollUp {
   width: 40px;
   height: 40px;
-  background-color: #088178;
+  background-color: #4a69e2 ;
   color: #ffffff;
   right: 30px;
   bottom: 30px;
