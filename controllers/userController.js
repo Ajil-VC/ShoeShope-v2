@@ -1,4 +1,4 @@
-const {User,OTP,Product} = require('../models/models')
+const {User,OTP,Product,Category,Brand} = require('../models/models')
 const bcrypt = require('bcrypt');
 const otpGenerator = require('otp-generator');
 const {appPassword} = require('../config/config')
@@ -167,12 +167,35 @@ const loadHomePage = async(req,res) => {
     }
 }
 
+const loadMensShowcase = async(req,res) => {
+
+    try{
+
+        const category = await Category.find().exec();
+        const brand = await Brand.find().exec();
+
+        if(category.length == 0){
+            console.log("\n\n\n Category is empty\n\n\n");
+        }
+        if(brand.length == 0){
+            console.log("\n\n\n Brand is empty\n\n\n");
+        }
+        
+        return res.status(200).render('mens',{category,brand}) ;
+
+        
+    }catch(error){
+
+    }
+}
+
 module.exports = {
     loadRegister,
     loadLogin,
     loginUser,
     gen_otp,
     verifyOTP,
-    loadHomePage
+    loadHomePage,
+    loadMensShowcase
   
 }

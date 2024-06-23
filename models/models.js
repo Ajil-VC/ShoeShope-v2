@@ -149,6 +149,9 @@ const productSchema = new mongoose.Schema({
     isActive : {
         type : Number,
         default : 1
+    },
+    targetGroup : {
+        type :String
     }    
 
 },{timestamps : true});

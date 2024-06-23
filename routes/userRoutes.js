@@ -39,6 +39,7 @@ userRouter.get('/auth/failure',(req,res) => {
     res.send("Something went wrong....")
 })
 
-userRouter.get('/home',isLoggedIn,userController.loadHomePage)
+userRouter.get('/home',isLoggedIn,userController.loadHomePage) ;
+userRouter.get('/mens',userController.loadMensShowcase) ;
 
 module.exports = userRouter;

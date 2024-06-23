@@ -343,7 +343,7 @@ const addNewProduct = async(req,res) => {
     console.log("\n\n\n\n\nChecking from back",req.files,"\n\n\n\n\n",req.body);
 
     const { productName,description,regularPrice } = req.body;
-    const {salePrice,stockQuantity,category,brand} = req.body;
+    const {salePrice,stockQuantity,category,brand,targetGroup} = req.body;
 
     try{
         //Add modal asking "Update details instead of creating duplicate."
@@ -356,7 +356,8 @@ const addNewProduct = async(req,res) => {
             stockQuantity: stockQuantity,
             Category    : category,
             Brand   : brand,
-            image   : req.files.map(file => file.filename)
+            image   : req.files.map(file => file.filename),
+            targetGroup : targetGroup
         });
 
         await newProduct.save();
