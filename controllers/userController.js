@@ -170,8 +170,10 @@ const loadHomePage = async(req,res) => {
 const loadMensShowcase = async(req,res) => {
 
     try{
+     
 
         const category = await Category.find().exec();
+        
         const brand = await Brand.find().exec();
         console.log("Going to search ")
         const groupProducts = await Product.find({targetGroup : "Men"}).exec(); 
@@ -191,6 +193,28 @@ const loadMensShowcase = async(req,res) => {
     }
 }
 
+
+const loadProductDetails = async (req,res) => {
+
+    const product_id = req.query.product_id ; 
+    
+    try{
+        
+        const product_details = await Product.findOne({ _id : product_id });
+        const category = product_details.Category ;
+        const related_products = await Product.find({ Category : category });
+
+        return res.render('product_details',{product_details,related_products});
+
+    }catch(error){
+
+        console.log('Internal Error while loading product Details');
+        return res.status(500).send("Internal Error while loading product Details");
+    }
+
+}
+
+
 module.exports = {
     loadRegister,
     loadLogin,
@@ -198,6 +222,7 @@ module.exports = {
     gen_otp,
     verifyOTP,
     loadHomePage,
-    loadMensShowcase
+    loadMensShowcase,
+    loadProductDetails
   
 }
