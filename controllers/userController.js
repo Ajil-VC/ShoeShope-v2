@@ -32,7 +32,6 @@ const loadRegister = async(req,res) => {
 //************************************* */
 const gen_otp = async(req,res) => {
 
-    console.log(req.body)
     req.session.formdata = {...req.body}
     const {email} = {...req.body}
 
@@ -63,6 +62,42 @@ const gen_otp = async(req,res) => {
         console.log(error);
         res.status(500).send("Error sending OTP")
     }
+}
+//resend otp here
+//************************************* */
+const resend_otp = async (req,res) => {
+
+    console.log("Heloo this is resend  otp")
+    console.log(req.session.formdata)
+    const email = req.session.formdata.email;
+   
+    const otp = otpGenerator.generate(5,{digits:true,alphabets:false,upperCaseAlphabets:false,lowerCaseAlphabets:false, specialChars:false})
+    try{
+
+        await OTP.create({email,otp})
+
+        //Sending OTP to the email
+        const transporter = nodemailer.createTransport({
+            service : 'gmail',
+            auth : {
+                user : 'fullstackdevelopersince2024@gmail.com',
+                pass : appPassword
+            }
+        });
+        await transporter.sendMail({
+            from : "fullstackdevelopersince2024@gmail.com",
+            to : email,
+            subject : "OTP Verification",
+            text : `Your OTP for verification is " ${otp} "`
+        });
+
+        return res.json({success:true,message : "OTP send to your email.."})
+        
+    }catch(error){
+        console.log(error);
+        res.status(500).send("Error sending OTP")
+    }
+
 }
 
 
@@ -230,6 +265,7 @@ module.exports = {
     verifyOTP,
     loadHomePage,
     loadShowcase,
-    loadProductDetails
+    loadProductDetails,
+    resend_otp
   
 }

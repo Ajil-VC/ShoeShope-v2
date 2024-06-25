@@ -22,6 +22,7 @@ userRouter.get('/',(req,res) => {
 //Registration
 userRouter.get('/signup',userController.loadRegister) ;
 userRouter.post('/signup',userController.gen_otp) ;
+userRouter.get('/resend_otp',userController.resend_otp) ;
 userRouter.post('/signup/verify-otp',userController.verifyOTP) ;
 
 //Login
