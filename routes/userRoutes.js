@@ -40,7 +40,7 @@ userRouter.get('/auth/failure',(req,res) => {
 })
 
 userRouter.get('/home',isLoggedIn,userController.loadHomePage) ;
-userRouter.get('/mens',userController.loadMensShowcase) ;
+userRouter.get('/showcase',userController.loadShowcase) ;
 userRouter.get('/product_details',userController.loadProductDetails) ;
 
 module.exports = userRouter;

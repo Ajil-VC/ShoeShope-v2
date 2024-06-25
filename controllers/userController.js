@@ -32,6 +32,7 @@ const loadRegister = async(req,res) => {
 //************************************* */
 const gen_otp = async(req,res) => {
 
+    console.log(req.body)
     req.session.formdata = {...req.body}
     const {email} = {...req.body}
 
@@ -167,16 +168,15 @@ const loadHomePage = async(req,res) => {
     }
 }
 
-const loadMensShowcase = async(req,res) => {
+const loadShowcase = async(req,res) => {
 
     try{
      
-
-        const category = await Category.find().exec();
-        
+        const targetGroup = req.query.group ;
+        const category = await Category.find().exec(); 
         const brand = await Brand.find().exec();
-        console.log("Going to search ")
-        const groupProducts = await Product.find({targetGroup : "Men"}).exec(); 
+
+        const groupProducts = await Product.find({targetGroup : targetGroup}).exec(); 
 
         if(category.length == 0){
             console.log("\n\n\n Category is empty\n\n\n");
@@ -185,13 +185,16 @@ const loadMensShowcase = async(req,res) => {
             console.log("\n\n\n Brand is empty\n\n\n");
         }
         
-        return res.status(200).render('mens',{category,brand,groupProducts}) ;
+        return res.status(200).render('showcase',{category,brand,groupProducts,targetGroup}) ;
 
         
     }catch(error){
-
+        console.log("Internal error while loading showcase");
+        return res.status(500).send("Internal error while loading showcase");
     }
 }
+
+
 
 
 const loadProductDetails = async (req,res) => {
@@ -201,10 +204,12 @@ const loadProductDetails = async (req,res) => {
     try{
         
         const product_details = await Product.findOne({ _id : product_id });
-        const category = product_details.Category ;
-        const related_products = await Product.find({ Category : category });
+        const category  = product_details.Category ;
+        const target    = product_details.targetGroup ;
+ 
+        const related_products = await Product.find({ $and:[{Category : category},{targetGroup : target }]});
 
-        return res.render('product_details',{product_details,related_products});
+        return res.render('product_details',{product_details,related_products,target});
 
     }catch(error){
 
@@ -215,6 +220,8 @@ const loadProductDetails = async (req,res) => {
 }
 
 
+
+
 module.exports = {
     loadRegister,
     loadLogin,
@@ -222,7 +229,7 @@ module.exports = {
     gen_otp,
     verifyOTP,
     loadHomePage,
-    loadMensShowcase,
+    loadShowcase,
     loadProductDetails
   
 }

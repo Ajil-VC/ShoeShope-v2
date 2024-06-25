@@ -9,7 +9,7 @@
             <div class="container">
                 <div class="breadcrumb">
                     <a href="/home" rel="nofollow">Home</a>
-                    <span></span> <a href="/mens">Mens</a>
+                    <span></span> <a href="/showcase?group=<%=target%>"><%=target%></a>
                     <span></span> <a href="">Product Details</a>
                 </div>
             </div>
@@ -133,7 +133,13 @@
                                         <ul class="product-meta font-xs color-grey mt-50">
                                             <!-- <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
                                             <li class="mb-5">Tags: <a href="#" rel="tag">Cloth</a>, <a href="#" rel="tag">Women</a>, <a href="#" rel="tag">Dress</a> </li> -->
-                                            <li>Availability:<span class="in-stock text-success ml-5"><%=product_details.stockQuantity%> Items In Stock</span></li>
+                                            <li>Availability:
+                                                <% if(product_details.stockQuantity < 1){ %>
+                                                    <span class="in-stock text-danger ml-5">Out of Stock</span>
+                                                <% } else{%> 
+                                                    <span class="in-stock text-success ml-5"><%=product_details.stockQuantity%> Items In Stock</span>
+                                                <% } %>
+                                            </li>
                                         </ul>
                                     </div>
                                     <!-- Detail Info -->
@@ -260,13 +266,15 @@
                                 </div>
                             </div>
                             <div class="row mt-60">
+
+                                <!--Give condtion if no products available-->
                                 <div class="col-12">
                                     <h3 class="section-title style-1 mb-30">You may also like</h3>
                                 </div>
                                 <div class="col-12">
                                     <div class="row related-products">
 
-                                        <% for(let i = 0 ; i < 4 ; i++){ %>
+                                        <% for(let i = 0 ; (i < related_products.length && i < 4) ; i++){ %>
 
                                             <div class="col-lg-3 col-md-4 col-12 col-sm-6">
                                                 <div class="product-cart-wrap small hover-up">
@@ -305,6 +313,8 @@
                                       
                                     </div>
                                 </div>
+
+
                             </div>
                           
                         </div>
