@@ -38,7 +38,7 @@ const gen_otp = async(req,res) => {
    
     const otp = otpGenerator.generate(5,{digits:true,alphabets:false,upperCaseAlphabets:false,lowerCaseAlphabets:false, specialChars:false})
     try{
-
+        console.log("Your OTP is : ",otp)
         await OTP.create({email,otp})
 
         //Sending OTP to the email
@@ -73,7 +73,7 @@ const resend_otp = async (req,res) => {
    
     const otp = otpGenerator.generate(5,{digits:true,alphabets:false,upperCaseAlphabets:false,lowerCaseAlphabets:false, specialChars:false})
     try{
-
+        console.log("Your OTP is : ",otp)
         await OTP.create({email,otp})
 
         //Sending OTP to the email
@@ -133,12 +133,12 @@ const verifyOTP = async(req,res) => {
                 const userData = await newUser.save();
 
                 if(userData){
-                    return res.status(200).send('successfully registered')
+                    return res.status(200).redirect('/home')
                 }else{
                     res.send('Something went wrong while registering')
                 }
             }catch(error){
-                res.status(500).send('Internal server error while registering')
+                res.status(500).send('Internal server error while registering\nLooks like the email is already used.')
             }
             
         }else{

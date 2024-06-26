@@ -480,6 +480,33 @@ h4 {
 
 
 /* Fullstack Developer Ajil*/
+
+.error{
+  color: red;
+  
+}
+
+.stylish-input {
+  width: 400px;
+  padding: 10px 20px;
+  border: 2px solid #ccc;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.stylish-input:focus {
+  border-color: #66afe9;
+  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+.stylish-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+
 .viewHeight{
   height: 100vh;
   display: flex;
@@ -5894,8 +5921,8 @@ h6.post-title {
   z-index: 999;
   left: 0;
   -webkit-transition: all .3s ease 0s;
-  transition: all .3s ease 0s;
-  border-bottom: 2px solid #046963;
+  transition: all .3s ease 0s; /* Ajil Here is the navigation bar line color */
+  border-bottom: 2px solid white;
   background: #fff;
 }
 

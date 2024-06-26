@@ -21,25 +21,30 @@
                                             <h3 class="mb-30">Register</h3>
                                         </div>
                                       
-                                        <form method="post" action="/signup" >
-                                            <div class="otp-form-group">
-                                                <input type="text" required="" name="firstName" placeholder="First Name">
+                                        <form method="post" action="/signup" id="registrationForm" >
+                                            <div class="otp-form-group d-flex flex-column ">
+                                                <input type="text"   id="Reg-firstName" name="firstName" placeholder="First Name">
+                                                <div id="firstNameError" class="error ml-5" ></div>
                                             </div>
-                                            <div class="otp-form-group">
-                                                <input type="text" required="" name="lastName" placeholder="Last Name">
+                                            <div class="otp-form-group d-flex flex-column " >
+                                                <input type="text"  id="Reg-lastName" name="lastName" placeholder="Last Name">
+                                                <div id="lastNameError" class="error ml-5" ></div>
                                             </div>
-                                            <div class="otp-form-group">
-                                                <input required="" type="email" name="email" placeholder="Email">
+                                            <div class="otp-form-group d-flex flex-column ">
+                                                <input  type="email" id="Reg-email" name="email" placeholder="Email">
+                                                <div id="emailError" class="error ml-5" ></div>
                                             </div>
-                                            <div class="otp-form-group">
-                                                <input required="" type="number" name="mobile_no" placeholder="Mobile Number">
+                                            <div class="otp-form-group d-flex flex-column ">
+                                                <input  type="text" id="Reg-mob" name="mobile_no" placeholder="Mobile Number">
+                                                <div id="mobError" class="error ml-5" ></div>
                                             </div>
-                                            <div class="otp-form-group">
-                                                <input required="" type="password" name="password" placeholder="Password">
+                                            <div class="otp-form-group d-flex flex-column ">
+                                                <input  type="password" id="Reg-pass" name="password" placeholder="Password">
+                                                <div id="passwordError" class="error ml-5" ></div>
                                             </div>
                                          
                                             <div class="otp-form-group text-center">
-                                                <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Submit</button>
+                                                <button  class="btn btn-fill-out btn-block hover-up" name="login">Submit</button>
                                             </div>
                                         </form>
                                         <div class="divider-text-center mt-15 mb-15">

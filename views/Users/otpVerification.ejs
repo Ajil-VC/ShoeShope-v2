@@ -4,7 +4,7 @@
 <%- include("../layouts/navigation.ejs")  %>
 
 
-    <main class="main" onload="startTimer()" >
+    <main class="main">
   
         <section class="pt-150 pb-150 viewHeight">
             <div class="container text-center">
@@ -16,9 +16,9 @@
                             <h3 class="text-center text-danger"> <span id="otp-timer" ></span></h3>
                             <h4 class="text-success" id="otp-success-msg" >otp send to your email successfully</h4>
                             <p class="text-center text-success" id="verify-otp" >Verify your OTP</p>
-                            <form method="post" action="/signup/verify-otp">
+                            <form method="post" action="/signup/verify-otp" id="otp-form" >
                                 <div class="otp-form-group">
-                                    <input type="text" class="otp-input form-control"  oninput="moveToNext(this, 'otp2')" maxlength="1" required="" name="otp">
+                                    <input type="text" class="otp-input form-control" id="otp1" oninput="moveToNext(this, 'otp2')" maxlength="1" required="" name="otp">
                                     <input type="text" class="otp-input form-control" id="otp2" oninput="moveToNext(this, 'otp3')" maxlength="1" required="" name="otp">
                                     <input type="text" class="otp-input form-control" id="otp3" oninput="moveToNext(this, 'otp4')" maxlength="1" required="" name="otp">
                                     <input type="text" class="otp-input form-control" id="otp4" oninput="moveToNext(this, 'otp5')" maxlength="1" required="" name="otp">
@@ -26,7 +26,7 @@
                                 </div>
                                 <div class="otp-form-group text-center" id="otp-submit-parent" >
                                     <button type="submit" class="btn btn-fill-out btn-block hover-up" id="otp-submit-bn" name="login">Submit</button>
-                                    <!-- <a class="btn" id="resend-otp" hidden >Resend OTP</a> -->
+                                
                                 </div>
                             </form>
                             <button class="btn" id="resend-otp" hidden>Resend OTP</button>
