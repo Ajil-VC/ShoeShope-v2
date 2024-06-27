@@ -135,7 +135,9 @@
                                             <!-- <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
                                             <li class="mb-5">Tags: <a href="#" rel="tag">Cloth</a>, <a href="#" rel="tag">Women</a>, <a href="#" rel="tag">Dress</a> </li> -->
                                             <li>Availability:
-                                                <% if(product_details.stockQuantity < 1){ %>
+                                                <% if(product_details.isActive ==0){ %>
+                                                    <span class="in-stock text-danger ml-5">Unavailable</span>
+                                                <% }else if(product_details.stockQuantity < 1){ %>
                                                     <span class="in-stock text-danger ml-5">Out of Stock</span>
                                                 <% } else{%> 
                                                     <span class="in-stock text-success ml-5"><%=product_details.stockQuantity%> Items In Stock</span>

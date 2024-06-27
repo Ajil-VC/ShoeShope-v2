@@ -11,11 +11,28 @@ function blockUser(userID){
     return response.json();  
 })
 .then(data => {
-    console.log('data recieved : ',data)
+    console.log('data recieved : ',data.userID);
+    const btnId = document.getElementById(`blockBtn-${userID}`);
+    console.log(btnId)
+    console.log(data.isBlocked)
+    if(data.isBlocked){
+        btnId.textContent = 'Block';
+        btnId.classList.add('blockBtn');
+        btnId.classList.remove('unblockBtn');
+        btnId.classList.remove('btn-success');
+        btnId.classList.add('btn-warning')
+    }else{
+        btnId.textContent = 'unblock';
+        btnId.classList.add('unblockBtn');
+        btnId.classList.remove('blockBtn');
+        btnId.classList.remove('btn-warning');
+        btnId.classList.add('btn-success')
+
+    }
                              
 })
 .catch(error => {
-    console.log("There was a problem with the fetch operation",error)
+    console.log("There was a problem with the fetch operation of blocking user",error)
 });
 
 }
@@ -81,6 +98,28 @@ if(btnForAddBrand){
     
 
 
+}
+
+
+
+function listProduct(productID){
+
+    fetch(`http://localhost:2000/admin/productslist?productID=${productID}`, {method : 'PATCH'})
+    .then(response => {
+        if(!response.ok){
+
+            throw new Error("Network response was no ok for patch request of listProducts")
+        }
+        return response.json();
+    })
+    .then(data => {
+
+        console.log('data recieved : ',data)
+                         
+    })
+    .catch(error => {
+        console.log("There was a problem while performing listProducts fetch operation",error)
+    });
 }
 
 
@@ -168,24 +207,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         })
 
+    
+    const btn_crop =  document.querySelector('#btn-crop');
+    if(btn_crop){
 
-    document.querySelector('#btn-crop').addEventListener('click', () => {
- 
-        if (window.cropperInstance) {
-
-            const croppedImages = window.cropperInstance.getCroppedCanvas();
-            croppedImages.toBlob((blob) => {
-
-                if(blob){
-                    console.log(blob)
-                    console.log(formDataForAddNewProduct);
-                    imageBlobs.push(blob);
-                    console.log(imageBlobs,"\nUpper one is arrya of blobs ");
-                }
-
-            });
-        }
-    });
+        btn_crop.addEventListener('click', () => {
+     
+            if (window.cropperInstance) {
+    
+                const croppedImages = window.cropperInstance.getCroppedCanvas();
+                croppedImages.toBlob((blob) => {
+    
+                    if(blob){
+                        console.log(blob)
+                        console.log(formDataForAddNewProduct);
+                        imageBlobs.push(blob);
+                        console.log(imageBlobs,"\nUpper one is arrya of blobs ");
+                    }
+    
+                });
+            }
+        });
+    }
     
 
     

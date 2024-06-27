@@ -80,11 +80,14 @@
                                         
                                         <td class="text-end">
                                             <% if(!user[i].isBlocked){ %>
-                                                <a href="#" onclick="blockUser('<%= user[i]._id %>')" class="btn btn-sm blockBtn rounded font-sm mt-15 BlockBtn">Block</a>
-                                            <% }else{ %>
-                                                <a href="#" onclick="blockUser('<%= user[i]._id %>')" class="btn btn-sm unblockBtn rounded font-sm mt-15 BlockBtn">Unblock</a>
-                                            <% } %>
-                                            <a href="#" onclick="deletUser('<%= user[i]._id %>')" class="btn btn-sm btn-brand rounded font-sm mt-15 DangerRed DeleteBtn">Delete</a>
+                                                <!-- <a href="#" onclick="blockUser('<%= user[i]._id %>')" id="blockBtn-<%=user[i]._id%>" class="btn btn-sm blockBtn rounded font-sm mt-15 BlockBtn">Block</a> -->
+                                                <button onclick="blockUser('<%= user[i]._id %>')" id="blockBtn-<%=user[i]._id%>" class="btn btn-sm blockBtn rounded font-sm mt-15 BlockBtn btn-warning " >Block</button>
+                                                <% }else{ %>
+                                                <!-- <a href="#" onclick="blockUser('<%= user[i]._id %>')" class="btn btn-sm unblockBtn rounded font-sm mt-15 BlockBtn">Unblock</a> --> 
+                                                <button onclick="blockUser('<%= user[i]._id %>')" id="blockBtn-<%=user[i]._id%>" class="btn btn-sm unblockBtn rounded font-sm mt-15 BlockBtn btn-success " >Unblock</button>
+                                                <% } %>
+                                            <!-- <a href="#" onclick="deletUser('<%= user[i]._id %>')" class="btn btn-sm btn-brand rounded font-sm mt-15 text-danger DeleteBtn">Delete</a> -->
+                                                <button onclick="deletUser('<%= user[i]._id %>')" class="btn btn-sm  rounded font-sm mt-15 text-danger DeleteBtn" >Delete</button>
                                         </td>
                                     </tr> 
 

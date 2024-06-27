@@ -81,6 +81,7 @@ adminRouter.post('/category',adminController.addBrandOrCategory);
 adminRouter.patch('/category',adminController.softDeleteCategory);
 
 adminRouter.get('/productslist',adminController.loadAllProducts);
+adminRouter.patch('/productslist',adminController.softDeleteProducts);
 adminRouter.get('/productslist/add_new_product',adminController.loadAddNewProduct);
 adminRouter.post('/productslist/add_new_product',upload.array('image',3),adminController.addNewProduct);
 

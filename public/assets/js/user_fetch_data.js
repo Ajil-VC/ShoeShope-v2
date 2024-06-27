@@ -108,34 +108,71 @@ if(otp_form){
 
 
 
-//Eventlistener for password
-// Reg_pass = document.getElementById('Reg-pass')
+
 
 
 //Form validation for registration and submission
 const firstNameError = document.getElementById('firstNameError');
-const lastNameError = document.getElementById('lastNameError');
 const emailError = document.getElementById('emailError');
 const mobError = document.getElementById('mobError');
 const passwordError = document.getElementById('passwordError');
+Reg_pass = document.getElementById('Reg-pass')
+let Reg_pass_value;
+let valid = true;
+const passwordCheck = {condition : false,msg : ""};
+
+Reg_pass.addEventListener('input',(event) => {
+    Reg_pass_value = Reg_pass.value;
+    console.log(Reg_pass_value)
+    if(!/[A-Z]/.test(Reg_pass_value)){
+        
+        passwordError.textContent = "Password Should Contain atleast 1 Uppercase"
+        passwordCheck.msg = "Password Should Contain atleast 1 Uppercase"
+        passwordCheck.condition = false;
+    }else if(!/[a-z]/.test(Reg_pass_value)){
+        
+        passwordError.textContent = "Password Should Contain atleast 1 Lowercase"
+        passwordCheck.msg = "Password Should Contain atleast 1 Lowercase"
+        passwordCheck.condition = false;
+    }else if(!/\d/.test(Reg_pass_value)){
+        
+        passwordError.textContent = "Password Should Contain a number"
+        passwordCheck.msg = "Password Should Contain a number"
+        passwordCheck.condition = false;
+    }else if(!/^.{5,}$/.test(Reg_pass_value)){
+        
+        passwordError.textContent = "Password Should Contain 5 charecters minimum"
+        passwordCheck.msg = "Password Should Contain 5 charecters minimum"
+        passwordCheck.condition = false;
+    }else if(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(Reg_pass_value)){
+        
+        passwordError.textContent = ""
+        passwordCheck.msg = ""
+        passwordCheck.condition = true; 
+    }
+    
+    
+    
+})
+
+
 
 document.getElementById('registrationForm').addEventListener('submit',function(event) {
     console.log("This is registration")
     event.preventDefault();
 
-    Reg_firstName = document.getElementById('Reg-firstName').value.trim();
-    Reg_lastName = document.getElementById('Reg-lastName').value.trim();
-    Reg_email = document.getElementById('Reg-email').value.trim();
-    Reg_mob = document.getElementById('Reg-mob').value.trim();
-    Reg_pass = document.getElementById('Reg-pass').value.trim();
-
+    let Reg_firstName = document.getElementById('Reg-firstName').value.trim();
+    let Reg_email = document.getElementById('Reg-email').value.trim();
+    let Reg_mob = document.getElementById('Reg-mob').value.trim();
+    Reg_pass_value = Reg_pass.value.trim();
+    
     firstNameError.textContent = "";
     emailError.textContent = "";
     mobError.textContent = "";
     passwordError.textContent = ""
 
-    let valid = true;
-    
+    valid =true;
+
     if (!Reg_firstName ){
         
         firstNameError.textContent = "This field cant be empty"
@@ -145,7 +182,7 @@ document.getElementById('registrationForm').addEventListener('submit',function(e
         firstNameError.textContent = "Only letters and spaces"
         valid = false;
     }
-
+    
     if(!Reg_email){
         
         emailError.textContent = "This field can't be empty"
@@ -155,7 +192,7 @@ document.getElementById('registrationForm').addEventListener('submit',function(e
         emailError.textContent = "Enter a valid email id"
         valid = false;
     }
-
+    
     if(!Reg_mob){
         
         mobError.textContent = "This field can't be empty"
@@ -165,18 +202,19 @@ document.getElementById('registrationForm').addEventListener('submit',function(e
         mobError.textContent = "Please give a proper mobile number"
         valid = false;
     }
-
-    if(!Reg_pass){
-
+    
+    if(!Reg_pass_value){
+    
         passwordError.textContent = "This field cant be empty"
         valid = false;
-    }else if(!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(Reg_pass)){
-
-        passwordError.textContent = "Password Should Contain atleast 1 Uppercase, 1 lower case 1 digit and minimum 5 charecters length"
-        valid = false;
+    }else if(!passwordCheck.condition){
+        passwordError.textContent = passwordCheck.msg
+        valid = false
     }
+  
 
-    if(valid){
+    if(valid ){
+
         this.submit();
     }
 

@@ -148,12 +148,14 @@ const blockOrUnblockUser = async (req,res) => {
 
         const userData = await User.findOne({_id:idToBlockorUnblock})
         if(!userData.isBlocked){
-            await User.updateOne({_id:idToBlockorUnblock},{$set:{isBlocked:1}});
+            const user = await User.findByIdAndUpdate({_id:idToBlockorUnblock},{$set:{isBlocked:1}});
             //should send the json data to frontend and update it there.
+            return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
             
         }else{
-            await User.updateOne({_id:idToBlockorUnblock},{$set:{isBlocked:0}})
+            const user = await User.findByIdAndUpdate({_id:idToBlockorUnblock},{$set:{isBlocked:0}})
             //should send the json data to frontend and update it there.    
+            return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
         }
      
 
@@ -311,13 +313,43 @@ const softDeleteCategory = async(req,res) => {
 const loadAllProducts = async (req,res) => {
 
     try{
+        
+        const products = await Product.find().exec();
 
-        return res.render('productslist')
+        return res.render('productslist',{products})
 
     }catch(error){
 
         console.log('Error while loading products\n',error);
         return res.status(500).send("Error while loading products")
+    }
+}
+
+const softDeleteProducts = async(req,res) => {
+    //Complete this function to list product
+    const productID = req.query.productID;
+    try{
+
+        const product = await Product.findOne({_id:productID}).exec();
+        
+        if(product.isActive){
+            
+            await Product.updateOne({_id:productID},{$set:{isActive : 0}}).exec();
+            const productDetails = await Product.find({});
+            // return res.status(200).render('productslist',{productDetails})
+            return res.json({productID : productID,isActive:0})
+        }else{
+
+            await Product.updateOne({_id:productID},{$set:{isActive : 1}}).exec();
+            const productDetails = await Product.find({});
+            return res.status(200).render('productslist',{productDetails})
+
+        }
+
+    }catch(error){
+
+        console.log("Error while performing softdeletion of Produts",error);
+        return res.status(500).send('Error while performing softdeletion Produts');
     }
 }
 
@@ -384,5 +416,6 @@ module.exports = {
     softDeleteCategory,
     loadAllProducts,
     loadAddNewProduct,
-    addNewProduct
+    addNewProduct,
+    softDeleteProducts
 }
