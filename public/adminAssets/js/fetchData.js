@@ -152,24 +152,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const formDataForAddNewProduct = new FormData();
 
-    var openModalBtn = document.getElementById('openModalBtn');
-    // var addFirstProductImage =  document.getElementById('addFirstProductImage');
-    // addSecondProductImage = document.getElementById('addSecondProductImage');
-    // addThirdProductImage = document.getElementById('addThirdProductImage');
+    let openModalBtn = document.getElementById('openModalBtn');
+    const modal_close_button = document.getElementById('modal-close-button');
+
     const imageCroper = document.getElementById('imageCroper');
     const form = document.getElementById('formForAddNewProduct');
     let currentInputField = null;
-    let imageBlobs = [];
+    let imageBlobs = {};
 
 
                 //**reader fn start here
-                function ReadFileAndCropper(file,reader,imageCroper,openModalBtn,chooseimageElement,){
-
+                function ReadFileAndCropper(file,reader,imageCroper,openModalBtn,chooseimageElement){
+                    
                     reader.onload = (event) => {
                       
-                        
                         var imageUrl = event.target.result;
-            
+                        
                         chooseimageElement.src = imageUrl;              
                         imageCroper.src = imageUrl ;
                         
@@ -179,13 +177,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.cropperInstance.destroy();
                         }
                         
-        
+                        
                         //Cropper Initializing here
                         window.cropperInstance = new Cropper(imageCroper,{
                             aspectRatio: 1,
                             full: true, // Cover the whole image
                             autoCropArea: false // Allow free expansion
                         })
+                        
                         
                         currentInputField = chooseimageElement;
                     }
@@ -196,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.addProduct-image-input').forEach(inputField => {
             
             inputField.addEventListener('change',(e) => {
-                console.log(e)
+                console.log("Thisise",e)
                 let file = e.target.files[0];
                 if(!file){
                     return;
@@ -220,8 +219,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
                     if(blob){
                         console.log(blob)
+                        console.log(currentInputField,"This is the input ha")
                         console.log(formDataForAddNewProduct);
-                        imageBlobs.push(blob);
+                        imageBlobs[currentInputField] = blob;
+                        modal_close_button.click();
+
                         console.log(imageBlobs,"\nUpper one is arrya of blobs ");
                     }
     
@@ -269,10 +271,11 @@ document.addEventListener('DOMContentLoaded', function() {
             formDataForAddNewProduct.append(hiddenCategory.name, hiddenCategory.value);
             formDataForAddNewProduct.append(hiddenBrand.name, hiddenBrand.value);
             
-            imageBlobs.forEach((blob,index) => {
-                
-                formDataForAddNewProduct.append('image', blob, `croppedimage${index+1}.png`);
+            Object.entries(imageBlobs).forEach(([key, blob], index) => {
+                formDataForAddNewProduct.append('image', blob, `croppedimage${index + 1}.png`);
             });
+
+           
             
             fetch('http://localhost:2000/admin/productslist/add_new_product',{
                 method : 'post',
@@ -280,13 +283,23 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => {
                 if(!response.ok){
+
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Looks like You have already added the product",
+                        icon: 'error'
+                    });
                     throw new Error('Network response was not ok in submission of new product.')
                 }
                 return response.json();
             })
             .then(data => {
-
-                console.log('data recieved : ',data)
+                console.log('data recieved : ',data,data.message)
+                Swal.fire({
+                    title: 'Good job!',
+                    text: data.message,
+                    icon: 'success'
+                });
                                  
             })
             .catch(error => {

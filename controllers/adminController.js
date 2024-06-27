@@ -393,7 +393,7 @@ const addNewProduct = async(req,res) => {
         });
 
         await newProduct.save();
-        // return res.status(201).send("New Product added successfully");
+        return res.status(201).json({message:"Product Added Successfully"});
 
     }catch(error){
 
