@@ -79,6 +79,7 @@ adminRouter.delete('/customers',adminController.deleteUser);
 adminRouter.get('/category',adminController.loadCategory);
 adminRouter.post('/category',adminController.addBrandOrCategory);
 adminRouter.patch('/category',adminController.softDeleteCategory);
+adminRouter.put('/category',adminController.updateCategory);
 
 adminRouter.get('/productslist',adminController.loadAllProducts);
 adminRouter.patch('/productslist',adminController.softDeleteProducts);

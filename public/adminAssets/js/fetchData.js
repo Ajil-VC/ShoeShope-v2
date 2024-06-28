@@ -147,7 +147,6 @@ function listCategory(categoryID){
 
 
 
-
 document.addEventListener('DOMContentLoaded', function() {
     
     const formDataForAddNewProduct = new FormData();
@@ -312,7 +311,62 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
 
+
+    const categoryNameUpdate = document.getElementById('categoryNameUpdate'); 
+    const categoryDescriptionUpdate = document.getElementById('categoryDescriptionUpdate'); 
+    const btn_new_save = document.getElementById('btn-new-save');
+    new_modal_close_button = document.getElementById('new-modal-close-button');
+    let categoryUpdationCurrentInput = '';
+    let td_des;
+    let td_id;
+    let td_name;
+    
+    //using event delegation  technique to select the button
+    const tbodyCheckForCategories = document.getElementById('tbodyCheckForCategories');
+    if(tbodyCheckForCategories){
+        tbodyCheckForCategories.addEventListener('click',(e)=>{
+
+            const button = e.target.closest('.catUpdateBtnParent .btn');
+            if(button){
+                categoryUpdationCurrentInput = button.id;
+                categoryNameUpdate.value = button.dataset.category;
+                categoryDescriptionUpdate.value = button.dataset.description;
+                td_des = document.getElementById(`td-des-${categoryUpdationCurrentInput}`)
+                td_id = document.getElementById(`td-id-${categoryUpdationCurrentInput}`)
+                td_name = document.getElementById(`td-n-${categoryUpdationCurrentInput}`)
+                
+            }
+        })
+    }
+    
+  
+    if(btn_new_save){
+        btn_new_save.addEventListener('click',(e)=> {
+           
+            console.log(categoryUpdationCurrentInput)
+            new_modal_close_button.click();
+
+            fetch(`http://localhost:2000/admin/category?id=${categoryUpdationCurrentInput}&category_name=${categoryNameUpdate.value}&description=${categoryDescriptionUpdate.value}`,{method:"PUT"})
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok")
+                }
+                return response.json()
+            })
+            .then(data => {
+
+                // let td_des;
+                // let td_id;
+                // let td_name;
+                console.log("Data",data.name)
+                td_name.textContent = data.name;
+                console.log("This is ",data)
+            })
+        })
+    }
+
 }) //DOMContentLoaded
+
 
 
 

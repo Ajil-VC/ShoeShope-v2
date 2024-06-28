@@ -309,6 +309,25 @@ const softDeleteCategory = async(req,res) => {
 
 }
 
+const updateCategory = async(req,res) => {
+
+    const id = req.query.id;
+    const name = req.query.category_name;
+    const description = req.query.description;
+
+    try{
+
+        const updpatedCategory = await Category.findByIdAndUpdate(id,{$set:{name:name,description:description}},{new:true});
+        console.log("updpatedCategory HHH",updpatedCategory)
+        return res.status(201).json(updpatedCategory);
+        
+
+    }catch(error){
+        console.log("Internal server error while performing udpation of categories.",error);
+        return res.status(500).send("Internal server error while performing udpation of categories.",error);
+    }
+}
+
 
 const loadAllProducts = async (req,res) => {
 
@@ -414,6 +433,7 @@ module.exports = {
     loadCategory,
     addBrandOrCategory,
     softDeleteCategory,
+    updateCategory,
     loadAllProducts,
     loadAddNewProduct,
     addNewProduct,

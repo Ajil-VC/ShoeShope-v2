@@ -6,6 +6,35 @@
 <!--Head with search bar and other options Here-->
 <%- include("../layouts/adminHead.ejs")  %>
 
+<div class="modal fade" id="newModalCenter" tabindex="-1" role="dialog" aria-labelledby="newModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newModalLongTitle">New Feature Modal</h5>
+                <button type="button" id="new-modal-close-button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- New Data here -->
+                <form action="">
+                    <label for="categoryNameUpdate" class="form-label">Category Name</label>
+                    <input type="text" placeholder="Type here" class="form-control" id="categoryNameUpdate"   name="" >
+                    <label for="categoryDescriptionUpdate" class="form-label mt-3 ">Description</label>
+                    <textarea placeholder="Type here" class="form-control" rows="4" id="categoryDescriptionUpdate"  name="description" ></textarea>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btn-new-save">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
         <section class="content-main">
 
@@ -91,9 +120,10 @@
                                                         <p><%=i+1%></p>
                                                     </div>
                                                 </td>
-                                                <td><b><%=categoryDetails[i].name%></b></td>
-                                                <td><%=categoryDetails[i]._id%></td>
-                                                <td><%=categoryDetails[i].description%></td>
+                                                <td id="td-n-<%=categoryDetails[i]._id%>" ><b><%=categoryDetails[i].name%></b></td>
+                                                <td id="td-id-<%=categoryDetails[i]._id%>" ><%=categoryDetails[i]._id%></td>
+                                                <td id="td-des-<%=categoryDetails[i]._id%>" ><%=categoryDetails[i].description%></td>
+                                                
                                                 <td>
                                                     <% if(!categoryDetails[i].isActive){ %>
 
@@ -118,12 +148,11 @@
 
                                                     <% } %>
                                                 </td>
-                                                <td class="text-end">
-                                                    
-                                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
+                                                <td class="text-end catUpdateBtnParent "  >
+                                                    <button type="button" data-category="<%=categoryDetails[i].name%>" data-description="<%=categoryDetails[i].description%>" class="btn btn-sm  font-sm btn-dark rounded btn-brand"  id="<%=categoryDetails[i]._id%>" style="width: 100%;" data-toggle="modal" data-target="#newModalCenter">
                                                         <i class="material-icons md-edit"></i> Edit
-                                                    </a>
-
+                                                    </button>
+                         
                                                 </td>
                                             </tr>
 
