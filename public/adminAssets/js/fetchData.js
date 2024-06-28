@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 console.log('data recieved : ',data,data.message)
                 Swal.fire({
-                    title: 'Good job!',
+                    title: '',
                     text: data.message,
                     icon: 'success'
                 });

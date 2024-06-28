@@ -6,6 +6,7 @@ const {passport} = require('../middleware/googleauth');
 
 userRouter.use(express.urlencoded({extended:true}));
 
+
 userRouter.use((req,res,next) => {
     
     req.app.set('views','./views/Users');

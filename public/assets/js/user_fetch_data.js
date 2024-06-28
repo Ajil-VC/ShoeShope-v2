@@ -23,9 +23,8 @@ function moveToNext (current,nextField){
 
 const otp_submit_btn = document.getElementById('otp-submit-bn');
 const otp_success_msg = document.getElementById('otp-success-msg');
-const verify_otp = document.getElementById('verify-otp');
 const otp_timer = document.getElementById('otp-timer');
-const resend_otp = document.getElementById('resend-otp' )
+const resend_otp = document.getElementById('resend-otp')
 
 function startTimer(){    
     let timeLeft = 55 ;
@@ -39,7 +38,7 @@ function startTimer(){
             // otp_success_msg.remove();
             otp_success_msg.textContent = ""
             otp_submit_btn.setAttribute('hidden',true)
-            verify_otp.setAttribute('hidden',true);
+            
             resend_otp.removeAttribute('hidden');
             resend_otp.disabled = false;
         }
@@ -70,8 +69,10 @@ if(resend_otp){
     
             resend_otp.setAttribute('hidden', true);
             otp_submit_btn.removeAttribute('hidden');
-            verify_otp.removeAttribute('hidden');
+           
             otp_success_msg.textContent = data.message;
+            otp_success_msg.classList.remove('text-danger')
+            otp_success_msg.classList.add('text-success')
     
             startTimer();
     
@@ -84,28 +85,81 @@ if(resend_otp){
     })
 }
 
-const otp_form = document.getElementById('otp-form');
-if(otp_form){
 
-    otp_form.addEventListener('submit',function(event) {
+
+const otp_form = document.getElementById('otp-form');
+if(otp_submit_btn){
     
-        event.preventDefault();
+    otp_submit_btn.addEventListener('click',(e) =>{
+        
+        e.preventDefault();
     
         let otp = '';
         for(let i = 1 ; i <= 5 ; i++ ){
             otp += document.getElementById('otp'+i).value;
         }
-    
+        console.log(typeof otp,"Type of otp",otp)
+        let intOTP = parseInt(otp);
+        console.log(intOTP,typeof intOTP)
         let hidden_otp = document.createElement('input');
-        hidden_otp.type = 'hidden';
-        hidden_otp.name = 'otp';
-        hidden_otp.value = otp ;
-        this.appendChild(hidden_otp);
-    
-        this.submit();
+            hidden_otp.type = 'hidden';
+            hidden_otp.name = 'otp';
+            hidden_otp.value = intOTP ;
+            console.log("Consoling from frontend",otp)
+            const otpformData = new FormData(otp_form);
+            //Checking down
+            console.log(typeof hidden_otp.value,"Type")
+            otp_form.appendChild(hidden_otp);
+            let urlEncodedData = new URLSearchParams(otpformData);
+                       
+            fetch('http://localhost:2000/signup/verify-otp',{method : 'POST',headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'},body : urlEncodedData.toString() })
+            .then(response => {
+                
+                if(!response.ok){
+                    
+                    Swal.fire({
+                        title: 'Internal Server Error!',
+                        text: "Try again later",
+                        icon: 'error'
+                    });
+                    throw new Error('Network response was not ok while submitting otp.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // console.log(otp_success_msg)
+                console.log("Data recieved: ",data);
+                if(!data.status){
+        
+                    otp_success_msg.classList.remove('text-success')
+                    otp_success_msg.classList.add('text-danger')
+                    otp_success_msg.textContent = data.message;
+                }else{
+        
+                    window.location.href = "http://localhost:2000/home"
+                }
+        
+            })
+            .catch(error =>{
+                console.log("Error while trying to submit otp",error)
+            })
+            otp_form.removeChild(hidden_otp);
     })
 }
 
+   
+    
+      
+    
+        
+
+ 
+  
+        
+      
+  
+ 
 
 
 
@@ -224,3 +278,4 @@ if(registrationForm){
     
     })
 }
+

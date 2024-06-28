@@ -107,9 +107,10 @@ const verifyOTP = async(req,res) => {
 
    try{
     
-    const otp = req.body.otp;
+    const otp = req.body.otp.join('');//Getting array of otp so added this
     const email = req.session.formdata.email;
     const userDatafromSession = req.session.formdata;
+    console.log("From back:",otp)
 
         /* Using .exec() with Mongoose queries ensures a promise is returned,
         aligning with modern JavaScript practices for handling asynchronous operations. */
@@ -133,7 +134,8 @@ const verifyOTP = async(req,res) => {
                 const userData = await newUser.save();
 
                 if(userData){
-                    return res.status(200).redirect('/home')
+                    console.log("User created successfully")
+                    return res.status(201).json({status:true})
                 }else{
                     res.send('Something went wrong while registering')
                 }
@@ -142,7 +144,7 @@ const verifyOTP = async(req,res) => {
             }
             
         }else{
-            return res.status(400).send('Invalid otp')
+            return res.json({message:"Invalid otp!!",status:false});
         }
 
    }catch(error){
