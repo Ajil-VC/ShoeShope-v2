@@ -1,6 +1,6 @@
 const express = require('express');
 const userRouter = express.Router();
-const {isLoggedIn} = require('../middleware/user_auth');
+const authenticate = require('../middleware/user_auth');
 const {passport} = require('../middleware/googleauth');
 
 
@@ -41,8 +41,13 @@ userRouter.get('/auth/failure',(req,res) => {
     res.send("Something went wrong....")
 })
 
-userRouter.get('/home',isLoggedIn,userController.loadHomePage) ;
+userRouter.get('/home',userController.loadHomePage) ;
 userRouter.get('/showcase',userController.loadShowcase) ;
 userRouter.get('/product_details',userController.loadProductDetails) ;
+
+userRouter.get('/profile',authenticate.isLoggedIn,userController.loadUserProfile)
+userRouter.put('/profile/account-detail',userController.updateUserProfile)//Complete this part
+userRouter.post('/profile/address',userController.addNewAddress);
+userRouter.get('/profile/logout',authenticate.isLoggedIn,userController.logoutUser);
 
 module.exports = userRouter;

@@ -481,6 +481,24 @@ h4 {
 
 /* Fullstack Developer Ajil*/
 
+.address-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.default-badge {
+  background-color: #e0e0e0;
+  color: #000;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+.address-actions a {
+  margin-right: 8px;
+}
+
 .error{
   color: red;
   
@@ -1053,8 +1071,8 @@ button.submit:hover, button[type='submit']:hover {
   padding: 12px 30px;
   border-radius: 4px;
   color: #fff;
-  border: 1px solid #046963;
-  background-color: #088178;
+
+  background-color: #4A69E2;
   cursor: pointer;
   -webkit-transition: all 300ms linear 0s;
   transition: all 300ms linear 0s;
@@ -1062,7 +1080,7 @@ button.submit:hover, button[type='submit']:hover {
 }
 
 .btn:hover, .button:hover {
-  background-color: #046963;
+  background-color: #838383;
 }
 
 .btn.btn-sm, .button.btn-sm {
@@ -1979,8 +1997,8 @@ label {
 }
 
 .dot-style-1 ul li.slick-active button {
-  background: #4A69E2;
-  border-color: #4A69E2;
+  background: lightblue;
+  
 }
 
 .dot-style-1.dot-style-1-position-1 ul {
@@ -2366,7 +2384,7 @@ label {
 
 .dashboard-menu ul li a.active {
   color: #fff;
-  background-color: #088178;
+  background-color: lightgrey;
 }
 
 .dashboard-menu ul li a.active i {

@@ -104,6 +104,47 @@ const brandSchema = mongoose.Schema({
 })
 
 
+const addressSchema = new mongoose.Schema({
+
+    addressType: {
+        type: String,
+        required: true
+    },
+    place: {
+        type: String,
+        required: true,
+    },
+    city: {
+        type: String,
+        required: true,
+    },
+    district: {
+        type: String,
+        required: true,
+    },
+    state: {
+        type: String,
+        required: true,
+    },
+    landmark: {
+        type: String,
+        required: false,
+    },
+    pinCode: {
+        type: String,
+        required: true,
+    },
+    mobile_no: {
+        type: String,
+        required: true,
+    },
+    default: {
+        type: Number,
+        default: 0 
+    }
+
+});
+
 
 const otpSchema = new mongoose.Schema({
     email: {type:String , required : true},
@@ -159,6 +200,7 @@ const productSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP',otpSchema);
+const Address = mongoose.model('Address',addressSchema);
 
 const Admin = mongoose.model('Admin',adminSchema);
 
@@ -173,5 +215,6 @@ module.exports = {
     Admin,
     Category,
     Brand,
-    Product
+    Product,
+    Address
 }

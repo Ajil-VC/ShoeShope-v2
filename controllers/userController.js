@@ -170,18 +170,26 @@ const loginUser = async (req,res) => {
         const {email,password} = req.body;
 
         const userData = await User.findOne({email}).exec();
-        const passwordMatch = await bcrypt.compare(password,userData.password)
-        
-        if(passwordMatch){
-
-            req.session.user_id = userData._id; 
-            req.session.isAuthorised = userData.isAuthorised; 
-            req.session.isBlocked = userData.isBlocked;
-            console.log(req.session)
-
-            return res.status(200).redirect('home')
+        console.log(userData)
+        if(userData.google_id){
+            return res.status(200).redirect('/auth/google')
+        }
+        else if(userData){
+            const passwordMatch = await bcrypt.compare(password,userData.password)
+            
+            if(passwordMatch){
+    
+                req.session.user_id = userData._id; 
+                req.session.isAuthorised = userData.isAuthorised; 
+                req.session.isBlocked = userData.isBlocked;
+                console.log(req.session)
+    
+                return res.status(200).redirect('home')
+            }else{
+                return res.status(401).send('email or password incorrect');
+            }
         }else{
-            return res.status(404).send('User Not Found')
+            return res.status(404).send("User not found");
         }
 
     }catch(error){
@@ -257,9 +265,90 @@ const loadProductDetails = async (req,res) => {
 }
 
 
+const loadUserProfile = async(req,res) => {
+
+    let userID = '';
+    try{
+        if(req?.user?.google_id){
+            userID = req.user._id;
+
+        }else if(req.session.user_id){
+            userID = req.session.user_id;
+        }
+        
+        userDetails = await User.findOne({_id : userID}) ;
+        console.log("Consoling userDetailis:",userDetails)
+
+        return res.status(200).render('profile',{userDetails});
+    }catch(error){
+
+        console.log("Internal error while loading profile",error);
+        return res.status(500).send("Internal error while loading profile",error);
+    }
+}
+
+const updateUserProfile = async(req,res) => {
+
+    try{
+
+
+
+    }catch(error){
+        console.log("Internal Error whil updloading the profile details",error);
+        return res.status(500).send("Internal Error whil updloading the profile details",error);
+    }
+}
+
+
+const logoutUser = async(req,res) => {
+
+    try{
+
+        if(req?.user?.google_id){
+
+            req.logout((err) => {
+    
+                if(err){
+                    console.log("Error occured while trying to logout the passport authenticated user",err);
+                    return next(err);
+                }else{
+                    console.log("User logged out successfully")
+                    return res.status(302).redirect('/home')
+                }
+            })
+            
+        }
+        else if(req.session.user_id){
+
+            req.session.destroy((err) => {
+                
+                if(err){
+                    console.error("Error while destroying session : ",err);
+                    return res.status(500).send("Error while destroying session : ",err);
+                }
+
+                console.log("User logged out successfully");
+                return res.status(302).redirect('/home');
+            });
+        }else{
+            console.log("Unknown Error while logging out")
+        }
+
+    }catch(error){
+        console.log("Internal error while trying to logout",error);
+        return res.status(500).send("Internal error while trying to logout",error);
+    }
+
+}
+
+const addNewAddress = async(req,res) => {
+
+    console.log(req.body)
+}
 
 
 module.exports = {
+
     loadRegister,
     loadLogin,
     loginUser,
@@ -268,6 +357,10 @@ module.exports = {
     loadHomePage,
     loadShowcase,
     loadProductDetails,
-    resend_otp
+    resend_otp,
+    loadUserProfile,
+    updateUserProfile,
+    addNewAddress,
+    logoutUser
   
 }

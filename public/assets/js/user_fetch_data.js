@@ -113,7 +113,7 @@ if(otp_submit_btn){
             let urlEncodedData = new URLSearchParams(otpformData);
                        
             fetch('http://localhost:2000/signup/verify-otp',{method : 'POST',headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'},body : urlEncodedData.toString() })
+                'Content-Type': 'application/x-www-form-urlencoded'},body : urlEncodedData })
             .then(response => {
                 
                 if(!response.ok){
@@ -278,4 +278,6 @@ if(registrationForm){
     
     })
 }
+
+
 
