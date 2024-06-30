@@ -48,6 +48,7 @@ userRouter.get('/product_details',userController.loadProductDetails) ;
 userRouter.get('/profile',authenticate.isLoggedIn,userController.loadUserProfile)
 userRouter.put('/profile/account-detail',userController.updateUserProfile)//Complete this part
 userRouter.post('/profile/address',userController.addNewAddress);
+userRouter.patch('/profile/address',userController.makeDefaultAddress);
 userRouter.get('/profile/logout',authenticate.isLoggedIn,userController.logoutUser);
 
 module.exports = userRouter;

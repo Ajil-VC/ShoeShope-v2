@@ -138,7 +138,7 @@ const addressSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    default: {
+    defaultAdd: {
         type: Number,
         default: 0 
     }

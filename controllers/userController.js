@@ -1,4 +1,6 @@
-const {User,OTP,Product,Category,Brand} = require('../models/models')
+const {User,OTP,Product,Category,Brand,Address} = require('../models/models');
+const mongoose = require('mongoose') 
+const {ObjectId} = require('mongodb')
 const bcrypt = require('bcrypt');
 const otpGenerator = require('otp-generator');
 const {appPassword} = require('../config/config')
@@ -274,12 +276,18 @@ const loadUserProfile = async(req,res) => {
 
         }else if(req.session.user_id){
             userID = req.session.user_id;
-        }
-        
-        userDetails = await User.findOne({_id : userID}) ;
-        console.log("Consoling userDetailis:",userDetails)
+        }  
 
-        return res.status(200).render('profile',{userDetails});
+        const userDetails = await User.findOne({_id : userID}).exec() ;
+        const defaultAddress =await Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec ();
+        const otherAddress =await Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec ();
+            console.log(otherAddress)
+        if(!defaultAddress){
+
+            return res.status(200).render('profile',{userDetails,defaultAddress});    
+        }
+
+        return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress});
     }catch(error){
 
         console.log("Internal error while loading profile",error);
@@ -343,7 +351,82 @@ const logoutUser = async(req,res) => {
 
 const addNewAddress = async(req,res) => {
 
-    console.log(req.body)
+    let userID = "";
+    let isDefault = 0;
+    if(req?.user?._id){
+        userID = req.user._id;
+    }else if(req.session.user_id){
+        userID = req.session.user_id
+    }
+    try{
+        
+
+        isDefault = await User.aggregate([
+            {$match:{_id:new ObjectId(userID)}},{$project:{size:{$size:"$address"}}}
+        ]).exec();
+
+        if(isDefault[0].size < 1 ){
+            isDefault = 1;
+        }else{
+            isDefault = 0;
+        }
+
+        const newAddress = new Address({
+
+            addressType : req.body.addressName,
+            pinCode     : req.body.addressPincode,
+            place       : req.body.addressPlace,
+            city        : req.body.addressCity,
+            district    : req.body.addressDistrict,
+            state       : req.body.addressState,
+            landmark    : req.body.addressLandmark,
+            mobile_no   : req.body.addressMobile,
+            defaultAdd  : isDefault
+        })
+        const addressData = await newAddress.save();
+        if(addressData){
+            
+            await User.updateOne({_id:userID},{$push:{address : addressData._id}});
+            return res.status(201).redirect('/profile')
+        }else{
+            console.log("Something went wrong while creating address");
+            return res.send("Something went wrong while creating address");
+        }
+
+    }catch(error){
+        console.log("Internal error while adding new Address",error);
+        return res.status(500).send("Internal erro while adding new Address",error);
+    }
+}
+
+const makeDefaultAddress = async(req,res) =>{
+    
+    const AddressId = req.query.AddressID;
+    console.log("Why",AddressId)
+    try{
+        const address_id = new mongoose.Types.ObjectId(AddressId);
+        
+        let userID = "";
+        if(req?.user?._id){
+            userID = req.user._id;
+        }else if(req.session.user_id){
+            userID = req.session.user_id
+        }
+    
+        const userDetails = await User.findOne({_id : userID}) 
+        const removeDefaultAddress = await Address.updateMany({_id:{$in:userDetails.address},defaultAdd:1},{$set:{defaultAdd:0}}).exec ();
+        console.log("This is previous defaultAddress:",removeDefaultAddress);
+        
+        await Address.updateOne({_id : address_id},{$set:{defaultAdd:1}}).exec();
+
+        return res.status(200).json({status : true});
+
+    }catch(error){
+
+        console.log("Internal server error while trying to make default address",error)
+        res.status(500).send("Internal server error while trying to make default address",error);
+    }
+
 }
 
 
@@ -361,6 +444,7 @@ module.exports = {
     loadUserProfile,
     updateUserProfile,
     addNewAddress,
+    makeDefaultAddress,
     logoutUser
   
 }

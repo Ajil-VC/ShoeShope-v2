@@ -60,7 +60,8 @@
                             <input type="text" placeholder="Type here" class="form-control" id="addressPlace" name="addressPlace">
                         </div>
                     </div>
-
+                    <label for="addressMobile" class="form-label">Mobile</label>
+                    <input type="text" placeholder="Type here" class="form-control" id="addressMobile" name="addressMobile">
                     <label for="addressLandmark" class="form-label">Landmark</label>
                     <input type="text" placeholder="Type here" class="form-control" id="addressLandmark" name="addressLandmark">
 
@@ -343,54 +344,84 @@
                                     <div class="container mt-5 tab-pane fade " id="address" >
                                         <button type="button" class="btn  mb-3" data-toggle="modal" data-target="#addNewAddressModalCenter" >Add New Address</button>
                                    <!-- Button to trigger the modal -->
-   
-                                        <div class="address-card">
-                                            <div class="d-flex justify-content-between align-items-start" >
-                                                <p>
-                                                    <span style="font-weight: bolder;  color: black;" >AddressType</span> <br>
-                                                    <span>User name,</span> <br>
-                                                    <span>Cheruthottil (H),</span> <br>
-                                                    <span>Kayamkulam PO, Ernamkulam,</span> <br>
-                                                    <span>Mobile: <span style="font-weight: bold; " >+91 0123456789</span></span>
-                                                </p>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <span class="default-badge bg-warning ">Default</span>
+                                       
+                                        <% if(!defaultAddress){ %>
+                                            
+                                            <div class="address-card">
+                                                <div class="d-flex justify-content-between align-items-start" >
+                                                    <p>
+                                                        <span>No Address Added</span>
+                                                    </p>
                                                 </div>
-
+                              
                                             </div>
-                                            <div class="d-flex justify-content-end align-items-center" >
-                                                <div class="address-actions">
-                                                    <a href="#" class="text-primary">Edit</a>
-                                                    <a href="#" class="text-danger">Delete</a>
+                                        <% }else{ %>
+
+                                            <!--Default Address-->
+                                            <div class="address-card">
+                                                <div class="d-flex justify-content-between align-items-start" >
+                                                    <p>
+                                                        <span style="font-weight: bolder;  color: black;" ><%=defaultAddress.addressType%></span> <br>
+                                                        <span>LandMark: <%=defaultAddress.landmark%>,</span> <br>
+                                                        <span>Place: <%=defaultAddress.place%>,</span> <br>
+                                                        <span><%=defaultAddress.city%> city, PIN: <%=defaultAddress.pinCode%>,</span> <br>
+                                                        <span><%=defaultAddress.district%> Dt, <%=defaultAddress.state%></span> <br>
+                                                        <span>Mobile: <span style="font-weight: bold; " >+91 <%=defaultAddress.mobile_no%></span></span>
+                                                    </p>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="default-badge" style="background-color: rgb(206, 206, 206);" >Default</span>
+                                                    </div>
+    
                                                 </div>
-
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="address-card">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <p>
-                                                    <span style="font-weight: bolder;  color: black;" >AddressType</span> <br>
-                                                    <span>User name,</span> <br>
-                                                    <span>Cheruthottil (H),</span> <br>
-                                                    <span>Kayamkulam PO, Ernamkulam,</span> <br>
-                                                    <span>Mobile: <span style="font-weight: bold; " >+91 0123456789</span></span>
-                                                </p>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <a href="#" class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.875rem; border-radius: 0.25rem; background-color: #4A69E2; color: white;">
-                                                        Make Default
-                                                    </a>
+                                                <div class="d-flex justify-content-end align-items-center" >
+                                                    <div class="address-actions">
+                                                        <a href="#" class="text-primary">Edit</a>
+                                                        <a href="#" class="text-danger">Delete</a>
+                                                    </div>
+    
                                                 </div>
-
                                             </div>
-                                            <div class="d-flex justify-content-end align-items-center" >
-                                                <div class="address-actions">
-                                                    <a href="#" class="text-primary">Edit</a>
-                                                    <a href="#" class="text-danger">Delete</a>
+                                            
+                                            <!--Other Address-->
+                                           
+                                            <% if(otherAddress.length > 0){ 
+                                                for(let i = 0 ; i < otherAddress.length ; i++){ %>
+
+
+                                                
+                                                <div class="address-card" >
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <p>
+                                                            <span style="font-weight: bolder;  color: black;" ><%=otherAddress[i].addressType%></span> <br>
+                                                            <span>LandMark: <%=otherAddress[i].landmark%>,</span> <br>
+                                                            <span>Place: <%=otherAddress[i].place%>,</span> <br>
+                                                            <span><%=otherAddress[i].city%> city, PIN: <%=otherAddress[i].pinCode%>,</span> <br>
+                                                            <span><%=otherAddress[i].district%> Dt, <%=otherAddress[i].state%></span> <br>
+                                                            <span>Mobile: <span style="font-weight: bold; " >+91 <%=otherAddress[i].mobile_no%></span></span>
+                                                        </p>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <!-- <a  class="btn" onclick="makeDefaultAddress('<%=otherAddress[i]._id%>')" style="padding: 0.25rem 0.6rem; font-size: 0.875rem; border-radius: 0.25rem; background-color: #75e24a; color: white;">
+                                                                Make Default
+                                                            </a> -->
+                                                            <button class="btn" onclick="makeDefaultAddress('<%=otherAddress[i]._id%>')" style="padding: 0.25rem 0.6rem; font-size: 0.875rem; border-radius: 0.25rem; background-color: #75e24a; color: white;" >
+                                                                Make Default
+                                                            </button>
+                                                            <!-- href="/profile/address?_method=PATCH&makeAddressID=<%=otherAddress[i]._id%>" -->
+                                                        </div>
+        
+                                                    </div>
+                                                    <div class="d-flex justify-content-end align-items-center" >
+                                                        <div class="address-actions">
+                                                            <a href="#" class="text-primary">Edit</a>
+                                                            <a href="#" class="text-danger">Delete</a>
+                                                        </div>
+        
+                                                    </div>
                                                 </div>
+                                            <% }} %>
+                                            
 
-                                            </div>
-                                        </div>
+                                        <% } %>
 
                                       
                                

@@ -150,19 +150,7 @@ if(otp_submit_btn){
 
    
     
-      
     
-        
-
- 
-  
-        
-      
-  
- 
-
-
-
 
 
 //Form validation for registration and submission
@@ -280,4 +268,35 @@ if(registrationForm){
 }
 
 
+
+async function makeDefaultAddress(AddressId){
+    
+    if(!AddressId){
+        console.log("Didnt get the Address Id");
+        return ;
+    }
+    console.log(AddressId);
+
+    try{
+
+        const response = await fetch(`http://localhost:2000/profile/address?AddressID=${AddressId}`,{
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+              }
+        });
+
+        if(!response.ok){
+            throw new Error('Network response was not ok while making default address');
+        }
+
+        const data = await response.json();
+        console.log(data);
+        window.location.reload();
+
+    }catch(error){
+        console.log("There was a problem with making default address",error)
+    }
+
+}
 
