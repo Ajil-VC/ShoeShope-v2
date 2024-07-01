@@ -198,6 +198,29 @@ const productSchema = new mongoose.Schema({
 },{timestamps : true});
 
 
+const cartSchema = new mongoose.Schema({
+
+    userId : {
+        type : mongoose.Schema.Types.ObjectId,
+        required : true,
+        ref : 'User'
+    },
+    items : [
+        {
+            productId : {
+                type : mongoose.Schema.Types.ObjectId,
+                required : true,
+                ref : 'Product'
+            },
+            quantity : {
+                type : Number,
+                required : true,
+                min : 1
+            }
+        }
+    ] 
+})
+
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP',otpSchema);
 const Address = mongoose.model('Address',addressSchema);

@@ -75,6 +75,73 @@
     </div>
 </div>
 
+<!--Address Editing -->
+<div class="modal fade" id="editAddressModalCenter" tabindex="-1" role="dialog" aria-labelledby="editAddressModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAddressModalLongTitle">Edit Address</h5>
+                <button type="button" id="editAddress-modal-close-button" class="close" data-dismiss="modal" aria-label="Close" style="background-color: transparent; border: none; font-size: 1.5rem; color: gray; padding: 0.5rem 1rem;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/profile/address/edit" method="post" id="editAddressForm">
+                    <input type="hidden" id="editAddressId" name="addressId">
+
+                    <div class="d-flex justify-content-between row form-group">
+                        <div class="col-lg-6">
+                            <label for="editAddressName" class="form-label">Address Type</label>
+                            <select id="editAddressName" class="form-control" name="addressName">
+                                <option>Home</option>
+                                <option>Office</option>
+                                <option>Work place</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="editAddressPincode" class="form-label">Pincode</label>
+                            <input type="text" placeholder="Enter pincode" class="form-control" id="editAddressPincode" name="addressPincode">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between row form-group">
+                        <div class="col-lg-6">
+                            <label for="editAddressState" class="form-label">State</label>
+                            <input type="text" placeholder="Enter state" class="form-control" id="editAddressState" name="addressState">
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="editAddressDistrict" class="form-label">District</label>
+                            <input type="text" placeholder="Enter district" class="form-control" id="editAddressDistrict" name="addressDistrict">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between row form-group">
+                        <div class="col-lg-6">
+                            <label for="editAddressCity" class="form-label">City</label>
+                            <input type="text" placeholder="Enter city" class="form-control" id="editAddressCity" name="addressCity">
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="editAddressPlace" class="form-label">Place</label>
+                            <input type="text" placeholder="Enter place" class="form-control" id="editAddressPlace" name="addressPlace">
+                        </div>
+                    </div>
+
+                    <label for="editAddressMobile" class="form-label">Mobile</label>
+                    <input type="text" placeholder="Enter mobile number" class="form-control" id="editAddressMobile" name="addressMobile">
+
+                    <label for="editAddressLandmark" class="form-label">Landmark</label>
+                    <input type="text" placeholder="Enter landmark" class="form-control" id="editAddressLandmark" name="addressLandmark">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" form="editAddressForm" class="btn btn-primary" id="btn-editAddress-update">Update Address</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="mobile-header-active mobile-header-wrapper-style">
         <div class="mobile-header-wrapper-inner">
             <div class="mobile-header-top">
@@ -358,7 +425,7 @@
                                         <% }else{ %>
 
                                             <!--Default Address-->
-                                            <div class="address-card">
+                                            <div class="address-card" id="<%=defaultAddress._id%>" >
                                                 <div class="d-flex justify-content-between align-items-start" >
                                                     <p>
                                                         <span style="font-weight: bolder;  color: black;" ><%=defaultAddress.addressType%></span> <br>
@@ -375,8 +442,8 @@
                                                 </div>
                                                 <div class="d-flex justify-content-end align-items-center" >
                                                     <div class="address-actions">
-                                                        <a href="#" class="text-primary">Edit</a>
-                                                        <a href="#" class="text-danger">Delete</a>
+                                                        <a onclick="updateAddress('<%=defaultAddress._id%>')" class="text-primary" data-address-id="<%=defaultAddress._id%>" >Edit</a>
+                                                        <a onclick="deleteAddress('<%=defaultAddress._id%>')" class="text-danger">Delete</a>
                                                     </div>
     
                                                 </div>
@@ -389,7 +456,7 @@
 
 
                                                 
-                                                <div class="address-card" >
+                                                <div class="address-card" id="<%=otherAddress[i]._id%>" >
                                                     <div class="d-flex justify-content-between align-items-start">
                                                         <p>
                                                             <span style="font-weight: bolder;  color: black;" ><%=otherAddress[i].addressType%></span> <br>
@@ -400,20 +467,18 @@
                                                             <span>Mobile: <span style="font-weight: bold; " >+91 <%=otherAddress[i].mobile_no%></span></span>
                                                         </p>
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <!-- <a  class="btn" onclick="makeDefaultAddress('<%=otherAddress[i]._id%>')" style="padding: 0.25rem 0.6rem; font-size: 0.875rem; border-radius: 0.25rem; background-color: #75e24a; color: white;">
-                                                                Make Default
-                                                            </a> -->
+                                                    
                                                             <button class="btn" onclick="makeDefaultAddress('<%=otherAddress[i]._id%>')" style="padding: 0.25rem 0.6rem; font-size: 0.875rem; border-radius: 0.25rem; background-color: #75e24a; color: white;" >
                                                                 Make Default
                                                             </button>
-                                                            <!-- href="/profile/address?_method=PATCH&makeAddressID=<%=otherAddress[i]._id%>" -->
+                                           
                                                         </div>
         
                                                     </div>
                                                     <div class="d-flex justify-content-end align-items-center" >
                                                         <div class="address-actions">
-                                                            <a href="#" class="text-primary">Edit</a>
-                                                            <a href="#" class="text-danger">Delete</a>
+                                                            <a onclick="updateAddress('<%=otherAddress[i]._id%>')" class="text-primary">Edit</a>
+                                                            <a onclick="deleteAddress('<%=otherAddress[i]._id%>')" class="text-danger">Delete</a>
                                                         </div>
         
                                                     </div>
@@ -432,34 +497,36 @@
                                         <div class="card">
                                             <div class="card-header">
                                                 <h5>Account Details</h5>
-                                                <label><span >user@gmail.com</span></label>
+                                                <label><span ><%=userDetails.email%></span></label>
                                             </div>
                                             <div class="card-body">
                                                 
-                                                <form method="put" name="enq">
+                                                <form method="post" name="enq"  action="/profile/account-detail?_method=PUT">
                                                     <div class="row">
                                                         <div class="form-group col-md-12">
                                                             
                                                         <div class="form-group col-md-6">
                                                             <label>First Name</label>
-                                                            <input  class="form-control square" name="Fname" type="text">
+                                                            <input class="form-control square" value="<%=userDetails.firstName%>" name="Fname" type="text">
                                                         </div>
                                                         <div class="form-group col-md-6">
                                                             <label>Last Name </label>
-                                                            <input  class="form-control square" name="Lname">
+                                                            <input  class="form-control square"  value="<%=userDetails.lastName%>" name="Lname">
                                                         </div>
                                                         
                                                         
                                                         <div class="form-group col-md-12">
                                                             <label>New Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="npassword" type="password">
+                                                            <input required="" id="newPassword" class="form-control square" name="npassword" type="password">
+                                                            <div id="newPasswordError" class="text-danger" ></div>
                                                         </div>
                                                         <div class="form-group col-md-12">
                                                             <label>Confirm Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="cpassword" type="password">
+                                                            <input required="" id="newPasswordConfirm" class="form-control square" type="password">
+                                                            <div id="confirmPasswordError" class="text-danger" ></div>
                                                         </div>
                                                         <div class="col-md-12">
-                                                            <button type="submit" class="btn btn-fill-out submit" value="Submit">Update</button>
+                                                            <button type="submit" id="changePasswordBtn" class="btn btn-fill-out submit" value="Submit">Update</button>
                                                         </div>
                                                     </div>
                                                 </form>

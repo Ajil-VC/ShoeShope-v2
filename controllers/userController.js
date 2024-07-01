@@ -297,9 +297,22 @@ const loadUserProfile = async(req,res) => {
 
 const updateUserProfile = async(req,res) => {
 
+    const firstName = req.body.Fname;
+    const lastName = req.body.Lname;
+    const newPassword = req.body.npassword;
+    const newHashedPassword = await securePassword(newPassword);
+    console.log(newHashedPassword);
+    let userID = "";
+    if(req?.user?._id){
+        userID = req.user._id;
+    }else if(req.session.user_id){
+        userID = req.session.user_id
+    }
     try{
 
-
+        await User.updateOne({_id:userID},{$set:{firstName:firstName,lastName:lastName,password:newHashedPassword}});
+        // return res.status(200).json({status:true})
+        return res.redirect('/profile')
 
     }catch(error){
         console.log("Internal Error whil updloading the profile details",error);
@@ -364,7 +377,7 @@ const addNewAddress = async(req,res) => {
         isDefault = await User.aggregate([
             {$match:{_id:new ObjectId(userID)}},{$project:{size:{$size:"$address"}}}
         ]).exec();
-
+        console.log(isDefault);
         if(isDefault[0].size < 1 ){
             isDefault = 1;
         }else{
@@ -415,7 +428,7 @@ const makeDefaultAddress = async(req,res) =>{
     
         const userDetails = await User.findOne({_id : userID}) 
         const removeDefaultAddress = await Address.updateMany({_id:{$in:userDetails.address},defaultAdd:1},{$set:{defaultAdd:0}}).exec ();
-        console.log("This is previous defaultAddress:",removeDefaultAddress);
+        console.log("Status of removal:",removeDefaultAddress.modifiedCount);
         
         await Address.updateOne({_id : address_id},{$set:{defaultAdd:1}}).exec();
 
@@ -429,6 +442,92 @@ const makeDefaultAddress = async(req,res) =>{
 
 }
 
+const deleteAddress = async(req,res) => {
+
+    const address_id = req.query.AddressID;
+    const addressId = new mongoose.Types.ObjectId(address_id);
+    let isDefault = 0;
+
+    let userID = "";
+        if(req?.user?._id){
+            userID = req.user._id;
+        }else if(req.session.user_id){
+            userID = req.session.user_id
+        }
+
+    try{
+
+        const userDetails = await User.findOne({_id : userID});
+        const defaultAddress = await Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec ();
+        
+        isDefault = await User.aggregate([
+            {$match:{_id:new ObjectId(userID)}},{$project:{size:{$size:"$address"}}}
+        ]).exec();
+
+        const isQueryAdAndDefaultAdEq = (addressId.toString() === defaultAddress._id.toString());
+        if(!isQueryAdAndDefaultAdEq || (isQueryAdAndDefaultAdEq && isDefault[0].size == 1)){
+
+            await User.updateOne({_id : userID},{$pull:{address:addressId}}).exec();
+            await Address.deleteOne({_id: addressId }).exec();
+            console.log("Address deleted Successfully.");
+            return res.json({ status : true });
+
+        }else{
+            
+            const otherAddress =await Address.findOne({_id:{$in:userDetails.address},defaultAdd:0}).exec ();
+            await Address.updateOne({_id : otherAddress._id},{$set:{defaultAdd:1}}).exec();
+            await User.updateOne({_id : userID},{$pull:{address:addressId}}).exec(); 
+            await Address.deleteOne({_id: addressId }).exec();
+            return res.json({ status : true });
+        }
+
+    }catch(error){
+
+        console.log("Internal error while trying to delete address",error);
+        return res.status(500).send("Internal error while trying to delete address",error);
+    }
+}
+
+const updateAddress = async(req,res) => {
+
+    //complete this part
+}
+
+const loadCart = async(req,res) => {
+
+    console.log("Hellleooeo")
+    try{
+
+        return res.status(200).render('cart')
+
+    }catch(error){
+        console.log("Internal server error while trying to get cart",error);
+        return res.status(500).send("Internal server error while trying to get cart",error);
+    }
+}
+
+const addProductToCart = async(req,res) => {
+
+    console.log("This is productID",req.query.product_id)
+    let userID = "";
+        if(req?.user?._id){
+            userID = req.user._id;
+        }else if(req.session.user_id){
+            userID = req.session.user_id
+        }
+        console.log("This is User id:",userID)
+
+        
+
+    try{
+
+
+    }catch(error){
+
+        console.log("Internal Error while trying add product to the Cart",error);
+        return res.status(500).send("Internal Error while trying add product to the Cart",error);
+    }
+}
 
 module.exports = {
 
@@ -445,6 +544,10 @@ module.exports = {
     updateUserProfile,
     addNewAddress,
     makeDefaultAddress,
-    logoutUser
+    deleteAddress,
+    updateAddress,
+    logoutUser,
+    loadCart,
+    addProductToCart
   
 }

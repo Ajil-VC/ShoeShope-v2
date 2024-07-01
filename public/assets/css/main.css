@@ -477,6 +477,109 @@ h4 {
   --ShoeShopeBlue-color: #4A69E2;
 }
 
+/*Cart styles below*/
+.cart-item {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+  background-color: #4e73df;
+  border: none;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.cart-item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+.cart-item-details h3 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.cart-item-details p {
+  color: #666;
+  margin: 5px 0;
+}
+
+.cart-item-details h4 {
+  font-size: 20px;
+  margin: 10px 0;
+}
+
+.cart-item-options {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.stock-info {
+  color: #dc3545;
+  font-size: 14px;
+}
+
+
+.btn-remove {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: auto;
+}
+
+.order-summary {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.order-summary h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.summary-total {
+  font-weight: bold;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.form-control {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.discount {
+  color: #28a745;
+}
+.form-select-cart{
+  width: auto;
+    margin-right: 10px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
 
 
 /* Fullstack Developer Ajil*/

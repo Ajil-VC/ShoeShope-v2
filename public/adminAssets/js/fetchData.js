@@ -273,7 +273,6 @@ document.addEventListener('DOMContentLoaded', function() {
             Object.entries(imageBlobs).forEach(([key, blob], index) => {
                 formDataForAddNewProduct.append('image', blob, `croppedimage${index + 1}.png`);
             });
-
            
             
             fetch('http://localhost:2000/admin/productslist/add_new_product',{

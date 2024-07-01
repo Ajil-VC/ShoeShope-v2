@@ -166,7 +166,7 @@ if(Reg_pass){
 
     Reg_pass.addEventListener('input',(event) => {
         Reg_pass_value = Reg_pass.value;
-        console.log(Reg_pass_value)
+      
         if(!/[A-Z]/.test(Reg_pass_value)){
             
             passwordError.textContent = "Password Should Contain atleast 1 Uppercase"
@@ -292,7 +292,23 @@ async function makeDefaultAddress(AddressId){
 
         const data = await response.json();
         console.log(data);
-        window.location.reload();
+        // window.location.reload();
+        let currentUrl = window.location.href;
+        let currentFragment = window.location.hash;
+
+        if(!currentFragment){
+            currentFragment = '#address'
+        }
+
+        window.location.href = currentUrl;
+        window.location.hash = currentFragment;
+
+        Swal.fire({
+            title: '',
+            text: "Successfully made as new address",
+            icon: 'success'
+        });
+        
 
     }catch(error){
         console.log("There was a problem with making default address",error)
@@ -300,3 +316,183 @@ async function makeDefaultAddress(AddressId){
 
 }
 
+
+function swalConfirm() {
+    return new Promise((resolve, reject) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!',
+            customClass: {
+                confirmButton: 'btn btn-success',
+                cancelButton: 'btn btn-danger'
+            },
+            buttonsStyling: true,
+            reverseButtons: true,
+            padding: '2em',
+            width: '32em'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire(
+                    'Deleted!',
+                    'Your file has been deleted.',
+                    'success'
+                )
+                resolve(true);
+            } else {
+                Swal.fire(
+                    'Cancelled',
+                    'Your address is safe :)',
+                    'error'
+                )
+                resolve(false);
+            }
+        })
+    });
+}
+
+async function deleteAddress(addressID){
+
+    try{
+
+        let confirmDeletion = await swalConfirm();
+        if(confirmDeletion){
+            
+            const response = await fetch(`http://localhost:2000/profile/address?AddressID=${addressID}`,{method:"DELETE"});
+            if(!response.ok){
+                throw new Error('Network response was not ok while deleting the address');
+            }
+            const data = await response.json();
+       
+            if(data.status){
+
+                Swal.fire({
+                    title: '',
+                    text: "Successfully Deleted",
+                    icon: 'success'
+                });
+                let currentURL = window.location.href;
+                window.location.href = currentURL;
+            }
+
+        }
+        
+    }catch(error){
+        console.log("There wa a problem while deleting address.",error)
+    }
+}
+
+
+const newPassword = document.getElementById("newPassword");
+const newPasswordConfirm = document.getElementById('newPasswordConfirm');
+const changePasswordBtn = document.getElementById('changePasswordBtn');
+let confirmPasswordError = document.getElementById('confirmPasswordError');
+if(changePasswordBtn){
+
+    changePasswordBtn.disabled = true;
+}
+let newPasswordValue;
+if(newPassword){
+    let newPasswordError = document.getElementById('newPasswordError');
+    let confirmPasswordValue 
+    newPassword.addEventListener('input',()=> {
+        confirmPasswordValue = newPasswordConfirm.value;
+        newPasswordValue = newPassword.value;
+        console.log("First",newPasswordValue,confirmPasswordValue)
+        if(/^$/.test(newPasswordValue)){
+            
+            newPasswordError.textContent = "This field should not be empty"
+            changePasswordBtn.disabled = true;
+            
+        }
+        else if(!/[A-Z]/.test(newPasswordValue)){
+            
+            newPasswordError.textContent = "Password Should Contain atleast 1 Uppercase"
+            changePasswordBtn.disabled = true;
+           
+
+        }else if(!/[a-z]/.test(newPasswordValue)){
+            
+            newPasswordError.textContent = "Password Should Contain atleast 1 Lowercase"
+            changePasswordBtn.disabled = true;
+         
+
+        }else if(!/\d/.test(newPasswordValue)){
+            
+            newPasswordError.textContent = "Password Should Contain a number"
+            changePasswordBtn.disabled = true;
+          
+
+        }else if(!/^.{5,}$/.test(newPasswordValue)){
+            
+            newPasswordError.textContent = "Password Should Contain 5 charecters minimum"
+            changePasswordBtn.disabled = true;
+
+        }else if(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(newPasswordValue)){
+            
+            newPasswordError.textContent = ""
+    
+        }
+        if(newPasswordValue != confirmPasswordValue){
+            confirmPasswordError.textContent = "Password Must be same as above"
+            changePasswordBtn.disabled = true;
+        }else{
+            confirmPasswordError.textContent = "";
+            changePasswordBtn.disabled = false;
+        }
+
+    })
+}
+if(newPasswordConfirm){
+    
+    newPasswordConfirm.addEventListener('input',()=> {
+        let confirmPasswordValue = newPasswordConfirm.value;
+        console.log("Second",newPasswordValue,confirmPasswordValue)
+
+        if(confirmPasswordValue != newPasswordValue){
+            confirmPasswordError.textContent = "Password Must be same as above"
+            changePasswordBtn.disabled = true;
+        }else{
+            confirmPasswordError.textContent = "";
+            changePasswordBtn.disabled = false;
+        }
+    })
+}
+
+
+
+async function updateAddress(addressID){
+    event.preventDefault();
+    const modal = document.getElementById('editAddressModalCenter');
+    try{
+        $(modal).modal('show')
+
+        //Need to complete this
+    }catch(error){
+        console.log("Error occured while editing address",error)
+    }
+}
+
+
+async function addProductToCart(productId){
+    
+    console.log("ProductID",productId)
+    const response = await fetch(`http://localhost:2000/product_details?product_id=${productId}`,{method : "post",headers : {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }},);
+
+    if(!response.ok){
+        throw new Error('Network response was not ok while adding product to cart');
+    }
+
+    const data = await response.json();
+    if(data.redirect){
+        
+        return window.location.href = data.redirect;
+    }
+}
+ 

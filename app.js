@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const session = require('express-session')
 const morgan = require('morgan')
+const methodOverride = require('method-override');
 
 const {passport} = require('./middleware/googleauth')
 
@@ -10,6 +11,7 @@ const express = require('express')
 const app = express();
 
 app.use(morgan('dev'))
+app.use(methodOverride('_method'));
 
 
 app.use(session({
