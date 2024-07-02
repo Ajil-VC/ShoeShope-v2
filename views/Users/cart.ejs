@@ -5,61 +5,85 @@
     <section class="pt-50 pb-150" style="font-family: Arial, sans-serif;" >
     <div class="container">
         <h1><i class="fi-rs-shopping-bag"></i> Your Cart</h1>
-        <p>Total 2 items in your cart</p>
+        <% if(cartItemsArray.length > 0 ){%>
+
+            <p>Total <%=cartItemsArray.length %> items in your cart</p>
+        <% } %>
+     
+        
 
         <div class="row">
             <div class="col-md-8">
-                <!-- Cart Items -->
-                <div class="cart-item">
+                <!-- Cart Items -->  
 
-                    <img src="/ProductImage/1718969688867_croppedimage1.png" alt="Nike Air Jordan 1 Mid Sneakers" class="cart-item-image">
+                <% if(cartItemsArray.length > 0 ){ %>
 
-                    <div class="cart-item-details">
-                        <h3>Nike</h3>
-                        <p>Men Air Jordan 1 Mid Sneakers</p>
-                        <h4>₹ 14,000</h4>
-                        <div class="cart-item-options">
-                            <select class="form-select-cart">
-                                <option>Size: S</option>
-                                <option>Size: M</option>
-                                <option>Size: L</option>
-                                <option>Size: XL</option>
-                            </select>
-                            <select class="form-select-cart">
-                                <option>Qty: 1</option>
-                            </select>
-                            <span class="stock-info">7 left</span>
+                    <% for( let i = 0 ; i < cartItemsArray.length ; i++){ %>
+
+                        <div class="cart-item" id="itemTileId-<%=cartItemsArray[i].productId._id%>" >
+                            
+                            <input type="checkbox" class="cart-item-checkbox" checked >
+                            <img src="/ProductImage/<%=cartItemsArray[i].productId.image[0]%>" alt="/ProductImage/<%=cartItemsArray[i].productId.image[1]%>" class="cart-item-image">
+        
+                            <div class="cart-item-details">
+                                <h3><%=cartItemsArray[i].productId.ProductName%></h3>
+                                <p><%=cartItemsArray[i].productId.Brand%></p>
+                                <h4>₹ <%=cartItemsArray[i].productId.salePrice%></h4>
+                                <div class="cart-item-options">
+                                    <select class="form-select-cart">
+                                        <option>Size: S</option>
+                                        <option>Size: M</option>
+                                        <option>Size: L</option>
+                                        <option>Size: XL</option>
+                                    </select>
+                                    <div class="d-flex ml-5 justify-content-center " >
+                                        <div>Qty:</div>
+                                        <% if( cartItemsArray[i].productId.stockQuantity < 4 ){ %>
+                                            <input class="form-select-cart" value="1" style="height: 30px; width: 70px;" type="number" max="<%=cartItemsArray[i].productId.stockQuantity%>" min="1" >
+                                        <% }else{ %>
+                                            <input class="form-select-cart" value="1" style="height: 30px; width: 70px;" type="number" max="4" min="1" >              
+                                        <%} %>
+
+                                    </div>
+                                    <span class="stock-info"><%=cartItemsArray[i].productId.stockQuantity%> left</span>
+                                </div>
+                            </div>
+        
+                            <button class="btn-remove" onclick="removeProductFromCart('<%=cartItemsArray[i].productId._id%>')" ><i class="fi-rs-trash"></i></button>
+                        </div>
+
+                    <% } %>
+
+                <% }else{ %>
+                    <div class="cart-item ">
+                        <div class="cart-item-details">
+                            <h3>Your Cart is Empty !!</h3>
                         </div>
                     </div>
-
-                    <button class="btn-remove"><i class="fi-rs-trash"></i></button>
-                </div>
-                <!-- Repeat the above cart-item div for the blue sneaker -->
+                <% } %>
 
             </div>
+
             <div class="col-md-4">
                 <!-- Order Summary -->
                 <div class="order-summary">
                     <h2>Order Summary</h2>
                     <div class="summary-item">
-                        <span>2 items</span>
-                        <span>₹ 28,000</span>
+                        <span id="orderSummary-quantity" >2 items</span>
+                        <span id="orderSummary-addedAmount" >₹ 28,000</span>
                     </div>
-                    <div class="summary-item">
-                        <span>Delivery Fee</span>
-                        <span>₹ 52</span>
-                    </div>
+      
                     <div class="summary-item">
                         <span>GST Amount</span>
-                        <span>₹ 987</span>
+                        <span id="orderSummary-GST" >₹ 987</span>
                     </div>
                     <div class="summary-item discount">
-                        <span>Discount 30%</span>
+                        <span id="orderSummary-discount" > Discount 30%</span>
                         <span>₹ -8400</span>
                     </div>
-                    <div class="summary-total">
+                    <div class="summary-total d-flex justify-content-between ">
                         <strong>Total Amount</strong>
-                        <strong>₹ 19,600</strong>
+                        <strong id="orderSummary-totalAmount" >₹ 19,600</strong>
                     </div>
                     <input type="text" class="form-control" placeholder="Enter Coupon Code (optional)">
                     <button class="btn btn-primary btn-block">Checkout</button>

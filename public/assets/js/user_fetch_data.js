@@ -128,7 +128,7 @@ if(otp_submit_btn){
                 return response.json();
             })
             .then(data => {
-                // console.log(otp_success_msg)
+
                 console.log("Data recieved: ",data);
                 if(!data.status){
         
@@ -336,11 +336,13 @@ function swalConfirm() {
             width: '32em'
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire(
-                    'Deleted!',
-                    'Your file has been deleted.',
-                    'success'
-                )
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'Your file has been deleted.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                })
                 resolve(true);
             } else {
                 Swal.fire(
@@ -490,9 +492,48 @@ async function addProductToCart(productId){
     }
 
     const data = await response.json();
-    if(data.redirect){
-        
+    if(data.redirect){  
         return window.location.href = data.redirect;
+    }else if(data.status){
+        console.log("DonEEEE");
+        const IdForaddToCartFn = document.getElementById('IdForaddToCartFn');
+        const IdForGoToCartFn = document.getElementById('IdForGoToCartFn');
+        if(IdForaddToCartFn){
+            IdForaddToCartFn.textContent = "Go to cart"
+            IdForaddToCartFn.removeAttribute('onclick');
+            IdForaddToCartFn.addEventListener('click',()=> {
+                window.location.href = "http://localhost:2000/cart"
+            })
+        }
     }
 }
+
+function goToCart(){
+    window.location.href = "http://localhost:2000/cart"
+}
  
+
+async function removeProductFromCart(productId){
+
+    let confirmDeletion = await swalConfirm();
+    try{
+        if(confirmDeletion){
+
+            const response = await fetch(`http://localhost:2000/cart?productId=${productId}`,{method : "PATCH"});
+            if(!response.ok)                  {
+                throw new Error('Network response was not ok while removing product from cart');
+            }
+            const data = await response.json();
+            if(data.status){
+                console.log(data.productId,"This is from fron")
+                const itemTileId = document.getElementById(`itemTileId-${productId}`);
+                itemTileId.remove();
+                window.location.href = 'http://localhost:2000/cart'
+            }
+
+        }
+
+    }catch(error){
+        console.log("Error while fetching operation of remove product from cart");
+    }
+}

@@ -479,6 +479,7 @@ h4 {
 
 /*Cart styles below*/
 .cart-item {
+  position: relative;
   background-color: #ffffff;
   border-radius: 8px;
   padding: 20px;
@@ -540,6 +541,15 @@ h4 {
   margin-left: auto;
 }
 
+.cart-item-checkbox {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .order-summary {
   background-color: #ffffff;
   border-radius: 8px;
@@ -580,6 +590,7 @@ h4 {
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+
 
 
 /* Fullstack Developer Ajil*/

@@ -45,6 +45,8 @@ userRouter.get('/home',userController.loadHomePage) ;
 userRouter.get('/showcase',userController.loadShowcase) ;
 userRouter.get('/product_details',userController.loadProductDetails) ;
 userRouter.post('/product_details',authenticate.isLoggedIn,userController.addProductToCart)
+userRouter.get('/cart',authenticate.isLoggedIn,userController.loadCart);
+userRouter.patch('/cart',authenticate.isLoggedIn,userController.removeProductFromCart);
 
 userRouter.get('/profile',authenticate.isLoggedIn,userController.loadUserProfile)
 userRouter.put('/profile/account-detail',userController.updateUserProfile)
@@ -54,6 +56,5 @@ userRouter.delete('/profile/address',userController.deleteAddress);
 userRouter.put('/profile/address',userController.updateAddress);
 userRouter.get('/profile/logout',authenticate.isLoggedIn,userController.logoutUser);
 
-userRouter.get('/cart',userController.loadCart);
 
 module.exports = userRouter;

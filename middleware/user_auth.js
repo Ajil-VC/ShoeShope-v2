@@ -4,8 +4,9 @@ const isLoggedIn = async(req,res,next) => {
 
     try{
         if( !req.session.user_id && !req.user ){
-         
-            if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+
+            const acceptHeader = req.headers.accept || "";
+            if (req.xhr || acceptHeader.indexOf('json') > -1) {
                 // If the client expects a JSON response
                 return res.json({ redirect: '/login' });
               } else {

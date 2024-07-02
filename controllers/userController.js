@@ -1,4 +1,4 @@
-const {User,OTP,Product,Category,Brand,Address} = require('../models/models');
+const {User,OTP,Product,Category,Brand,Address,Cart} = require('../models/models');
 const mongoose = require('mongoose') 
 const {ObjectId} = require('mongodb')
 const bcrypt = require('bcrypt');
@@ -247,20 +247,36 @@ const loadShowcase = async(req,res) => {
 const loadProductDetails = async (req,res) => {
 
     const product_id = req.query.product_id ; 
-    
+    let userID = "";
+    if(req?.user?._id){
+        userID = req.user._id;
+    }else if(req.session.user_id){
+        userID = req.session.user_id
+    }
+    let elemMatch = null;
+
     try{
-        
+        if(userID){
+
+                elemMatch = await Cart.findOne({ 
+                userId : userID,
+                items:{$elemMatch: {
+                    productId: product_id }
+                }
+            })
+        }
+        console.log("This is elem match\n\n\n\n",elemMatch,userID,"This is userID\n\n\n\n")
         const product_details = await Product.findOne({ _id : product_id });
         const category  = product_details.Category ;
         const target    = product_details.targetGroup ;
  
         const related_products = await Product.find({ $and:[{Category : category},{targetGroup : target }]});
 
-        return res.render('product_details',{product_details,related_products,target});
+        return res.render('product_details',{product_details,related_products,target, elemMatch});
 
     }catch(error){
 
-        console.log('Internal Error while loading product Details');
+        console.log('Internal Error while loading product Details',error);
         return res.status(500).send("Internal Error while loading product Details");
     }
 
@@ -495,10 +511,24 @@ const updateAddress = async(req,res) => {
 
 const loadCart = async(req,res) => {
 
-    console.log("Hellleooeo")
+    let userID = "";
+    if(req?.user?._id){
+        userID = req.user._id;
+    }else if(req.session.user_id){
+        userID = req.session.user_id
+    }
+    let cartItemsArray = [];
     try{
 
-        return res.status(200).render('cart')
+        const hasCart = await Cart.findOne({userId : userID});
+        console.log("This is userCart",hasCart)
+        if(hasCart){
+
+            let cartItems = await Cart.findById(hasCart._id).populate('items.productId');
+            cartItemsArray = cartItems.items
+            console.log(cartItemsArray)
+        }
+        return res.status(200).render('cart',{cartItemsArray})
 
     }catch(error){
         console.log("Internal server error while trying to get cart",error);
@@ -509,6 +539,7 @@ const loadCart = async(req,res) => {
 const addProductToCart = async(req,res) => {
 
     console.log("This is productID",req.query.product_id)
+    const productID = req.query.product_id;
     let userID = "";
         if(req?.user?._id){
             userID = req.user._id;
@@ -517,15 +548,71 @@ const addProductToCart = async(req,res) => {
         }
         console.log("This is User id:",userID)
 
-        
-
     try{
+
+        const hasCart = await Cart.findOne({userId : userID});
+        if(hasCart){
+
+            const item = {
+                productId : productID,
+                quantity  : 1
+            }
+            await Cart.updateOne({_id : hasCart._id},{$push:{items : item}});
+            return res.status(201).json({status:true});
+    
+        }else{
+            
+            const newCart = new Cart({
+                userId  : userID,
+                items   : [
+                    {
+                        productId : productID,
+                        quantity  : 1
+                    }
+                ]  
+            });
+    
+            const cartData = await newCart.save();
+            if(cartData){
+                console.log("This is cartdata",cartData);
+            }else{
+                console.log("cart not added")
+            }
+            return res.status(201).json({status:true});
+        }
 
 
     }catch(error){
 
         console.log("Internal Error while trying add product to the Cart",error);
         return res.status(500).send("Internal Error while trying add product to the Cart",error);
+    }
+}
+
+const removeProductFromCart = async (req,res) => {
+    
+    let userID = "";
+    if(req?.user?._id){
+        userID = req.user._id;
+    }else if(req.session.user_id){
+        userID = req.session.user_id
+    }
+    const productId = req.query.productId ;
+    
+    try{
+
+        const userCart = await Cart.findOne({userId : userID});
+        console.log(userCart)
+        await Cart.updateOne({userId : userID},{$pull : {items : {productId : productId }}});
+        return res.status(200).json({
+            status : true,
+            productId : productId
+        });
+
+    }catch(error){
+
+        console.log("Internal Error while trying to remove the product from cart",error);
+        return res.status(500).send("Internal Error while trying to remove the product from cart",error);
     }
 }
 
@@ -536,18 +623,22 @@ module.exports = {
     loginUser,
     gen_otp,
     verifyOTP,
+    resend_otp,
+
     loadHomePage,
     loadShowcase,
     loadProductDetails,
-    resend_otp,
     loadUserProfile,
     updateUserProfile,
+    
     addNewAddress,
     makeDefaultAddress,
     deleteAddress,
     updateAddress,
+
     logoutUser,
     loadCart,
-    addProductToCart
+    addProductToCart,
+    removeProductFromCart
   
 }

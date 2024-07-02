@@ -103,10 +103,20 @@
                                         <div class="detail-extralink"  >
                                             
                                             <div class="product-extra-link2"  >
-                                                <button type="submit" onclick="addProductToCart('<%=product_details._id%>')" href="/profile" class="button button-add-to-cart d-flex justify-content-between align-items-center " style="width: 215px;" >
-                                                    <span style="margin-right: 10px;" >Add to cart</span>
-                                                    <img src="/assets/imgs/theme/icons/icon-white-cart.svg" alt="" style="width: 15px;" >
-                                                </button>
+                                                <%console.log(elemMatch)%>
+                                                <% if(elemMatch === null){ %>
+                                                    
+                                                    <button type="submit" id="IdForaddToCartFn" onclick="addProductToCart('<%=product_details._id%>')" href="/profile" class="button button-add-to-cart d-flex justify-content-between align-items-center " style="width: 215px;" >
+                                                        <span style="margin-right: 10px;" >Add to cart</span>
+                                                        <img src="/assets/imgs/theme/icons/icon-white-cart.svg" alt="" style="width: 15px;" >
+                                                    </button>
+                                                    <% }else{ %>
+                                                        <button type="submit" onclick="goToCart()" id="IdForGoToCartFn" href="/profile" class="button button-add-to-cart d-flex justify-content-between align-items-center " style="width: 215px;" >
+                                                            <span style="margin-right: 10px;" >Go to cart</span>
+                                                            <img src="/assets/imgs/theme/icons/icon-white-cart.svg" alt="" style="width: 15px;" >
+                                                        </button>
+                                                    
+                                                <% } %>
                                             </div>
 
                                         </div>

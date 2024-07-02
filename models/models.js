@@ -224,6 +224,7 @@ const cartSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP',otpSchema);
 const Address = mongoose.model('Address',addressSchema);
+const Cart = mongoose.model('Cart',cartSchema);
 
 const Admin = mongoose.model('Admin',adminSchema);
 
@@ -239,5 +240,6 @@ module.exports = {
     Category,
     Brand,
     Product,
-    Address
+    Address,
+    Cart
 }
