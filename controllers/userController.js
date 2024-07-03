@@ -509,6 +509,44 @@ const updateAddress = async(req,res) => {
     //complete this part
 }
 
+
+//CartItems Getting function
+// --->
+const cartItemsFindFn = async(userID) =>{
+
+    try{
+
+        let cartItemsArray = [];
+        let subTotal = 0 ;
+        let totalSelectedItems = 0;        
+        const hasCart = await Cart.findOne({userId : userID});
+        console.log("This is userCart",hasCart)
+        if(hasCart){
+
+            let cartItems = await Cart.findById(hasCart._id).populate('items.productId');
+            cartItemsArray = cartItems.items
+            console.log(cartItemsArray)
+            for(let i = 0 ; i < cartItemsArray.length ; i++){
+                if(cartItemsArray[i].isSelected){
+    
+                    subTotal = subTotal + cartItemsArray[i].productId.salePrice;
+                    console.log(subTotal)
+                    totalSelectedItems++;
+                }
+            }
+        }
+        let gst = (subTotal * (16 / 100)).toFixed(2);
+        let totalAmount = subTotal + +gst;
+
+        return { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems };
+
+    }catch(error){
+        throw new Error("Internal server error while getting cart Details.")
+    }
+
+}
+
+
 const loadCart = async(req,res) => {
 
     let userID = "";
@@ -517,18 +555,10 @@ const loadCart = async(req,res) => {
     }else if(req.session.user_id){
         userID = req.session.user_id
     }
-    let cartItemsArray = [];
     try{
 
-        const hasCart = await Cart.findOne({userId : userID});
-        console.log("This is userCart",hasCart)
-        if(hasCart){
-
-            let cartItems = await Cart.findById(hasCart._id).populate('items.productId');
-            cartItemsArray = cartItems.items
-            console.log(cartItemsArray)
-        }
-        return res.status(200).render('cart',{cartItemsArray})
+        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        return res.status(200).render('cart',{cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems})
 
     }catch(error){
         console.log("Internal server error while trying to get cart",error);
@@ -538,7 +568,6 @@ const loadCart = async(req,res) => {
 
 const addProductToCart = async(req,res) => {
 
-    console.log("This is productID",req.query.product_id)
     const productID = req.query.product_id;
     let userID = "";
         if(req?.user?._id){
@@ -546,7 +575,6 @@ const addProductToCart = async(req,res) => {
         }else if(req.session.user_id){
             userID = req.session.user_id
         }
-        console.log("This is User id:",userID)
 
     try{
 
@@ -602,11 +630,19 @@ const removeProductFromCart = async (req,res) => {
     try{
 
         const userCart = await Cart.findOne({userId : userID});
-        console.log(userCart)
+        console.log(userCart,"This is remova")
+
         await Cart.updateOne({userId : userID},{$pull : {items : {productId : productId }}});
+        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        const totalCartItems = cartItemsArray.length;
         return res.status(200).json({
             status : true,
-            productId : productId
+            productId : productId,
+            subTotal : subTotal,
+            totalAmount : totalAmount,
+            gst : gst,
+            totalCartItems : totalCartItems,
+            totalSelectedItems : totalSelectedItems
         });
 
     }catch(error){
@@ -614,6 +650,85 @@ const removeProductFromCart = async (req,res) => {
         console.log("Internal Error while trying to remove the product from cart",error);
         return res.status(500).send("Internal Error while trying to remove the product from cart",error);
     }
+}
+
+const selectItemToOrder = async(req,res) => {
+
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+    const productId = req.query.productId ;
+    const productID = new mongoose.Types.ObjectId(productId);
+   
+
+    try{
+
+        const product =await Cart.aggregate([
+            {$match : {userId : userID} },
+            {$unwind:"$items"},
+            {$match:{"items.productId" : productID}}
+        ]).exec();
+        let productIsSelected = product[0].items.isSelected;
+        productIsSelected = !productIsSelected;
+
+            await Cart.findOneAndUpdate(
+            { userId: userID, 'items.productId': productId },
+            { $set: { 'items.$.isSelected': productIsSelected } }, 
+          );
+
+          const { subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+          return res.status(200).json({
+            status : true,
+            productId : productId,
+            subTotal : subTotal,
+            totalAmount : totalAmount,
+            gst : gst,
+            totalSelectedItems : totalSelectedItems
+        });
+
+    }catch(error){
+
+        console.log("Internal error while trying to select the item",error);
+        return res.status(500).send("Internal error while trying to select the item",error)
+    }
+    
+}
+
+const changeQuantity = async (req,res) => {
+
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+    const productId = req.query.productId ;
+    const productID = new mongoose.Types.ObjectId(productId);
+    const newQuantity = req.query.newQuantity;
+
+    try{
+        const product = await Product.findOne({_id : productID}).exec();
+        const productStock = product.stockQuantity;
+
+        if(newQuantity > 4){
+            return res.json({message : "Max 4 items per product"});
+        }else if(newQuantity > productStock){
+            return res.json({message : `Only ${productStock} is available`});
+        }      
+        
+        await Cart.findOneAndUpdate(
+            { userId: userID, 'items.productId': productId },
+            { $set: { 'items.$.quantity': newQuantity } }, 
+          );
+
+    }catch(error){
+        console.log("Internal Error while changing product quantity",error);
+        return res.status(500).send("Internal Error while changing product quantity",error);
+    }
+
 }
 
 module.exports = {
@@ -639,6 +754,8 @@ module.exports = {
     logoutUser,
     loadCart,
     addProductToCart,
-    removeProductFromCart
+    removeProductFromCart,
+    selectItemToOrder,
+    changeQuantity
   
 }

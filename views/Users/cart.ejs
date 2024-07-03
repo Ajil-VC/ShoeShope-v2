@@ -7,7 +7,7 @@
         <h1><i class="fi-rs-shopping-bag"></i> Your Cart</h1>
         <% if(cartItemsArray.length > 0 ){%>
 
-            <p>Total <%=cartItemsArray.length %> items in your cart</p>
+            <p id="totalItemsInCart" >Total <%=cartItemsArray.length %> items in your cart</p>
         <% } %>
      
         
@@ -22,7 +22,8 @@
 
                         <div class="cart-item" id="itemTileId-<%=cartItemsArray[i].productId._id%>" >
                             
-                            <input type="checkbox" class="cart-item-checkbox" checked >
+                                <input type="checkbox" data-product-id="<%=cartItemsArray[i].productId._id%>"  class="cart-item-checkbox "  <% if(cartItemsArray[i].isSelected){ %>checked<% } %> >
+                           
                             <img src="/ProductImage/<%=cartItemsArray[i].productId.image[0]%>" alt="/ProductImage/<%=cartItemsArray[i].productId.image[1]%>" class="cart-item-image">
         
                             <div class="cart-item-details">
@@ -30,20 +31,17 @@
                                 <p><%=cartItemsArray[i].productId.Brand%></p>
                                 <h4>₹ <%=cartItemsArray[i].productId.salePrice%></h4>
                                 <div class="cart-item-options">
-                                    <select class="form-select-cart">
+                                    <select class="form-select-cart" >
                                         <option>Size: S</option>
                                         <option>Size: M</option>
                                         <option>Size: L</option>
                                         <option>Size: XL</option>
                                     </select>
                                     <div class="d-flex ml-5 justify-content-center " >
-                                        <div>Qty:</div>
-                                        <% if( cartItemsArray[i].productId.stockQuantity < 4 ){ %>
-                                            <input class="form-select-cart" value="1" style="height: 30px; width: 70px;" type="number" max="<%=cartItemsArray[i].productId.stockQuantity%>" min="1" >
-                                        <% }else{ %>
-                                            <input class="form-select-cart" value="1" style="height: 30px; width: 70px;" type="number" max="4" min="1" >              
-                                        <%} %>
+                                        <div>Qty: </div>
 
+                                        <input class="form-select-cart quantity-input ml-2 " value="1" style="height: 30px; width: 70px;" type="number" max="<%=cartItemsArray[i].productId.stockQuantity < 4 ? cartItemsArray[i].productId.stockQuantity : 4%>" min="1" data-product-id="<%=cartItemsArray[i].productId._id%>">
+                                    
                                     </div>
                                     <span class="stock-info"><%=cartItemsArray[i].productId.stockQuantity%> left</span>
                                 </div>
@@ -69,21 +67,25 @@
                 <div class="order-summary">
                     <h2>Order Summary</h2>
                     <div class="summary-item">
-                        <span id="orderSummary-quantity" >2 items</span>
-                        <span id="orderSummary-addedAmount" >₹ 28,000</span>
+                        <span id="orderSummary-quantity" ><%=totalSelectedItems %> item added</span>
+                        <span id="orderSummary-subTotal" >₹ <%=subTotal%></span>
                     </div>
       
                     <div class="summary-item">
                         <span>GST Amount</span>
-                        <span id="orderSummary-GST" >₹ 987</span>
+                        <span id="orderSummary-GST" >₹ <%=gst%></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Delivery Charge</span>
+                        <span>₹ _</span>
                     </div>
                     <div class="summary-item discount">
-                        <span id="orderSummary-discount" > Discount 30%</span>
-                        <span>₹ -8400</span>
+                        <span id="orderSummary-discount" > Discount 0%</span>
+                        <span>₹ 0</span>
                     </div>
                     <div class="summary-total d-flex justify-content-between ">
                         <strong>Total Amount</strong>
-                        <strong id="orderSummary-totalAmount" >₹ 19,600</strong>
+                        <strong id="orderSummary-totalAmount" >₹ <%=totalAmount%></strong>
                     </div>
                     <input type="text" class="form-control" placeholder="Enter Coupon Code (optional)">
                     <button class="btn btn-primary btn-block">Checkout</button>

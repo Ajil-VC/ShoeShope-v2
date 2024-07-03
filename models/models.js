@@ -215,11 +215,97 @@ const cartSchema = new mongoose.Schema({
             quantity : {
                 type : Number,
                 required : true,
-                min : 1
+                min : 1,
+                max : 4
+            },
+            isSelected : {
+                type: Boolean,
+                required: true,
+                default: true
             }
         }
     ] 
 })
+
+
+
+const orderItemSchema = new mongoose.Schema({
+
+    product: {
+        _id: { 
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        price: {
+            type: Number,
+            required: true
+        },
+        images: {
+          url: {
+            type: String,
+            }
+        },
+      },
+      quantity: { type: Number, required: true, min: 1 },
+      subtotal: { type: Number, required: true }
+})
+
+const orderSchema = new mongoose.Schema({
+
+    items: [orderItemSchema],
+    customer: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
+    totalItems : {
+        type : Number,
+        required : true,
+        default : 1
+    },
+    subTotal : {
+        type : Number,
+        required : true,
+        default : 0
+    },
+    gstAmount : {
+        type : Number
+    },
+    discount : {
+        type : Number,
+        required : true,
+        default : 0
+    },
+    totalAmount : {
+        type : Number,
+        required : true,
+        default : 0
+    },
+    orderDate : {
+        type : Date,
+        default : Date.now
+    },
+    status: {
+        type: String,
+        required: true,
+        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+        default: 'Pending'
+    },
+    shippingAddress: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Address'
+    },
+    paymentMethod: String
+
+},{timestamps : true});
+
+
 
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP',otpSchema);

@@ -513,13 +513,19 @@ function goToCart(){
 }
  
 
-async function removeProductFromCart(productId){
+const totalItemsInCart = document.getElementById('totalItemsInCart');
+const orderSummary_quantity = document.getElementById('orderSummary-quantity');
+const orderSummary_subTotal = document.getElementById('orderSummary-subTotal');
+const orderSummary_GST = document.getElementById('orderSummary-GST');
+const orderSummary_totalAmount = document.getElementById('orderSummary-totalAmount');
 
+async function removeProductFromCart(productId){
+    
     let confirmDeletion = await swalConfirm();
     try{
         if(confirmDeletion){
 
-            const response = await fetch(`http://localhost:2000/cart?productId=${productId}`,{method : "PATCH"});
+            const response = await fetch(`http://localhost:2000/cart?productId=${productId}`,{method : "delete"});
             if(!response.ok)                  {
                 throw new Error('Network response was not ok while removing product from cart');
             }
@@ -528,12 +534,106 @@ async function removeProductFromCart(productId){
                 console.log(data.productId,"This is from fron")
                 const itemTileId = document.getElementById(`itemTileId-${productId}`);
                 itemTileId.remove();
-                window.location.href = 'http://localhost:2000/cart'
+                if(data.totalCartItems > 0){
+
+                    totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
+                    orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+                    orderSummary_GST.textContent = `₹ ${data.gst}`;  
+                    orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`
+                }else{
+                    totalItemsInCart.textContent = "Your Cart is empty";
+                    orderSummary_subTotal.textContent = `₹ 0`;
+                    orderSummary_GST.textContent = `₹ 0`;  
+                    orderSummary_totalAmount.textContent = `₹ 0`;
+                    orderSummary_quantity.textContent = "No items item added"
+                }
+               
             }
 
         }
 
     }catch(error){
+
         console.log("Error while fetching operation of remove product from cart");
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Checkboxes
+    document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const productId = this.dataset.productId;
+            const isChecked = this.checked;
+
+            fetch(`http://localhost:2000/cart?productId=${productId}`,{method : "PUT"})
+            .then(response => {
+                
+                if(!response.ok){
+                    throw new Error('Network response was not ok while selecting product.');
+                }
+                return response.json();
+            })
+            .then(data => {
+
+                if(data.status){
+
+                    orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+                    orderSummary_GST.textContent = `₹ ${data.gst}`;  
+                    orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`
+                }else{
+             
+                    console.log("Something wrong with selecting product there is no data")
+                 
+                }
+        
+            })
+            .catch(error =>{
+                console.log("Error while trying select the product",error)
+            })
+    
+        });
+    });
+
+
+    //Quantity inputs
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const productId = this.dataset.productId;
+            const newQuantity = this.value;
+            console.log(`Quantity for product ${productId} changed to ${newQuantity}`);
+
+            fetch(`http://localhost:2000/cart?productId=${productId}&newQuantity=${newQuantity}`,{method : "PATCH"})
+            .then(response => {
+                
+                if(!response.ok){
+                    throw new Error('Network response was not ok while selecting product.');
+                }
+                return response.json();
+            })
+            .then(data => {
+
+                if(data.status){
+
+                    orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+                    orderSummary_GST.textContent = `₹ ${data.gst}`;  
+                    orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`
+                }else{
+             
+                    console.log("Something wrong with selecting product there is no data")
+                 
+                }
+        
+            })
+            .catch(error =>{
+                console.log("Error while trying change item quantity",error)
+            })
+            
+        });
+    });
+
+
+})
