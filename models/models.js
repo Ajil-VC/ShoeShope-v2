@@ -41,9 +41,11 @@ const userSchema = mongoose.Schema({
         type:String,
         required:true
     },
-    address : {
-        type : Array
-    },
+
+    address : [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Address'
+    }],
 
     mobile_no:{
         type:String,
@@ -141,6 +143,10 @@ const addressSchema = new mongoose.Schema({
     defaultAdd: {
         type: Number,
         default: 0 
+    },
+    selectedAdd: {
+        type: Boolean,
+        default: false
     }
 
 });
@@ -222,6 +228,11 @@ const cartSchema = new mongoose.Schema({
                 type: Boolean,
                 required: true,
                 default: true
+            },
+            size : {
+                type : String,
+                required : true,
+                default : 'S'
             }
         }
     ] 

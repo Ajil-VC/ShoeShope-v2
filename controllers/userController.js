@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt');
 const otpGenerator = require('otp-generator');
 const {appPassword} = require('../config/config')
 const nodemailer = require('nodemailer')
+const {add,format} = require('date-fns')
+
 
 const securePassword = async (password) => {
     
@@ -512,6 +514,7 @@ const updateAddress = async(req,res) => {
 
 //CartItems Getting function
 // --->
+// --->
 const cartItemsFindFn = async(userID) =>{
 
     try{
@@ -529,9 +532,9 @@ const cartItemsFindFn = async(userID) =>{
             for(let i = 0 ; i < cartItemsArray.length ; i++){
                 if(cartItemsArray[i].isSelected){
     
-                    subTotal = subTotal + cartItemsArray[i].productId.salePrice;
+                    subTotal = subTotal + (cartItemsArray[i].productId.salePrice * cartItemsArray[i].quantity);
                     console.log(subTotal)
-                    totalSelectedItems++;
+                    totalSelectedItems = totalSelectedItems + cartItemsArray[i].quantity;
                 }
             }
         }
@@ -539,7 +542,7 @@ const cartItemsFindFn = async(userID) =>{
         let totalAmount = subTotal + +gst;
 
         return { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems };
-
+        
     }catch(error){
         throw new Error("Internal server error while getting cart Details.")
     }
@@ -708,27 +711,148 @@ const changeQuantity = async (req,res) => {
     const productId = req.query.productId ;
     const productID = new mongoose.Types.ObjectId(productId);
     const newQuantity = req.query.newQuantity;
+    const shoeSize =req.query.shoeSize;
+    if(newQuantity){
 
-    try{
-        const product = await Product.findOne({_id : productID}).exec();
-        const productStock = product.stockQuantity;
-
-        if(newQuantity > 4){
-            return res.json({message : "Max 4 items per product"});
-        }else if(newQuantity > productStock){
-            return res.json({message : `Only ${productStock} is available`});
-        }      
-        
-        await Cart.findOneAndUpdate(
-            { userId: userID, 'items.productId': productId },
-            { $set: { 'items.$.quantity': newQuantity } }, 
-          );
-
-    }catch(error){
-        console.log("Internal Error while changing product quantity",error);
-        return res.status(500).send("Internal Error while changing product quantity",error);
+        try{
+            const product = await Product.findOne({_id : productID}).exec();
+            const productStock = product.stockQuantity;
+    
+            if(newQuantity > productStock){
+                return res.json({status:false, message : `Only ${productStock} is available`,stock:productStock});
+            }else if(newQuantity > 4){
+                return res.json({status:false, message : "Max 4 items per product"});
+            }else if(newQuantity < 1){
+                return res.json({status: false, message : "Item quantity cannot be less than 1"})
+            }      
+            
+            await Cart.findOneAndUpdate(
+                { userId: userID, 'items.productId': productId },
+                { $set: { 'items.$.quantity': newQuantity } }, 
+              );
+    
+              const { subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+              return res.status(200).json({
+                status : true,
+                productId : productId,
+                subTotal : subTotal,
+                totalAmount : totalAmount,
+                gst : gst,
+                totalSelectedItems : totalSelectedItems
+              })
+    
+        }catch(error){
+            console.log("Internal Error while changing product quantity",error);
+            return res.status(500).send("Internal Error while changing product quantity",error);
+        }
     }
 
+    if(shoeSize){
+        
+        try{
+
+            await Cart.findOneAndUpdate(
+                { userId: userID, 'items.productId': productId },
+                { $set: { 'items.$.size': shoeSize } }, 
+              );
+
+        }catch(error){
+            console.log("Internal Error while trying to change the size.",error);
+            return res.status(500).send("Internal Error while trying to change the size.",error);
+        }
+
+    }
+
+}
+
+
+const loadCheckout = async(req,res) => {
+
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+
+    try{
+
+        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        
+        const currentDate = new Date();
+        const deliveryDate = add(currentDate, { days: 5 });
+        const expectedDeliveryDate = format(deliveryDate,'EEEE yyyy MMMM dd');
+
+        const address = await User.findById(userID).populate('address').exec();
+
+        let defaultAddress;
+        for(let i = 0 ; i < address.address.length ; i++){
+            if(address.address[i].defaultAdd == 1){
+                defaultAddress = address.address[i];
+                break;
+            }
+        }
+       console.log(address)
+
+        return res.status(200).render('checkout',{
+        cartItemsArray,
+        subTotal,
+        totalAmount,
+        gst,
+        totalSelectedItems,
+        expectedDeliveryDate,
+        defaultAddress,
+        address
+    })
+
+    }catch(error){
+
+        console.log("Internal error while loading checkout",error);
+        return res.status(500).send("Internal error while loading checkout",error);
+    }
+
+
+
+}
+
+const validateCart = async(req,res) => {
+
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+
+    try{
+
+        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        console.log("\n\n\nThis is load cart data",cartItemsArray,"\n",
+            subTotal,"\n",
+            totalAmount,"\n",
+            gst,"\n",
+            totalSelectedItems,"\n\n\nThis is load cart data")
+
+            if(totalSelectedItems < 1){
+                return res.json({status : false, message : "Need atleast 1 item selected to checkout"})
+            }
+            for(let i = 0 ; i < cartItemsArray.length ; i++){
+                if( cartItemsArray[i].isSelected ){
+                    if(cartItemsArray[i].productId.stockQuantity < cartItemsArray[i].quantity){
+                        return res.json({status : false , message : "Stock limit exceeded for some products. Please revise your selection."});
+                    }
+                }
+            }
+
+            res.json({
+                status : true,
+                redirect: '/checkout_page'
+            })
+
+    }catch(error){
+        console.log("Internal error while validating cart",error);
+        return res.status(500).send("Internal error while validating cart",error);
+    }
 }
 
 module.exports = {
@@ -756,6 +880,9 @@ module.exports = {
     addProductToCart,
     removeProductFromCart,
     selectItemToOrder,
-    changeQuantity
+    changeQuantity,
+
+    validateCart,
+    loadCheckout
   
 }

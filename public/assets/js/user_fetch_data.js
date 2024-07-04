@@ -559,6 +559,35 @@ async function removeProductFromCart(productId){
     }
 }
 
+async function loadCheckout() {
+    
+    try{
+
+        const response = await fetch(`http://localhost:2000/checkout`,{ redirect: 'manual' });
+
+        if(!response.ok)                  {
+            throw new Error('Network response was not ok while removing product from cart');
+        }
+        const responseClone = response.clone();
+        const data = await response.json();
+        const textData = await responseClone.text();
+        if(!data.status){
+            Swal.fire(
+                'Oops',
+                `${data.message}`,
+                'error'
+            )
+        }else if(data.redirect){
+            
+            window.location.href = data.redirect;
+        }
+
+    }catch(error){
+        console.log("Error while going to checkout page")
+        Swal.fire('Error', 'There was a problem loading the checkout page', 'error');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // Checkboxes
@@ -590,6 +619,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
         
             })
+         
             .catch(error =>{
                 console.log("Error while trying select the product",error)
             })
@@ -622,7 +652,34 @@ document.addEventListener('DOMContentLoaded', function() {
                     orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
                     orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`
                 }else{
-             
+                    
+                    if(data.message == "Max 4 items per product"){
+                        Swal.fire(
+                            'Oops',
+                            `${data.message}`,
+                            'error'
+                        )
+                        this.value = 4
+
+                    }else if(data.message == "Item quantity cannot be less than 1"){
+
+                        this.value = 1
+                        Swal.fire(
+                            'Oops',
+                            `${data.message}`,
+                            'error'
+                        )
+
+                    }else{
+
+                        this.value = data.stock
+                        Swal.fire(
+                            'Oops',
+                            `${data.message}`,
+                            'error'
+                        )
+
+                    }
                     console.log("Something wrong with selecting product there is no data")
                  
                 }
@@ -635,5 +692,60 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+
+     //Size inputs
+     document.querySelectorAll('.cart-item-size').forEach(input => {
+        input.addEventListener('change', function() {
+            const productId = this.dataset.productId;
+            const shoeSize = this.value;
+            console.log(`size of  product ${productId} changed to ${shoeSize}`);
+
+            fetch(`http://localhost:2000/cart?productId=${productId}&shoeSize=${shoeSize}`,{method : "PATCH"})
+            .then(response => {
+                
+                if(!response.ok){
+                    throw new Error('Network response was not ok while changing the size.');
+                }
+            })
+            .catch(error =>{
+                console.log("Error while trying change item size",error)
+            })
+
+        })
+    })
+
+
+    
+    const dAddress_adType = document.getElementById('dAddress-adType');
+    const dAddress_ldMark = document.getElementById('dAddress-ldMark');
+    const dAddress_place = document.getElementById('dAddress-place');
+    const dAddress_city_pin = document.getElementById('dAddress-city-pin');
+    const dAddress_dt_st = document.getElementById('dAddress-dt-st');
+    const dAddress_mob = document.getElementById('dAddress-mob');
+
+    const addressContainer = document.querySelector('.address-container');
+
+    addressContainer.addEventListener('click', function(event) {
+        const clickedCard = event.target.closest('.address-card');
+        if (!clickedCard) return;
+
+        const radioInput = clickedCard.querySelector('input[type="radio"]');
+        
+        // Uncheck all other radio buttons and remove 'selected' class from other cards
+        document.querySelectorAll('.address-card').forEach(card => {
+            card.classList.remove('selected');
+            card.querySelector('input[type="radio"]').checked = false;
+        });
+
+        // Check the clicked card's radio button and add 'selected' class
+        radioInput.checked = true;
+        clickedCard.classList.add('selected');
+
+        // Get the address ID from the dataset and log it to the console
+        const selectedAddressId = clickedCard.dataset.addressId;
+        console.log('Selected Address ID:', selectedAddressId);
+
+        //Need to set the selected address Modal is all set.Update other parts.
+    });
 
 })

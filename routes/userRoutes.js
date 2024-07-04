@@ -50,6 +50,9 @@ userRouter.delete('/cart',authenticate.isLoggedIn,userController.removeProductFr
 userRouter.put('/cart',authenticate.isLoggedIn,userController.selectItemToOrder);
 userRouter.patch('/cart',authenticate.isLoggedIn,userController.changeQuantity);
 
+userRouter.get('/checkout',authenticate.isLoggedIn,userController.validateCart);
+userRouter.get('/checkout_page',authenticate.isLoggedIn,userController.loadCheckout);
+
 userRouter.get('/profile',authenticate.isLoggedIn,userController.loadUserProfile)
 userRouter.put('/profile/account-detail',userController.updateUserProfile)
 userRouter.post('/profile/address',userController.addNewAddress);
