@@ -49,8 +49,9 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+   
         .change-address {
-            background-color: #ccc;
+            background-color: #a3a3a3;
             border: none;
             padding: 10px 15px;
             border-radius: 5px;
@@ -340,15 +341,84 @@
                                 <input type="radio" id="address-<%=i%>" class="address-checkbox" name="selected-address" value="<%=i%>">
                                 <label for="address-<%=i%>" class="checkbox-label"></label>
                             </div>
-                        </div>
+                        </div>
 
                     <% } %>
          
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
                 <button type="submit" form="changeAddressForm" class="btn btn-primary" id="btn-changeAddress-save">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Address Modal -->
+<div class="modal fade" id="addNewAddressModalCenter" tabindex="-1" role="dialog" aria-labelledby="addNewAddressModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addNewAddressModalLongTitle">Add New Address</h5>
+                <button type="button" id="addNewAddress-modal-close-button" class="close" data-dismiss="modal" aria-label="Close" style="background-color: transparent; border: none; font-size: 1.5rem; color: gray; padding: 0.5rem 1rem;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Add Address Data here -->
+                <form action="/checkout_page/addAddress?action=checkout" method="post" id="addNewAddressForm" >
+
+                    <div class="d-flex justify-content-between row form-group " >
+                        <div class="col-lg-6" >
+                            <label for="addressName" class="form-label">Address Type</label>
+                            <select id="addressName" class="form-control" name="addressName" >
+                                <option >Home</option>
+                                <option >Office</option>
+                                <option >Work place</option>
+                                <option >Other</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-6" >
+                            <label for="addressPincode" class="form-label">Pincode</label>
+                            <input type="text" placeholder="Type here" class="form-control" id="addressPincode" name="addressPincode">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between row form-group " >
+                        <div class="col-lg-6" >
+                            <label for="addressState" class="form-label">State</label>
+                            <input type="text" placeholder="Type here" class="form-control" id="addressState" name="addressState">
+                            
+                        </div>
+                        <div class="col-lg-6" >
+                            <label for="addressDistrict" class="form-label">District</label>
+                            <input type="text" placeholder="Type here" class="form-control" id="addressDistrict" name="addressDistrict">
+
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between row form-group " >
+                        <div class="col-lg-6" >
+                            <label for="addressCity" class="form-label">City</label>
+                            <input type="text" placeholder="Type here" class="form-control" id="addressCity" name="addressCity">
+                        </div>
+                        <div class="col-lg-6" >
+                            <label for="addressPlace" class="form-label">Place</label>
+                            <input type="text" placeholder="Type here" class="form-control" id="addressPlace" name="addressPlace">
+                        </div>
+                    </div>
+                    <label for="addressMobile" class="form-label">Mobile</label>
+                    <input type="text" placeholder="Type here" class="form-control" id="addressMobile" name="addressMobile">
+                    <label for="addressLandmark" class="form-label">Landmark</label>
+                    <input type="text" placeholder="Type here" class="form-control" id="addressLandmark" name="addressLandmark">
+
+                </form>
+              
+            </div>
+            <div class="modal-footer">
+               
+                <button type="submit" form="addNewAddressForm" class="btn btn-primary" id="btn-addNewAddress-save">Use Address</button>
             </div>
         </div>
     </div>
@@ -361,9 +431,9 @@
             <h1>CHECKOUT</h1>
             <div class="checkout-container">
                 
-                <div class="checkout-details">
+                <div class="checkout-details  ">
                     
-                    <div class="row align-items-center">
+                    <div class="row align-items-center  ">
                         <div class="col-md-2 mb-3 mb-md-0">
                             <div class="product-images d-flex">
                                 <div class="product-image">
@@ -371,8 +441,8 @@
                                 </div> 
                             </div>
                         </div>
-                        <div class="col-md-10">
-                            <div class="delivery-info">
+                        <div class="col-md-10 ">
+                            <div class="delivery-info  ">
                                 <p class="mb-1" style="font-weight: bold; font-size: larger;" ><%=totalSelectedItems%> Items</p>
                                 <p class="mb-0 " style="font-weight: bolder; font-size: x-large; color: #4A69E2; " >Arrives by <%=expectedDeliveryDate%></p>
                             </div>
@@ -381,13 +451,29 @@
 
                     <div class="delivery-address">
                         <h3>Delivery Address</h3>
-                        <p style="font-weight: bold;" id="dAddress-adType" ><%=defaultAddress.addressType%></p>
-                        <p id="dAddress-ldMark" >LandMark: <%=defaultAddress.landmark%>,</p>
-                        <p id="dAddress-place" > Place: <%=defaultAddress.place%>,</p>
-                        <p id="dAddress-city-pin" > <%=defaultAddress.city%> city, PIN : <%=defaultAddress.pinCode%></p>
-                        <p id="dAddress-dt-st" > <%=defaultAddress.district%> Dt, <%=defaultAddress.state%> </p>
-                        <p id="dAddress-mob" > Mobile: +91 <%=defaultAddress.mobile_no%></p>
-                        <button type="button" class=" mb-3 change-address " data-toggle="modal" data-target="#changeAddressModalCenter">Change Address</button>
+                        <% if(selectedAddress){ %>
+                            <p style="font-weight: bold;" id="dAddress-adType" ><%=selectedAddress?.addressType%></p>
+                            <p id="dAddress-ldMark" >LandMark: <%=selectedAddress?.landmark%>,</p>
+                            <p id="dAddress-place" > Place: <%=selectedAddress?.place%>,</p>
+                            <p id="dAddress-city-pin" > <%=selectedAddress?.city%> city, PIN : <%=selectedAddress?.pinCode%></p>
+                            <p id="dAddress-dt-st" > <%=selectedAddress?.district%> Dt, <%=selectedAddress?.state%> </p>
+                            <p id="dAddress-mob" > Mobile: +91 <%=selectedAddress?.mobile_no%></p>
+                        <% }else{ %>
+                            <p style="font-weight: bold;" id="dAddress-adType" ></p>
+                            <p id="dAddress-ldMark" ></p>
+                            <p id="dAddress-place" ></p>
+                            <p id="dAddress-city-pin" ></p>
+                            <p id="dAddress-dt-st" ></p>
+                            <p id="dAddress-mob" ></p>
+                        <% } %>
+                        <% if(address.address.length > 1 ){ %>
+                            <button type="button" class="btn mb-3  " data-toggle="modal" data-target="#changeAddressModalCenter">Select Address</button>
+                        <% } %>
+                     
+                        <button type="button" class="btn mb-3 " data-toggle="modal" data-target="#addNewAddressModalCenter">
+                        Add New Address
+                        </button>
+  
                         
                     </div>
                     <div class="payment-method">
@@ -435,7 +521,7 @@
                         <span>Total Amount</span>
                         <span>₹ <%=totalAmount%></span>
                     </div>
-                    <button class="place-order">Place Order</button>
+                    <button id="place-order" class="place-order">Place Order</button>
                 </div>
             </div>
         </div>

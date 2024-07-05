@@ -383,27 +383,38 @@ const logoutUser = async(req,res) => {
 const addNewAddress = async(req,res) => {
 
     let userID = "";
-    let isDefault = 0;
     if(req?.user?._id){
-        userID = req.user._id;
+        userID = new mongoose.Types.ObjectId(req.user._id);
     }else if(req.session.user_id){
-        userID = req.session.user_id
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
+    let isDefault = 0;
+    let selectedAdd = false
+    
+    
     try{
         
 
-        isDefault = await User.aggregate([
+        isDefaultAd = await User.aggregate([
             {$match:{_id:new ObjectId(userID)}},{$project:{size:{$size:"$address"}}}
         ]).exec();
-        console.log(isDefault);
-        if(isDefault[0].size < 1 ){
+       
+        if(isDefaultAd[0].size < 1){
             isDefault = 1;
+            selectedAdd = true;
+        }else if(req.query.action == 'checkout'){
+            const setSelectedAddrStatus = await Address.updateMany({userId : userID,selectedAdd : true},{$set : {selectedAdd : false}}).exec();
+        
+            if(setSelectedAddrStatus.acknowledged){
+          
+                selectedAdd = true;
+            }
         }else{
             isDefault = 0;
         }
-
+        
         const newAddress = new Address({
-
+            userId      : userID,
             addressType : req.body.addressName,
             pinCode     : req.body.addressPincode,
             place       : req.body.addressPlace,
@@ -412,13 +423,19 @@ const addNewAddress = async(req,res) => {
             state       : req.body.addressState,
             landmark    : req.body.addressLandmark,
             mobile_no   : req.body.addressMobile,
-            defaultAdd  : isDefault
+            defaultAdd  : isDefault,
+            selectedAdd : selectedAdd
         })
         const addressData = await newAddress.save();
         if(addressData){
             
             await User.updateOne({_id:userID},{$push:{address : addressData._id}});
+            if(req.query.action == 'checkout'){
+                
+                return res.status(201).redirect('/checkout_page')    
+            }
             return res.status(201).redirect('/profile')
+
         }else{
             console.log("Something went wrong while creating address");
             return res.send("Something went wrong while creating address");
@@ -464,6 +481,7 @@ const deleteAddress = async(req,res) => {
 
     const address_id = req.query.AddressID;
     const addressId = new mongoose.Types.ObjectId(address_id);
+    console.log("new mongoose.Types.ObjectId(address_id);",addressId)
     let isDefault = 0;
 
     let userID = "";
@@ -477,18 +495,23 @@ const deleteAddress = async(req,res) => {
 
         const userDetails = await User.findOne({_id : userID});
         const defaultAddress = await Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec ();
-        
+    
         isDefault = await User.aggregate([
             {$match:{_id:new ObjectId(userID)}},{$project:{size:{$size:"$address"}}}
         ]).exec();
-
+    
         const isQueryAdAndDefaultAdEq = (addressId.toString() === defaultAddress._id.toString());
-        if(!isQueryAdAndDefaultAdEq || (isQueryAdAndDefaultAdEq && isDefault[0].size == 1)){
-
-            await User.updateOne({_id : userID},{$pull:{address:addressId}}).exec();
-            await Address.deleteOne({_id: addressId }).exec();
-            console.log("Address deleted Successfully.");
-            return res.json({ status : true });
+       
+        if(!isQueryAdAndDefaultAdEq || (isQueryAdAndDefaultAdEq && (isDefault[0].size == 1))){
+      
+            const isDeleted = await Address.deleteOne({_id: addressId }).exec();
+            console.log(isDeleted)
+            if(isDeleted.acknowledged){
+                
+                await User.updateOne({_id : userID},{$pull:{address:addressId}}).exec();
+                console.log("Address deleted Successfully.");
+                return res.json({ status : true });
+            }
 
         }else{
             
@@ -784,15 +807,14 @@ const loadCheckout = async(req,res) => {
         const expectedDeliveryDate = format(deliveryDate,'EEEE yyyy MMMM dd');
 
         const address = await User.findById(userID).populate('address').exec();
-
-        let defaultAddress;
-        for(let i = 0 ; i < address.address.length ; i++){
-            if(address.address[i].defaultAdd == 1){
-                defaultAddress = address.address[i];
-                break;
-            }
-        }
-       console.log(address)
+        const selectedAddress = await Address.findOne({userId : userID,selectedAdd : true});
+        
+        // for(let i = 0 ; i < address.address.length ; i++){
+        //     if(address.address[i].selectedAdd == true){
+        //         selectedAddress = address.address[i];
+        //         break;
+        //     }
+        // }
 
         return res.status(200).render('checkout',{
         cartItemsArray,
@@ -801,7 +823,7 @@ const loadCheckout = async(req,res) => {
         gst,
         totalSelectedItems,
         expectedDeliveryDate,
-        defaultAddress,
+        selectedAddress,
         address
     })
 
@@ -810,8 +832,6 @@ const loadCheckout = async(req,res) => {
         console.log("Internal error while loading checkout",error);
         return res.status(500).send("Internal error while loading checkout",error);
     }
-
-
 
 }
 
@@ -827,11 +847,6 @@ const validateCart = async(req,res) => {
     try{
 
         const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
-        console.log("\n\n\nThis is load cart data",cartItemsArray,"\n",
-            subTotal,"\n",
-            totalAmount,"\n",
-            gst,"\n",
-            totalSelectedItems,"\n\n\nThis is load cart data")
 
             if(totalSelectedItems < 1){
                 return res.json({status : false, message : "Need atleast 1 item selected to checkout"})
@@ -853,6 +868,36 @@ const validateCart = async(req,res) => {
         console.log("Internal error while validating cart",error);
         return res.status(500).send("Internal error while validating cart",error);
     }
+}
+
+
+const changeDeliveryAddress = async(req,res) => {
+
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+    const addressId = new mongoose.Types.ObjectId(req.query.addressId);
+    
+    try{
+
+        const setSelectedAddrStatus = await Address.updateMany({userId : userID,selectedAdd : true},{$set : {selectedAdd : false}}).exec();
+        if(setSelectedAddrStatus.acknowledged){
+
+            const address = await Address.findOneAndUpdate({_id : addressId},{$set:{selectedAdd : true}},{new : true});
+            console.log("Changed hasdfasdf",address)
+                return res.status(200).json({status: true,address});
+        }
+
+    }catch(error){
+
+        console.log("Internal Error while trying to change the address",error)
+        return res.status(500).send("Internal Error while trying to change the address",error);
+    }
+    
+
 }
 
 module.exports = {
@@ -883,6 +928,7 @@ module.exports = {
     changeQuantity,
 
     validateCart,
-    loadCheckout
+    loadCheckout,
+    changeDeliveryAddress
   
 }

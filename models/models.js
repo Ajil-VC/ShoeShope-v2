@@ -108,6 +108,11 @@ const brandSchema = mongoose.Schema({
 
 const addressSchema = new mongoose.Schema({
 
+    userId : {
+        type : mongoose.Schema.Types.ObjectId,
+        required : true,
+        ref : 'User'
+    },
     addressType: {
         type: String,
         required: true

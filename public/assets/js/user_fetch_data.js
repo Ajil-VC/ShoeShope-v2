@@ -1,5 +1,6 @@
 
 
+
 $(document).ready(function(){
 
     $('.zoom_image').each(function() { 
@@ -722,30 +723,78 @@ document.addEventListener('DOMContentLoaded', function() {
     const dAddress_city_pin = document.getElementById('dAddress-city-pin');
     const dAddress_dt_st = document.getElementById('dAddress-dt-st');
     const dAddress_mob = document.getElementById('dAddress-mob');
-
+    let selectedAddressId ;
+    
     const addressContainer = document.querySelector('.address-container');
+    if(addressContainer){
 
-    addressContainer.addEventListener('click', function(event) {
-        const clickedCard = event.target.closest('.address-card');
-        if (!clickedCard) return;
-
-        const radioInput = clickedCard.querySelector('input[type="radio"]');
-        
-        // Uncheck all other radio buttons and remove 'selected' class from other cards
-        document.querySelectorAll('.address-card').forEach(card => {
-            card.classList.remove('selected');
-            card.querySelector('input[type="radio"]').checked = false;
+        addressContainer.addEventListener('click', function(event) {
+            const clickedCard = event.target.closest('.address-card');
+            if (!clickedCard) return;
+    
+            const radioInput = clickedCard.querySelector('input[type="radio"]');
+            
+            // Uncheck all other radio buttons and remove 'selected' class from other cards
+            document.querySelectorAll('.address-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('input[type="radio"]').checked = false;
+            });
+    
+            // Check the clicked card's radio button and add 'selected' class
+            radioInput.checked = true;
+            clickedCard.classList.add('selected');
+    
+            // Get the address ID from the dataset and log it to the console
+            selectedAddressId = clickedCard.dataset.addressId;
+            console.log('Selected Address ID:', selectedAddressId);
+    
+            
         });
+    }
+    
+    const btn_changeAddress_save = document.getElementById('btn-changeAddress-save');
+    const changeAddress_modal_close_button = document.getElementById('changeAddress-modal-close-button');
+    if(btn_changeAddress_save ){
 
-        // Check the clicked card's radio button and add 'selected' class
-        radioInput.checked = true;
-        clickedCard.classList.add('selected');
+        btn_changeAddress_save.addEventListener('click',()=> {
+            
+            if(selectedAddressId){
 
-        // Get the address ID from the dataset and log it to the console
-        const selectedAddressId = clickedCard.dataset.addressId;
-        console.log('Selected Address ID:', selectedAddressId);
+                fetch(`http://localhost:2000/checkout_page?addressId=${selectedAddressId}`,{method : "PATCH"})
+                   .then(response => {
+                       
+                       if(!response.ok){
+                           throw new Error('Network response was not ok while changing the size.');
+                       }
+                       return response.json();
+                   })
+                   .then(data => {
+                       console.log(data)
+                       dAddress_adType.textContent = data.address.addressType;
+                       dAddress_ldMark.textContent = `LandMark: ${data.address.landmark},`; 
+                       dAddress_place.textContent = `Place: ${data.address.place},`;
+                       dAddress_city_pin.textContent = `${data.address.city} city, PIN : ${data.address.pinCode}` ; 
+                       dAddress_dt_st.textContent = `${data.address.district} Dt, ${data.address.state}`;
+                       dAddress_mob.textContent = `Mobile: +91 ${data.address.mobile_no}`;
+                       
+                       changeAddress_modal_close_button.click();
+                   })
+                   .catch(error =>{
+                       console.log("Error while trying change item size",error)
+                   })
+            }
 
-        //Need to set the selected address Modal is all set.Update other parts.
-    });
+        })
+    }
+
+
+    const place_order = document.getElementById('place-order')
+    if(place_order){
+
+        place_order.addEventListener('click',() => {
+
+            console.log("place_order clicked")
+        })
+    }
 
 })
