@@ -1,6 +1,5 @@
 
 
-
 $(document).ready(function(){
 
     $('.zoom_image').each(function() { 
@@ -496,9 +495,9 @@ async function addProductToCart(productId){
     if(data.redirect){  
         return window.location.href = data.redirect;
     }else if(data.status){
-        console.log("DonEEEE");
+    
         const IdForaddToCartFn = document.getElementById('IdForaddToCartFn');
-        const IdForGoToCartFn = document.getElementById('IdForGoToCartFn');
+        // const IdForGoToCartFn = document.getElementById('IdForGoToCartFn');
         if(IdForaddToCartFn){
             IdForaddToCartFn.textContent = "Go to cart"
             IdForaddToCartFn.removeAttribute('onclick');
@@ -590,12 +589,12 @@ async function loadCheckout() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-
+    
     // Checkboxes
     document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const productId = this.dataset.productId;
-            const isChecked = this.checked;
+            // const isChecked = this.checked;
 
             fetch(`http://localhost:2000/cart?productId=${productId}`,{method : "PUT"})
             .then(response => {
@@ -787,13 +786,72 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
 
+    let paymentMethod = '';
+    const payment_options = document.querySelectorAll('.payment-option');
+    console.log("This is the payment option listner")
+    if(payment_options){
+     
+        payment_options.forEach(methodButton =>{
+            
+            methodButton.addEventListener('click',(e)=> {
+    
+                e.stopPropagation();
+            
+                // const currentSelection = e.currentTarget.id;
+                payment_options.forEach(option => option.classList.remove('selected'));
+                e.currentTarget.classList.add('selected');
+                
+                paymentMethod = e.currentTarget.querySelector('input').value;
+                
+                
+            })
+        })
+    }
 
     const place_order = document.getElementById('place-order')
     if(place_order){
 
         place_order.addEventListener('click',() => {
+            if(paymentMethod){
+                console.log(paymentMethod)
 
-            console.log("place_order clicked")
+                fetch(`http://localhost:2000/checkout_page?paymentMethod=${paymentMethod}`,{method : 'post'})
+                .then(response => {
+                    
+                    if(!response.ok){
+                        throw new Error('Network response was not ok while making order.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.status){
+                        
+                        window.location.href = data.redirect
+                      
+                    }else{
+
+                        Swal.fire({
+                            title: "Order not placed",
+                            text: data.message,
+                            icon: 'error'
+                        });
+
+                    }
+            
+                })
+             
+                .catch(error =>{
+                    console.log("Error occured while making order",error)
+                })
+            }else{
+                console.log("Please select a payment option")
+                Swal.fire({
+                    title: "Payment Method Required",
+                    text: "Please select a payment method to proceed.s",
+                    icon: 'error'
+                });
+            }
+
         })
     }
 

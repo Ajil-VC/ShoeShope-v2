@@ -1,4 +1,5 @@
-const {User,OTP,Product,Category,Brand,Address,Cart} = require('../models/models');
+const {User,OTP,Product,Category,Brand,Address,Cart,Order} = require('../models/models');
+
 const mongoose = require('mongoose') 
 const {ObjectId} = require('mongodb')
 const bcrypt = require('bcrypt');
@@ -546,12 +547,12 @@ const cartItemsFindFn = async(userID) =>{
         let subTotal = 0 ;
         let totalSelectedItems = 0;        
         const hasCart = await Cart.findOne({userId : userID});
-        console.log("This is userCart",hasCart)
+     
         if(hasCart){
 
             let cartItems = await Cart.findById(hasCart._id).populate('items.productId');
             cartItemsArray = cartItems.items
-            console.log(cartItemsArray)
+     
             for(let i = 0 ; i < cartItemsArray.length ; i++){
                 if(cartItemsArray[i].isSelected){
     
@@ -809,13 +810,6 @@ const loadCheckout = async(req,res) => {
         const address = await User.findById(userID).populate('address').exec();
         const selectedAddress = await Address.findOne({userId : userID,selectedAdd : true});
         
-        // for(let i = 0 ; i < address.address.length ; i++){
-        //     if(address.address[i].selectedAdd == true){
-        //         selectedAddress = address.address[i];
-        //         break;
-        //     }
-        // }
-
         return res.status(200).render('checkout',{
         cartItemsArray,
         subTotal,
@@ -887,8 +881,8 @@ const changeDeliveryAddress = async(req,res) => {
         if(setSelectedAddrStatus.acknowledged){
 
             const address = await Address.findOneAndUpdate({_id : addressId},{$set:{selectedAdd : true}},{new : true});
-            console.log("Changed hasdfasdf",address)
-                return res.status(200).json({status: true,address});
+            
+            return res.status(200).json({status: true,address});
         }
 
     }catch(error){
@@ -898,6 +892,154 @@ const changeDeliveryAddress = async(req,res) => {
     }
     
 
+}
+
+const getItemsAndReserve = async(cartItemsArray) =>{
+  
+    try{
+
+        //getting the purchasing item according to the selection.
+        const productsToOrder = cartItemsArray.filter(filteringItem  => filteringItem.isSelected == true )  
+        .map(item =>{
+    
+            return {
+                product : {
+                    id : item.productId._id,
+                    name : item.productId.ProductName,
+                    size : item.size,
+                    Brand : item.productId.Brand,
+                    Category : item.productId.Category,
+                    price : item.productId.salePrice,
+                    images : [item.productId.image[0],item.productId.image[1]],
+                },
+                quantity: item.quantity,
+                subtotal : (item.productId.salePrice) * (item.quantity)
+            }
+    
+        });
+
+        //Reserving the products using promise.all
+        try{
+            const concurrentReservation = productsToOrder.map(async item => {
+
+                const productIsAvailable = await Product.findById({_id : item.product.id});
+                if(!productIsAvailable){
+
+                    throw new Error(`Product not found ${item.product.id}`);
+                }else if(productIsAvailable.stockQuantity < item.quantity){
+                    
+                    //Need to handle the rollback if one product is insufficient in stock.
+
+                    throw new Error(`Insufficient stock for the product ${item.product.id}`);
+                }
+
+                return Product.updateOne(
+                    {_id : item.product.id},
+                    {$inc :{
+                        reserved : item.quantity,
+                        stockQuantity : -item.quantity     
+                    }}
+                );  
+            })
+
+            const reservationResult = await Promise.all(concurrentReservation);
+            const reservedItemCount = reservationResult.reduce((acc,cur) => {
+                return acc + cur.modifiedCount;
+            },0);
+            if(reservedItemCount == productsToOrder.length){
+                console.log("Completly reserved");
+                return productsToOrder;
+            }else{
+                console.log("Couldn't reserve all the products choosed.");
+                console.log("Here is the reservation result: ",reservationResult);
+                return null;
+            }
+
+        }catch(error){
+
+            console.log("Internal error while reserving the products",error);
+        }
+
+        
+    }catch(error){
+        console.log("Error while getting and reserving the items.",error);
+        return res.status(500).send("Error while getting and reserving the items.",error);
+    }
+   
+}
+
+
+
+const placeOrder = async(req,res) => {
+
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+
+    const paymentMethod = req.query.paymentMethod;
+    
+    try{
+
+        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        const address = await Address.findOne({userId : userID, selectedAdd : true});
+        const productsToOrder = await getItemsAndReserve(cartItemsArray);
+
+        if(productsToOrder){
+
+            const newOrder = new Order({
+                
+                customer    : userID,
+                items       : productsToOrder,
+                totalItems  : totalSelectedItems,
+                subTotal    : subTotal,
+                gstAmount   : gst,
+                discount    : 0,
+                totalAmount : totalAmount,
+                shippingAddress : address._id,
+                paymentMethod   : paymentMethod
+    
+            });
+    
+            const orderDetails = await newOrder.save();
+            if(orderDetails){
+                
+                const IdsToRemoveFromCart = productsToOrder.map(item => item.product.id)
+               
+                await Cart.updateOne({userId : userID},{$pull: {
+                    items: { 
+                        productId: {$in : IdsToRemoveFromCart}
+                    }}
+                }) 
+
+                return res.status(201).json({status : true,redirect:`/order_placed?order_id=${orderDetails._id}`})
+    
+            }else{
+                console.log("Couldn't make the order")
+                return res.json({status : false,message:"Couldn't place the order"})
+            }
+        }
+
+    }catch(error){
+
+        console.log("Internal error while trying to place order.",error);
+        return res.json({status : false,message:"Internal server error while placing the order"})
+       
+    }
+}
+
+
+const loadOrderPlaced = async(req,res) => {
+
+    try{
+
+        return res.status(200).render('order_placed',{order_id : req.query.order_id})
+
+    }catch(error){
+        console.log("Internal error while loading order placed page",error);
+    }
 }
 
 module.exports = {
@@ -929,6 +1071,8 @@ module.exports = {
 
     validateCart,
     loadCheckout,
-    changeDeliveryAddress
+    changeDeliveryAddress,
+    placeOrder,
+    loadOrderPlaced
   
 }

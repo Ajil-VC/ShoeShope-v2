@@ -338,7 +338,7 @@
                                 <p class="address-phone">Phone: <%=address.address[i].mobile_no%></p>
                             </div>
                             <div class="checkbox-container">
-                                <input type="radio" id="address-<%=i%>" class="address-checkbox" name="selected-address" value="<%=i%>">
+                                <input type="radio" id="address-<%=i%>" class="address-checkbox"  name="selected-address" value="<%=i%>">
                                 <label for="address-<%=i%>" class="checkbox-label"></label>
                             </div>
                         </div>
@@ -480,18 +480,18 @@
                         <h3>Payment Method</h3>
                         <p class="text-grey" >Select any payment method</p>
                         <div class="payment-options">
-                            <label class="payment-option d-flex ">
-                                <input type="radio" name="payment" value="card">
+                            <label class="payment-option d-flex " id="debit-card" >
+                                <input type="radio" name="payment" value="Debit Card / Credit Card">
                                 <span class="radio-custom"></span>
                                 <span class="label-text">Debit card / Credit card</span>
                             </label>
-                            <label class="payment-option d-flex ">
-                                <input type="radio" name="payment" value="upi">
+                            <label class="payment-option d-flex " id="upi" >
+                                <input type="radio" name="payment" value="UPI Method">
                                 <span class="radio-custom"></span>
                                 <span class="label-text">UPI Method</span>
                             </label>
-                            <label class="payment-option d-flex ">
-                                <input type="radio" name="payment" value="netbanking">
+                            <label class="payment-option d-flex " id="cod" >
+                                <input type="radio" name="payment" value="Cash on Delivery">
                                 <span class="radio-custom"></span>
                                 <span class="label-text">Cash on Delivery</span>
                             </label>

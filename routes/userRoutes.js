@@ -54,6 +54,8 @@ userRouter.get('/checkout',authenticate.isLoggedIn,userController.validateCart);
 userRouter.get('/checkout_page',authenticate.isLoggedIn,userController.loadCheckout);
 userRouter.patch('/checkout_page',authenticate.isLoggedIn,userController.changeDeliveryAddress);
 userRouter.post('/checkout_page/addAddress',userController.addNewAddress);
+userRouter.post('/checkout_page',authenticate.isLoggedIn,userController.placeOrder);
+userRouter.get('/order_placed',authenticate.isLoggedIn,userController.loadOrderPlaced)
 
 userRouter.get('/profile',authenticate.isLoggedIn,userController.loadUserProfile)
 userRouter.put('/profile/account-detail',userController.updateUserProfile)

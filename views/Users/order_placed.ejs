@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>ShoeShope</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/imgs/theme/favicon.svg">
+    <!-- Template CSS -->
+
+    <link rel="stylesheet" href="/assets/css/main.css?v=3.4">
+
+    <style>
+
+         .main-section{
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            margin: 0;
+        }
+        .section-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #333;
+            line-height: 1.6;
+        }
+        .order-number {
+            font-weight: bold;
+            color: #1976D2;
+        }
+        .success-btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        .success-btn:hover {
+            background-color: #45a049;
+        }
+       
+    </style>
+
+
+</head>
+
+
+<body>
+<%- include("../layouts/navigation.ejs")  %>
+
+<main class="main" >
+    <section class="pt-50 pb-150 main-section " style="font-family: Arial, sans-serif; " >
+
+        <div class="section-container">
+            <h1>Thank You for Your Order!</h1>
+            <p>Your order has been successfully placed.</p>
+            <p>Order Id: <span class="order-number"><%=order_id%></span></p>
+            <!-- <p>We've sent a confirmation email with order details to your registered email address.</p> -->
+            <p>Expected delivery: Within 3-5 business days</p>
+            <a href="#" class="success-btn">Track Your Order</a>
+        </div>
+    </section>
+</main>
+
+
+<%- include("../layouts/footer.ejs")  %> 

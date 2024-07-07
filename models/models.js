@@ -194,6 +194,11 @@ const productSchema = new mongoose.Schema({
         type : Number,
         required : true
     },
+    reserved : {
+        type : Number,
+        required : true,
+        default : 0
+    },
     image : {
         type : Array,
         required : true
@@ -248,7 +253,7 @@ const cartSchema = new mongoose.Schema({
 const orderItemSchema = new mongoose.Schema({
 
     product: {
-        _id: { 
+        id: { 
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
             required: true
@@ -257,14 +262,22 @@ const orderItemSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        size: {
+            type: String
+        },
+        Brand: {
+            type: String
+        },
+        Category: {
+            type: String
+        },
         price: {
             type: Number,
             required: true
         },
         images: {
-          url: {
-            type: String,
-            }
+            type : Array,
+             
         },
       },
       quantity: { type: Number, required: true, min: 1 },
@@ -290,7 +303,8 @@ const orderSchema = new mongoose.Schema({
         default : 0
     },
     gstAmount : {
-        type : Number
+        type : Number,
+        default : 0
     },
     discount : {
         type : Number,
@@ -304,6 +318,7 @@ const orderSchema = new mongoose.Schema({
     },
     orderDate : {
         type : Date,
+        required: true,
         default : Date.now
     },
     status: {
@@ -317,7 +332,12 @@ const orderSchema = new mongoose.Schema({
         required: true,
         ref: 'Address'
     },
-    paymentMethod: String
+    paymentMethod: {
+        type: String,
+        required: true,
+        enum: ['Debit Card / Credit Card','UPI Method', 'Cash on Delivery'],
+        default: 'Debit Card / Credit Card'
+    }
 
 },{timestamps : true});
 
@@ -327,6 +347,7 @@ const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP',otpSchema);
 const Address = mongoose.model('Address',addressSchema);
 const Cart = mongoose.model('Cart',cartSchema);
+const Order = mongoose.model('Order',orderSchema);
 
 const Admin = mongoose.model('Admin',adminSchema);
 
@@ -339,9 +360,12 @@ module.exports = {
     User,
     OTP,
     Admin,
+
     Category,
     Brand,
     Product,
     Address,
-    Cart
+    
+    Cart,
+    Order
 }
