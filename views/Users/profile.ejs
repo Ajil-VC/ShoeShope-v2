@@ -15,7 +15,6 @@
                 <button type="button" id="addNewAddress-modal-close-button" class="close" data-dismiss="modal" aria-label="Close" style="background-color: transparent; border: none; font-size: 1.5rem; color: gray; padding: 0.5rem 1rem;">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                
             </div>
             <div class="modal-body">
                 <!-- Add New Address Data here -->
@@ -363,49 +362,113 @@
                                     <!--Orders....-->
                                     <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
                                         <div class="card">
-                                            <div class="card-header">
-                                                <h5 class="mb-0">Your Orders</h5>
+                                            <div class="card-header d-flex justify-content-between align-items-center ">
+                                                <h5 class="mb-0">Your Order History</h5>
+                                                <button class="btn display-order-details " id="show-all-btn" >Show all</button>
                                             </div>
+                                            
                                             <div class="card-body">
-                                                <div class="table-responsive">
-                                                    <table class="table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Order</th>
-                                                                <th>Date</th>
-                                                                <th>Status</th>
-                                                                <th>Total</th>
-                                                                <th>Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td>#1357</td>
-                                                                <td>March 45, 2020</td>
-                                                                <td>Processing</td>
-                                                                <td>$125.00 for 2 item</td>
-                                                                <td><a href="#" class="btn-small d-block">View</a></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>#2468</td>
-                                                                <td>June 29, 2020</td>
-                                                                <td>Completed</td>
-                                                                <td>$364.00 for 5 item</td>
-                                                                <td><a href="#" class="btn-small d-block">View</a></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>#2366</td>
-                                                                <td>August 02, 2020</td>
-                                                                <td>Completed</td>
-                                                                <td>$280.00 for 3 item</td>
-                                                                <td><a href="#" class="btn-small d-block">View</a></td>
-                                                            </tr>
+
+                                                <div class="table-responsive" id="toggle-order-history" >
+                                                    <table class="table ods-order-table">
+
+                                                        <% if(orders.length < 1 ){ %>
+                                                            <thead>
+                                                                <tr>
+                                                                    You havn't ordered anything..!
+                                                                </tr>
+                                                            </thead>
+
+                                                        <% }else{ %>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Preview</th>
+                                                                
+                                                                    <th>Address</th>
+                                                                    <th>Price</th>
+                                                                    <th>Date</th>
+                                                                    <th>Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                        <% } %>
+                                                        <tbody id="order-history-table" > 
+
+                                                            <% for(let i = 0 ; i < orders.length ; i++){ %>
+
+                                                                <tr class="odsIdUnifiedRow" data-id="<%=orders[i]._id%>" >
+                                                                    <td>
+                                                                        <img src="/ProductImage/<%=orders[i]?.items[0]?.product?.images[0]%>" alt="Order preview" class="ods-order-preview">
+                                                                        <% if(orders[i]?.items[1]){ %>
+                                                                            <img src="/ProductImage/<%=orders[i]?.items[1]?.product?.images[0]%>" alt="Order preview" class="ods-order-preview">
+                                                                        <% }else{ %>
+                                                                            <img src="/ProductImage/<%=orders[i]?.items[0]?.product?.images[1]%>" alt="Order preview" class="ods-order-preview">
+                                                                        <% } %>
+                                                                        <div class="odsIdOrderId">Order ID: <%=orders[i]?._id%></div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <address class="ods-address">
+                                                                            <span style=" font-size: small; font-weight: bold;  color: black;" ><%=orders[i]?.shippingAddress?.addressType%></span><br>
+                                                                            <%=orders[i]?.shippingAddress?.place%>,<br>
+                                                                            <%=orders[i]?.shippingAddress?.city%> city,<br>
+                                                                            <%=orders[i]?.shippingAddress?.landmark%> city
+                                                                        </address>
+                                                                    </td>
+                                                                    <td><span class="ods-price">₹ <%=orders[i]?.totalAmount%></span></td>
+                                                                    <td><span class="ods-date"><%=orders[i]?.orderDate%></span></td>
+                                                                    <td><span class="ods-status ods-status-processing"><%=orders[i]?.status%></span></td>
+                                                                </tr>
+                                                             
+                                                            <% } %>
+
+
+                                                            <!-- <tr>
+                                                                <td><span class="ods-order-id">#2468</span></td>
+                                                                <td><img src="path_to_image.jpg" alt="Order preview" class="ods-order-preview"></td>
+                                                                <td>
+                                                                    <address class="ods-address">
+                                                                        456 Elm St,<br>
+                                                                        Other City, ST 67890
+                                                                    </address>
+                                                                </td>
+                                                                <td><span class="ods-price">$364.00</span></td>
+                                                                <td><span class="ods-status ods-status-completed">Completed</span></td>
+                                                                <td><span class="ods-date">June 29, 2024</span></td>
+                                                            </tr> -->
+                                                        
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                
+                                             
+                                                <!--Detailed Orders....-->
+                                                <div class="display-order-details " id="order-details">
+
+                                                    <div class="table-responsive">
+                                                        
+                                                        <table class="table ods-order-detail-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Product</th>
+                                                                    <th>Price</th>
+                                                                    <th>Qty</th>
+                                                                    <th>Total</th>
+                                                                    <th>Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="order-detail-table">
+                                                              <!--aasdfasdfasfsafsf-->
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+
+
                                             </div>
                                         </div>
                                     </div>
+
+                                    
 
                                     <!--Address management....-->
                                     <div class="container mt-5 tab-pane fade " id="address" >

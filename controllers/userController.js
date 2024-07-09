@@ -298,20 +298,40 @@ const loadUserProfile = async(req,res) => {
         }  
 
         const userDetails = await User.findOne({_id : userID}).exec() ;
-        const defaultAddress =await Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec ();
-        const otherAddress =await Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec ();
-            console.log(otherAddress)
-        if(!defaultAddress){
-
-            return res.status(200).render('profile',{userDetails,defaultAddress});    
-        }
-
-        return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress});
+        // const defaultAddress =await Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec ();
+        // const otherAddress =await Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec ();
+        //Fetching other 2 data concurrently using Promise.all
+        const [defaultAddress,otherAddress,orders] = await Promise.all([
+            Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec(),
+            Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec(),
+            Order.find({customer : userID}).populate('shippingAddress').exec()
+        ]);
+        console.log(orders)
+        return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders});
     }catch(error){
 
         console.log("Internal error while loading profile",error);
         return res.status(500).send("Internal error while loading profile",error);
     }
+}
+
+const getOrderDetails = async(req,res) => {
+
+    const orderId = new mongoose.Types.ObjectId(req.query.order_id);
+    
+    try{
+        const order = await Order.findById({_id : orderId}).populate('shippingAddress');
+        const products = order.items;
+        const address = order.shippingAddress;
+        const orderDate = order.orderDate;
+        const orderStatus = order.status
+        
+        return res.status(200).json({status : true, products,address,orderDate,orderStatus});
+
+    }catch(error){
+        console.log("Internal error while gettting order details.",error)
+    }
+    
 }
 
 const updateUserProfile = async(req,res) => {
@@ -1073,6 +1093,7 @@ module.exports = {
     loadCheckout,
     changeDeliveryAddress,
     placeOrder,
-    loadOrderPlaced
+    loadOrderPlaced,
+    getOrderDetails
   
 }

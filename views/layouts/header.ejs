@@ -16,5 +16,261 @@
     <!-- Template CSS -->
     <link rel="stylesheet" href="/assets/css/main.css?v=3.4">
 
+    <style>
+
+.ods-order-table th:last-child,
+.ods-order-table td:last-child {
+    width: 15%;  /* Reduced from the default 20% */
+}
+
+
+        .ods-order-table {
+            border-collapse: separate;
+            border-spacing: 0 15px;
+            
+        }
+
+    
+        .ods-order-table thead th {
+            background-color: #f8f9fa;
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            color: #495057;
+        }
+    
+        .ods-order-table tbody tr {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+    
+        .ods-order-table tbody tr:hover {
+            /* transform: translateY(-3px); */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    
+        .ods-order-table td {
+            padding: 15px;
+            vertical-align: middle;
+            border: none;
+            background-color: #ffffff;
+        }
+        
+        .display-order-details{
+            display: none;
+        }
+        .ods-order-id {
+            font-weight: bold;
+            color: #007bff;
+        }
+    
+        .ods-order-preview {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    
+        .ods-address {
+            font-style: normal;
+            line-height: 1.4;
+            color: #6c757d;
+        }
+    
+        .ods-price {
+            font-weight: bold;
+            color: #28a745;
+        }
+    
+        .ods-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+    
+        .ods-status-processing {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    
+        .ods-status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    
+        .ods-date {
+            color: #6c757d;
+        
+  
+        }
+
+
+        .odsIdUnifiedRow {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* .odsIdUnifiedRow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+} */
+
+.odsIdUnifiedRow td {
+    padding: 15px;
+    vertical-align: top;
+}
+
+.odsIdOrderId {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+
+/*Detailed view of order*/
+
+.ods-order-detail-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+}
+
+.ods-order-detail-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    text-align: left;
+    padding: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.odsIdDetailRow {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.ods-order-detail-table td {
+    padding: 20px 15px;
+    vertical-align: middle;
+}
+
+.odsIdProductCell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    
+}
+.order-date-styling{
+    padding: 6px;
+    background-color: rgb(218, 218, 218);
+    border-radius: 6px ;
+    font-family: Arial, Helvetica, sans-serif;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.order-details-bold-text{
+    font-weight: bold;
+    color: black;
+}
+.brandname-and-preview{
+    display: flex;
+    align-items: end;
+}
+
+.odsIdProductImage {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-right: 15px;
+    border-radius: 4px;
+}
+
+.odsIdProductInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.odsIdProductName {
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+.odsIdBrand {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.odsIdOrderId, .odsIdOrderDate, .odsIdDeliveryDate, .odsIdAddress {
+    font-size: 0.85em;
+    margin: 2px 0;
+    color: #495057;
+}
+
+.odsIdQuantityCell {
+    font-size: 0.9em;
+    width: 50px;
+}
+
+.odsIdTotalCell {
+    font-weight: 500;
+}
+
+.odsIdStatusCell {
+    /* display: flex; */
+    /* flex-direction: column;
+    align-items: flex-start;
+    justify-content: center; */
+    height: 100%;
+}
+
+.odsIdStatus {
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.odsIdStatus-pending {
+    background-color: #ffeeba;
+    color: #856404;
+}
+
+.odsIdStatus-delivered {
+    background-color: #d4edda;
+    color: #155724;
+}
+.return-and-status{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.odsIdReturnBtn {
+    padding: 8px 15px;
+  
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.odsIdReturnBtn:hover {
+    background-color: #0056b3;
+}
+
+
+
+    </style>
 
 </head>

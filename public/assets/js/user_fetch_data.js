@@ -51,7 +51,6 @@ function startTimer(){
 if(resend_otp){
 
     resend_otp.addEventListener('click',() => {
-        console.log("This is add eventlistener")
     
         fetch('http://localhost:2000/resend_otp')
         .then(response =>{
@@ -59,7 +58,7 @@ if(resend_otp){
             if(!response.ok){
                 throw new Error('Network Response was not ok while sending otp');
             }
-            console.log("This is the response")
+     
            return response.json();
             
         })
@@ -853,6 +852,105 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
         })
+    }
+
+
+
+    function createOrderDetailsRow(products,addres,orderDate,orderStatus){
+        
+        return `<tr class="odsIdDetailRow">
+            <td class="odsIdProductCell">
+                <div class="brandname-and-preview" >
+                    <img src="/ProductImage/${products?.product?.images[0]}" alt="Product preview" class="odsIdProductImage">
+                    <div class="odsIdProductInfo">
+                        <h6 class="odsIdProductName">${products?.product?.name}</h6>
+                        <span class="odsIdBrand">${products?.product?.Brand}</span>
+                    </div>
+                </div>
+
+                <div class="odsIdProductInfo">
+                    
+                    <p class="odsIdOrderId"><span class="order-details-bold-text " >Order ID: </span> ${products?._id}</p>
+                    <div class="order-date-styling" >
+                        <p class="odsIdOrderDate"><span class="order-details-bold-text" >Ordered:</span> ${orderDate}</p>
+                        <p class="odsIdDeliveryDate"><span class="order-details-bold-text" >Delivered:</span> ${products?.deliveredDate || 'Pending'}</p>
+                    </div>
+                    <p class="odsIdAddress"><span class="order-details-bold-text">Address:</span> ${addres.addressType}</p>
+                    <p class="odsIdAddress"><span class="order-details-bold-text" >Place:</span> ${addres.place}, City: ${addres.city} </p>
+                    <p class="odsIdAddress"><span class="order-details-bold-text" >landMark:</span> ${addres.landmark}, Pin: ${addres.pinCode} </p>
+                </div>
+                
+            </td>
+            <td class="odsIdPriceCell">₹${products?.product.price}</td>
+            <td class="odsIdQuantityCell">${products?.quantity}</td>
+            <td class="odsIdTotalCell">₹${products?.subtotal}</td>
+            <td class="odsIdStatusCell">
+                <div class="return-and-status" >
+                  <span class="odsIdStatus odsIdStatus-${orderStatus.toLowerCase()}">${orderStatus}</span>
+                    ${orderStatus.toLowerCase() === 'delivered' ? '<button class="odsIdReturnBtn">Return</button>':""}
+                </div>
+            </td>
+        </tr>`
+        
+    }
+                                                                    
+
+    function updateOrderDataTable(produts,addres,orderDate,orderStatus){
+
+        const tableBody = document.getElementById('order-detail-table');
+        tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderStatus)).join('');
+    }
+
+    //Order-Details
+    const order_history_table = document.getElementById('order-history-table');
+    const toggle_order_history = document.getElementById('toggle-order-history');
+    const show_all_btn = document.getElementById('show-all-btn');
+    const order_details = document.getElementById('order-details');
+    if(order_history_table){
+
+        order_history_table.addEventListener('click',(e) => {
+
+            const orderButton = e.target.closest('.odsIdUnifiedRow');
+            if(orderButton){
+                console.log(orderButton.dataset.id)
+                fetch(`http://localhost:2000/profile/get-order-details?order_id=${orderButton.dataset.id}`)
+                .then(response => {
+                    
+                    if(!response.ok){
+                        throw new Error('Network response was not ok while getting order details.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.status){
+                        
+                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderStatus);
+                      
+                    }else{
+
+                  
+
+                    }
+            
+                })
+             
+                .catch(error =>{
+                    console.log("Error occured while getting order details.",error)
+                })
+                
+                toggle_order_history.style.display = 'none';
+                order_details.classList.remove('display-order-details');
+                show_all_btn.classList.remove('display-order-details');
+            }
+        })
+       
+            show_all_btn.addEventListener('click',()=> {
+                console.log("worked")
+                order_details.classList.add('display-order-details');
+                show_all_btn.classList.add('display-order-details');
+                toggle_order_history.style.display = 'block';
+            })
+       
     }
 
 })
