@@ -274,7 +274,7 @@ async function makeDefaultAddress(AddressId){
         console.log("Didnt get the Address Id");
         return ;
     }
-    console.log(AddressId);
+  
 
     try{
 
@@ -858,39 +858,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function createOrderDetailsRow(products,addres,orderDate,orderStatus){
         
-        return `<tr class="odsIdDetailRow">
-            <td class="odsIdProductCell">
-                <div class="brandname-and-preview" >
-                    <img src="/ProductImage/${products?.product?.images[0]}" alt="Product preview" class="odsIdProductImage">
-                    <div class="odsIdProductInfo">
-                        <h6 class="odsIdProductName">${products?.product?.name}</h6>
-                        <span class="odsIdBrand">${products?.product?.Brand}</span>
-                    </div>
-                </div>
+        return `<div class="container-fluid bot-order-container">
+  <div class="row">
+    <!-- Image, Product Name, and Brand -->
+    <div class="col-md-6 bot-image-product-section">
+      <div class="d-flex align-items-center">
+        <img src="/ProductImage/${products?.product?.images[0]}" alt="Product preview" class="bot-product-image mr-3">
+        <div class="brand-size-align" >
+          <h6 class="bot-product-name ">${products?.product?.name}</h6>
+          <span class="bot-brand  ">${products?.product?.Brand}</span>
+          <p><span class="size-style" >size : ${products?.product?.size}</span></p>
+        </div>
+      </div>
+    </div>
 
-                <div class="odsIdProductInfo">
-                    
-                    <p class="odsIdOrderId"><span class="order-details-bold-text " >Order ID: </span> ${products?._id}</p>
-                    <div class="order-date-styling" >
-                        <p class="odsIdOrderDate"><span class="order-details-bold-text" >Ordered:</span> ${orderDate}</p>
-                        <p class="odsIdDeliveryDate"><span class="order-details-bold-text" >Delivered:</span> ${products?.deliveredDate || 'Pending'}</p>
-                    </div>
-                    <p class="odsIdAddress"><span class="order-details-bold-text">Address:</span> ${addres.addressType}</p>
-                    <p class="odsIdAddress"><span class="order-details-bold-text" >Place:</span> ${addres.place}, City: ${addres.city} </p>
-                    <p class="odsIdAddress"><span class="order-details-bold-text" >landMark:</span> ${addres.landmark}, Pin: ${addres.pinCode} </p>
-                </div>
-                
-            </td>
-            <td class="odsIdPriceCell">₹${products?.product.price}</td>
-            <td class="odsIdQuantityCell">${products?.quantity}</td>
-            <td class="odsIdTotalCell">₹${products?.subtotal}</td>
-            <td class="odsIdStatusCell">
-                <div class="return-and-status" >
-                  <span class="odsIdStatus odsIdStatus-${orderStatus.toLowerCase()}">${orderStatus}</span>
-                    ${orderStatus.toLowerCase() === 'delivered' ? '<button class="odsIdReturnBtn">Return</button>':""}
-                </div>
-            </td>
-        </tr>`
+    <!-- Date Information -->
+    <div class="col-md-6 bot-date-info">
+      <div class="bot-date-box">
+        <p><span class="bot-bold">Ordered:</span> ${orderDate}</p>
+        <p><span class="bot-bold">Delivered:</span> ${products?.deliveredDate || 'Pending'}</p>
+      </div>
+    </div>
+
+    <!-- Address and Order ID -->
+    <div class="col-md-6 bot-address-info mt-3 mt-md-0">
+      <p><span class="bot-bold">Order ID:</span> ${products?._id}</p>
+      <p><span class="bot-bold">Address:</span> ${addres.addressType}</p>
+      <p><span class="bot-bold">Place:</span> ${addres.place}, ${addres.city} city</p>
+      <p><span class="bot-bold">Landmark:</span> ${addres.landmark}, Pin: ${addres.pinCode}</p>
+    </div>
+
+    <!-- Price, Quantity, and Status -->
+    <div class="col-md-6 bot-price-info mt-3 mt-md-0">
+      <p><span class="bot-bold">Price:</span> ₹${products?.product.price} <span class="bot-bold">| Qty:</span> ${products?.quantity}</p>
+      <p><span class="bot-bold">Total:</span> ₹${products?.subtotal}</p>
+      <div class="bot-return-status" >
+        <div class="bot-status bot-status-${orderStatus.toLowerCase()}">${orderStatus}</div>
+        ${orderStatus.toLowerCase() === 'delivered' ? '<button class="bot-return-btn mt-2">Return</button>' : ''}
+      </div>
+    </div>
+  </div>
+</div>`
         
     }
                                                                     

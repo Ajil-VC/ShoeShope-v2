@@ -1,0 +1,177 @@
+<%- include("../layouts/adminHeader.ejs")  %>
+    
+<!--Aside Here-->
+<%- include("../layouts/adminAside.ejs")  %>
+
+<!--Head with search bar and other options Here-->
+<%- include("../layouts/adminHead.ejs")  %>
+    <!-- <div class="screen-overlay"></div> -->
+
+    
+     
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Order List </h2>
+                    <p>Detaild order view.</p>
+                </div>
+              
+            </div>
+
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+
+                        <div class="order-id">
+                          <h2>Orders Id: <%=orderDetails?._id%></h2>
+                          <span class="status-badge"><%=orderDetails?.status%></span>
+                        </div>
+                        <div class="order-date">
+                          <i class="calendar-icon"></i>
+                          <span><%=orderDetails?.orderDate%></span>
+                        </div>
+                    </div>
+                  <div class="status-dropdown">
+
+                    <select id="selectStatus" >
+                      <option value="Pending" <%= orderDetails.status === 'Pending' ? 'selected' : '' %> >Pending</option>
+                      <option value="Shipped" <%= orderDetails.status === 'Shipped' ? 'selected' : '' %> >Shipped</option>
+                      <option value="Delivered" <%= orderDetails.status === 'Delivered' ? 'selected' : '' %>  >Delivered</option>
+                      <option value="Cancelled" <%= orderDetails.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option>
+                    </select>
+
+                  </div>
+                </div>
+             
+                <div class="order-details">
+                  <h3>Update Details</h3>
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <label>Customer Name:</label>
+                      <span><%=orderDetails?.customer?.firstName%></span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Mobile No:</label>
+                      <span>+91 <%=orderDetails?.shippingAddress?.mobile_no%></span>
+                    </div>
+                  </div>
+                 
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <label>Payment Method:</label>
+                      <span><%=orderDetails?.paymentMethod%></span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Delivery date:</label>
+                      <span><%=orderDetails?.updatedAt%></span>
+                    </div>
+                  </div>
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <label>Shipping Cost:</label>
+                      <span>₹ _</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Total Amount:</label>
+                      <span>₹ <%=orderDetails?.totalAmount%></span>
+                    </div>
+                  </div>
+                  <div class="detail-row">
+                    <div class="detail-item">
+                      <label>Reference code:</label>
+                      <span>_______</span>
+                    </div>
+                  </div>
+                    <div class="detail-row">
+                    <div class="detail-item full-width">
+                        <div class="align-address-detailed-order" >
+                            <label>Shipping Address:</label>
+                            <span>Near <%=orderDetails?.shippingAddress?.landmark%>, <%=orderDetails?.shippingAddress?.city%> city,
+                              <%=orderDetails?.shippingAddress?.place%>, <%=orderDetails?.shippingAddress?.district%> dt. <br>
+                              Pin : <%=orderDetails?.shippingAddress?.pinCode%> </span>
+
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <button class="save-button" onclick="updateOrderStatus('<%=orderDetails._id%>')" >Save</button>
+                    </div>
+                    
+                </div>
+                    
+                  
+                </div>
+            </div>
+
+
+            <div class="row" style="background-color: white; border-radius: 10px; " >
+                <div class="col-lg-12 ">
+                    <div class="table-responsive">
+                        <table class="table  ">
+                            <thead style="background-color: white;" >
+                                <tr>
+                                    <th width="40%">Product</th>
+                                    <th width="20%">Unit Price</th>
+                                    <th width="20%">Quantity</th>
+                                    <th width="20%" class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <% for(let i = 0 ; i < orderDetails?.items?.length ; i++){ %>
+
+                                    <tr>
+                                        <td>
+                                            <a class="itemside" href="#">
+                                                <div class="left">
+                                                    <img src="/ProductImage/<%=orderDetails?.items[i]?.product?.images[0]%>" width="40" height="40" class="img-xs" alt="Item">
+                                                </div>
+                                                <div class="info"> <%=orderDetails?.items[i]?.product?.name%> (<%=orderDetails?.items[i]?.product?.Brand%>) </div>
+                                            </a>
+                                        </td>
+                                        <td> ₹ <%=orderDetails?.items[i]?.product?.price%> </td>
+                                        <td> <%=orderDetails?.items[i]?.quantity%> </td>
+                                        <td class="text-end"> ₹ <%=orderDetails?.items[i]?.subtotal%>  </td>
+                                    </tr>
+                                <% } %>
+                                <tr>
+                                    <td colspan="4">
+                                        <article class="float-end">
+                                            <dl class="dlist">
+                                                <dt>Subtotal:</dt>
+                                                <dd>₹ <%=orderDetails?.subTotal%></dd>
+                                            </dl>
+                                            <dl class="dlist">
+                                                <dt>GST:</dt>
+                                                <dd>₹ <%=orderDetails?.gstAmount%></dd>
+                                            </dl>
+                                            <dl class="dlist">
+                                                <dt>Grand total:</dt>
+                                                <dd> <b class="h5">₹ <%=orderDetails?.totalAmount%></b> </dd>
+                                            </dl>
+                                            <dl class="dlist">
+                                                <dt class="text-muted">Status:</dt>
+                                                <dd>
+                                                    <span class="badge rounded-pill alert-success text-success"> <%=orderDetails?.status%> </span>
+                                                </dd>
+                                            </dl>
+                                        </article>
+                                    </td>
+                                </tr>
+                       
+                            </tbody>
+                        </table>
+                    </div> <!-- table-responsive// -->
+                   
+                </div> <!-- col// -->
+                <div class="col-lg-1"></div>
+             
+            </div>
+
+          
+        </section> <!-- content-main end// -->
+      
+  
+    
+
+
+<%- include("../layouts/adminFooter.ejs")  %>

@@ -29,7 +29,125 @@
 <!--===================================-->
 <!--===================================-->
 
+    <style>
+
+.order-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 1150px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.order-id h2 {
+  display: inline;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  margin-right: 10px;
+  font-size: 1.2em;  /* Reduced size */
+  font-weight: normal;  /* Made it less bold */
+}
+
+.status-badge {
+  background-color: #ffd700;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 0.9em;
+}
+
+.order-date {
+  display: flex;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.calendar-icon {
+  margin-right: 5px;
+}
+
+.status-dropdown select {
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.order-details {
+  background-color: rgb(255, 255, 255);
+    border: 0.5px solid lightgray;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.order-details h3 {
+  font-size: 1.8em;  /* Increased size */
+  color: #000;  /* Black color */
+  margin-bottom: 20px;
+  font-weight: normal;  /* Made it less bold */
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+
+}
+
+.detail-item {
+  flex: 1;
+}
+
+.detail-item.full-width {
+  flex-basis: 100%;
+}
+
+label {
+  font-weight: bold;
+  color: #666;
+  margin-right: 10px;
+}
+.align-address-detailed-order{
+    display: flex;
+}
+
+.save-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 150px;
+}
+
+@media (max-width: 768px) {
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .order-date, .status-dropdown {
+    margin-top: 10px;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+  }
+  
+  .detail-item {
+    margin-bottom: 10px;
+  }
+}
+
+    </style>
     
+
 </head>
 
 <body>

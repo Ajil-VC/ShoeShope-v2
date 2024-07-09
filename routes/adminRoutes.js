@@ -86,6 +86,10 @@ adminRouter.patch('/productslist',adminController.softDeleteProducts);
 adminRouter.get('/productslist/add_new_product',adminController.loadAddNewProduct);
 adminRouter.post('/productslist/add_new_product',upload.array('image',3),adminController.addNewProduct);
 
+adminRouter.get('/order-list',adminController.loadOrderList);
+adminRouter.get('/order-list/order-details',adminController.loadOrderDetails);
+adminRouter.patch('/order-list/order-details',adminController.updateOrderStatus);
+
 
 
 module.exports = adminRouter;

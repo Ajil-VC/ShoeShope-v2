@@ -1,5 +1,6 @@
-const {Admin,User,Category,Brand,Product} = require('../models/models')
+const {Admin,User,Category,Brand,Product,Order} = require('../models/models')
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose') 
 
 const securePassword = async (password) => {
     
@@ -422,20 +423,94 @@ const addNewProduct = async(req,res) => {
 }
 
 
+const loadOrderList = async(req,res) => {
+
+    const page = parseInt(req.query.page) || 1 ;
+    const limit = 10;
+
+    try{
+
+        const skip = (page - 1) * limit; 
+        
+        const [orders,totalDocuments] = await Promise.all([
+            
+            Order.find().skip(skip).limit(limit).populate('customer').exec(),
+            Order.countDocuments().exec()
+        ])
+        const totalPages = Math.ceil(totalDocuments / limit);
+    
+        return res.status(200).render('order-list',{orderlist : orders, totalPages : totalPages, currentPage : page});
+
+    }catch(error){
+        console.log("Internal error while trying to load order list",error);
+    }
+}
+
+const loadOrderDetails = async(req,res) => {
+ 
+    const orderId = new mongoose.Types.ObjectId(req.query.orderId)
+
+    try{
+
+        const orderDetails = await Order.findOne({_id : orderId}).populate('customer').populate('shippingAddress').exec();
+        console.log(orderDetails)
+   
+        return res.status(200).render('order-details',{orderDetails});
+
+    }catch(error){
+        console.log("Internal Error occured while loading order Details.")
+    }
+}
+
+const updateOrderStatus = async(req,res) => {
+
+    const orderId = new mongoose.Types.ObjectId(req.query.orderId);
+    const orderStatus = req.query.orderStatus;
+
+    try{
+
+        let order = await Order.findOneAndUpdate({_id : orderId},{$set:{status : orderStatus}},{new : true});
+
+        if((order.confirmation ===  0) && (orderStatus === 'Delivered')){
+        
+            order = await Order.findOneAndUpdate({_id : orderId},{$set:{confirmation : 1}},{new : true});
+            
+            const prome = order.items.map(async item => {
+                return Product.updateOne({_id : item.product.id},{$inc : { reserved : -item.quantity }}).exec();
+            });
+            
+            await Promise.all(prome);
+              
+        } 
+        
+        return res.status(200).json({status : true, message : `Successfully set the status to ${orderStatus}`,orderstatus : orderStatus })
+            
+    }catch(error){
+        console.log("Internal Error while trying to update the status of order.");
+    }
+}
+
+
 module.exports = {
     adminRegistration,
     loadLogin,
     loginAdmin,
     loadDashboard,
+
     loadCustomerList,
     blockOrUnblockUser,
     deleteUser,
+    
     loadCategory,
     addBrandOrCategory,
     softDeleteCategory,
     updateCategory,
+
     loadAllProducts,
     loadAddNewProduct,
     addNewProduct,
-    softDeleteProducts
+    softDeleteProducts,
+    loadOrderList,
+    loadOrderDetails,
+    updateOrderStatus
 }

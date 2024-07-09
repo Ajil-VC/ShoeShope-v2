@@ -306,7 +306,7 @@ const loadUserProfile = async(req,res) => {
             Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec(),
             Order.find({customer : userID}).populate('shippingAddress').exec()
         ]);
-        console.log(orders)
+     
         return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders});
     }catch(error){
 

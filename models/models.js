@@ -327,6 +327,11 @@ const orderSchema = new mongoose.Schema({
         enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
         default: 'Pending'
     },
+    confirmation : {
+        type: Number,
+        required: true,
+        default: 0
+    },
     shippingAddress: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,

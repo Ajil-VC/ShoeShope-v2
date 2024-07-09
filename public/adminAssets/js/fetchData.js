@@ -1,5 +1,45 @@
 
 
+function swalConfirm() {
+    return new Promise((resolve, reject) => {
+        Swal.fire({
+            title: 'Heads Up !!!',
+            text: "This Action Cannot be undone.Please make sure",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, do it!',
+            cancelButtonText: 'No, cancel!',
+            customClass: {
+                confirmButton: 'btn btn-success',
+                cancelButton: 'btn btn-danger'
+            },
+            buttonsStyling: true,
+            reverseButtons: true,
+            padding: '2em',
+            width: '32em'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Updated!',
+                    text: 'Delivery status updated.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                })
+                resolve(true);
+            } else {
+                Swal.fire(
+                    'Cancelled',
+                    '',
+                    'error'
+                )
+                resolve(false);
+            }
+        })
+    });
+}
+
+
 function blockUser(userID){
     
     fetch(`http://localhost:2000/admin/customers/?id=${userID}`, {method : 'PATCH'})
@@ -367,8 +407,46 @@ document.addEventListener('DOMContentLoaded', function() {
 }) //DOMContentLoaded
 
 
+function getOrderDetails(orderid){
+
+    window.location.href = `/admin/order-list/order-details?orderId=${orderid}`;
+}
+async function updateOrderStatus(orderId){
+
+    const selectStatus = document.getElementById('selectStatus').value;
+
+    try{
+
+        if(selectStatus === 'Delivered'){
+
+            let takeConfirmation = await swalConfirm()
+            if(!takeConfirmation){
+                return
+            }
+        }
+        console.log("Hahaaha")
+        const response = await fetch(`http://localhost:2000/admin/order-list/order-details?orderId=${orderId}&orderStatus=${selectStatus}`,{method : 'PATCH'});
+        if(!response.ok){
+            throw new Error('Network response was not ok while fetching operation of update order status.');
+        }
+
+        const data = await response.json();
+        console.log(data);
+        if(data.status && (data.orderstatus !== 'Delivered')){
+            
+            Swal.fire({
+                title: '',
+                text: data.message,
+                icon: 'success'
+            });
+
+        }
 
 
+    }catch(error){
+        console.log("Error while fetching operation of update order status.",error);
+    }
+}
 
 
 
