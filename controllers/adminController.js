@@ -392,14 +392,23 @@ const loadAddNewProduct = async(req,res) => {
 
 const addNewProduct = async(req,res) => {
 
-    console.log("\n\n\n\n\nChecking from back",req.files,"\n\n\n\n\n",req.body);
-
-    const { productName,description,regularPrice } = req.body;
+    const {productName,description,regularPrice } = req.body;
     const {salePrice,stockQuantity,category,brand,targetGroup} = req.body;
 
+    const product_name = req.query.product_name;
+    
     try{
-        //Add modal asking "Update details instead of creating duplicate."
-   
+        
+        if(req.query.product_name){
+
+            const isProductExist = await Product.findOne({ProductName : product_name}).exec();
+            if(isProductExist){
+    
+                return res.status(200).json({status : false, message : `A product is already exist in the name ${product_name}`});
+            }
+            return res.json({status : true})
+        }
+        
         const newProduct = new Product({
             ProductName : productName,
             Description : description,
@@ -413,7 +422,7 @@ const addNewProduct = async(req,res) => {
         });
 
         await newProduct.save();
-        return res.status(201).json({message:"Product Added Successfully"});
+        return res.status(201).json({status : true ,message:"Product Added Successfully"});
 
     }catch(error){
 

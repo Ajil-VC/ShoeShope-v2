@@ -55,7 +55,8 @@
                     <div class="content-header">
                         <h2 class="content-title">Add New Product</h2>
                         <div>
-                            <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Cancel</button>
+                          
+                            <a href="/admin/productslist" class="btn btn-light rounded font-sm mr-5 text-body hover-up" >Cancel</a>
                             <button class="btn btn-md rounded font-sm hover-up" id="publishBtnForAddProduct" >Publish</button>
                         </div>
                     </div>
@@ -75,10 +76,12 @@
                                 <div class="mb-4">
                                     <label for="product_name" class="form-label">Product Name</label>
                                     <input type="text" placeholder="Type here" class="form-control" id="product_name" name="productName" >
+                                    <span  class="d-none text-danger" style="font-size: smaller;" id="product_name-error"></span>
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Description</label>
                                     <textarea placeholder="Type here" class="form-control" rows="4" id="descriptionOfProduct" name="description" ></textarea>
+                                    <span  class="text-danger" style="font-size: smaller;" id="descriptionOfProduct-error"></span>
                                 </div>
 
                                 
@@ -92,6 +95,7 @@
                                             <label class="form-label">Regular price</label>
                                             <div class="row gx-2">
                                                 <input placeholder="₹" name="regularPrice" id="regularPrice" type="text" class="form-control">
+                                                <span  class="text-danger" style="font-size: smaller;" id="regularPrice-error"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -99,6 +103,7 @@
                                         <div class="mb-4">
                                             <label class="form-label">Sale price</label>
                                             <input placeholder="₹" name="salePrice" id="salePrice" type="text" class="form-control">
+                                            <span  class="text-danger" style="font-size: smaller;" id="salePrice-error"></span>
                                         </div>
                                     </div>
 
@@ -108,6 +113,7 @@
                                         <div class="mb-4">
                                             <label class="form-label">Stock Quantity</label>
                                             <input placeholder="Enter the Quantity" name="stockQuantity" id="stockQuantity" type="text" class="form-control">
+                                            <span  class="text-danger" style="font-size: smaller;" id="stockQuantity-error"></span>
                                         </div>
                                     </div>
 
