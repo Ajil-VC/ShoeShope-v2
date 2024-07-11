@@ -505,9 +505,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
 
-                // let td_des;
-                // let td_id;
-                // let td_name;
                 console.log("Data",data.name)
                 td_name.textContent = data.name;
                 console.log("This is ",data)

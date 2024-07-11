@@ -85,6 +85,8 @@ adminRouter.get('/productslist',adminController.loadAllProducts);
 adminRouter.patch('/productslist',adminController.softDeleteProducts);
 adminRouter.get('/productslist/add_new_product',adminController.loadAddNewProduct);
 adminRouter.post('/productslist/add_new_product',upload.array('image',3),adminController.addNewProduct);
+adminRouter.get('/productslist/edit_product',adminController.loadEditProduct);
+adminRouter.put('/productslist/edit_product',upload.array('image',3),adminController.updateProduct);
 
 adminRouter.get('/order-list',adminController.loadOrderList);
 adminRouter.get('/order-list/order-details',adminController.loadOrderDetails);

@@ -7,9 +7,10 @@
 <%- include("../layouts/adminHead.ejs")  %>
 
 
+
   
   <!-- Modal Start here -->
-  <div class="modal fade" id="exampleModalCenter"  tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -53,10 +54,11 @@
             <div class="row">
                 <div class="col-9">
                     <div class="content-header">
-                        <h2 class="content-title">Add New Product</h2>
+                        <h2 class="content-title">Edit Product</h2>
                         <div>
-                            <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Cancel</button>
-                            <button class="btn btn-md rounded font-sm hover-up" id="publishBtnForAddProduct" >Update</button>
+                          
+                            <a href="/admin/productslist" class="btn btn-light rounded font-sm mr-5 text-body hover-up" >Cancel</a>
+                            <button class="btn btn-md rounded font-sm hover-up" data-id="<%=product._id%>" id="publishBtnForAddProduct" >Publish</button>
                         </div>
                     </div>
                 </div>
@@ -66,18 +68,17 @@
                             <h4>Basic</h4>
                         </div>
                         <div class="card-body">
-
                             
-
-                            
-                            <form id="formForAddNewProduct" action="/admin/productslist/add_new_product" enctype='multipart/form-data' >
+                            <form id="formForAddNewProduct" action="/admin/productslist/edit_product" enctype='multipart/form-data' >
                                 <div class="mb-4">
                                     <label for="product_name" class="form-label">Product Name</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name="productName" >
+                                    <input type="text" value="<%=product?.ProductName%>" placeholder="Type here" class="form-control" id="product_name" name="productName" >
+                                    <span  class="d-none text-danger" style="font-size: smaller;" id="product_name-error"></span>
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Description</label>
                                     <textarea placeholder="Type here" class="form-control" rows="4" id="descriptionOfProduct" name="description" ></textarea>
+                                    <span  class="text-danger" style="font-size: smaller;" id="descriptionOfProduct-error"></span>
                                 </div>
 
                                 
@@ -90,14 +91,16 @@
                                         <div class="mb-4">
                                             <label class="form-label">Regular price</label>
                                             <div class="row gx-2">
-                                                <input placeholder="₹" name="regularPrice" id="regularPrice" type="text" class="form-control">
+                                                <input placeholder="₹" value="<%=product?.regularPrice%>" name="regularPrice" id="regularPrice" type="text" class="form-control">
+                                                <span  class="text-danger" style="font-size: smaller;" id="regularPrice-error"></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="mb-4">
                                             <label class="form-label">Sale price</label>
-                                            <input placeholder="₹" name="salePrice" id="salePrice" type="text" class="form-control">
+                                            <input placeholder="₹" value="<%=product?.salePrice%>" name="salePrice" id="salePrice" type="text" class="form-control">
+                                            <span  class="text-danger" style="font-size: smaller;" id="salePrice-error"></span>
                                         </div>
                                     </div>
 
@@ -106,17 +109,18 @@
                                     <div class="col-lg-6">
                                         <div class="mb-4">
                                             <label class="form-label">Stock Quantity</label>
-                                            <input placeholder="Enter the Quantity" name="stockQuantity" id="stockQuantity" type="text" class="form-control">
+                                            <input placeholder="Enter the Quantity" value="<%=product?.stockQuantity%>" name="stockQuantity" id="stockQuantity" type="text" class="form-control">
+                                            <span  class="text-danger" style="font-size: smaller;" id="stockQuantity-error"></span>
                                         </div>
                                     </div>
 
                                     <div class="col-lg-6">
                                         <label class="form-label">Target Group</label> 
                                         <select class="form-select" name="targetGroup" id="targetGroup" >
-                                            
-                                            <option> Men </option>
-                                            <option> Women </option>
-                                            <option> Kids </option>
+                           
+                                            <option <%= product?.targetGroup === 'Men' ? 'selected' : '' %> > Men </option>
+                                            <option <%= product?.targetGroup === 'Women' ? 'selected' : '' %> > Women </option>
+                                            <option <%= product?.targetGroup === 'Kids' ? 'selected' : '' %> > Kids </option>
                                             
                                         </select>
                                     </div>
@@ -176,8 +180,8 @@
                                     <select class="form-select" name="category" id="category" >
                                         
                                         <% for(let i = 0 ; i < categories.length ; i++){ %>
-                                            
-                                            <option> <%=categories[i].name %> </option>
+                                      
+                                            <option <%= product?.Category === categories[i].name ? 'selected' : '' %> > <%=categories[i].name %> </option>
 
                                         <% } %>
 
@@ -189,8 +193,8 @@
                                     <select class="form-select" name="brand" id="brand" >
 
                                         <% for(let i = 0 ; i < brand.length ; i++){ %>
-                                            
-                                            <option> <%= brand[i].name %> </option>
+                                       
+                                            <option <%= product?.Brand === brand[i].name ? 'selected' : '' %> > <%= brand[i].name %> </option>
 
                                         <% } %>
                                    
@@ -206,4 +210,44 @@
 
 
 
-<%- include("../layouts/adminFooter.ejs")  %>
+
+
+        <footer class="main-footer font-xs">
+            <div class="row pb-30 pt-15">
+                <div class="col-sm-6">
+                    <script>
+                    document.write(new Date().getFullYear())
+                    </script> ©, ShoeShope
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-sm-end">
+                        All rights reserved
+                    </div>
+                </div>
+            </div>
+        </footer>
+        </main>
+        <script src="/adminAssets/js/vendors/jquery-3.6.0.min.js"></script>
+        <script src="/adminAssets/js/vendors/bootstrap.bundle.min.js"></script>
+        <script src="/adminAssets/js/vendors/select2.min.js"></script>
+        <script src="/adminAssets/js/vendors/perfect-scrollbar.js"></script>
+        <script src="/adminAssets/js/vendors/jquery.fullscreen.min.js"></script>
+        <script src="/adminAssets/js/vendors/chart.js"></script>
+        <!-- Main Script -->
+        <script src="/adminAssets/js/main.js" type="text/javascript"></script>
+        <script src="/adminAssets/js/custom-chart.js" type="text/javascript"></script>
+        
+        <!--New Bootstrap dependancies 4 below-->
+        <!-- CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <!-- JS, Popper.js, and jQuery -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+        <script src="/adminAssets/js/edit_product.js"></script>
+        
+        </body>
+        
+        </html>

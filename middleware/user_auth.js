@@ -37,8 +37,20 @@ const isLoggedOut = async(req,res,next) => {
         return res.status(500).send("internal error occured while checking isLoggedOut",error)
     }
 }
+
+const isBlocked = async(req,res,next) => {
+
+    try{
+        
+
+    }catch(error){
+        console.log("Interal error occured while checking user isblocked",error);
+        return res.status(500).send("Interal error occured while checking user isblocked",error);
+    }
+}
  
 module.exports = {
     isLoggedOut,
-    isLoggedIn
+    isLoggedIn,
+    isBlocked
 }

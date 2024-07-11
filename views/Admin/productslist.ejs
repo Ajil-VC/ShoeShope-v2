@@ -82,7 +82,7 @@
                         
                             <div class="col col-check text-end flex-grow-0">
 
-                                <a href="#" class="btn btn-sm font-sm rounded btn-brand">
+                                <a href="/admin/productslist/edit_product?productId=<%=products[i]._id%>"  class="btn btn-sm font-sm rounded btn-brand">
                                     <i class="material-icons md-edit"></i> Edit
                                 </a>
                   
@@ -99,11 +99,20 @@
             <div class="pagination-area mt-30 mb-50">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-start">
-                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                        <li class="page-item"><a class="page-link" href="#">02</a></li>
-                        <li class="page-item"><a class="page-link" href="#">03</a></li>
-                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">16</a></li>
+                        <!-- products,totalPages : totalPages, currentPage : page -->
+                        <% for(let i = 1 ; i <= totalPages ; i++ ) { 
+             
+                            if(i == currentPage){ %>
+
+                                <li class="page-item active"><a class="page-link" ><%=i%></a></li>
+                            <% }else{ %>
+
+                                <li class="page-item"><a class="page-link" href="/admin/productslist?page=<%=i%>"><%=i%></a></li>
+                                <%console.log(i)%>
+                        <% }} %>
+                        
+                        <!-- <li class="page-item"><a class="page-link dot" href="#">...</a></li> -->
+                        <!-- <li class="page-item"><a class="page-link" href="#">16</a></li> -->
                         <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
                     </ul>
                 </nav>

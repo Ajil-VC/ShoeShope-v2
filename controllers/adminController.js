@@ -103,7 +103,7 @@ const loadCustomerList = async(req,res) => {
 
 
     const page = parseInt(req.query.page) || 1 ;
-    const limit = 10;
+    const limit = 5;
     try{
 
         //Getting fetched data here
@@ -330,13 +330,22 @@ const updateCategory = async(req,res) => {
 }
 
 
+
 const loadAllProducts = async (req,res) => {
 
-    try{
-        
-        const products = await Product.find().exec();
+    const page = parseInt(req.query.page) || 1 ;
+    const limit = 6;
 
-        return res.render('productslist',{products})
+    try{
+     
+        const skip = (page - 1) * limit; 
+        const [products, totalDocuments] = await Promise.all([
+            Product.find().skip(skip).limit(limit).exec(),
+            Product.countDocuments().exec()
+        ])
+        const totalPages = Math.ceil(totalDocuments / limit);
+
+        return res.render('productslist',{products,totalPages : totalPages, currentPage : page})
 
     }catch(error){
 
@@ -431,11 +440,78 @@ const addNewProduct = async(req,res) => {
     }
 }
 
+const loadEditProduct = async(req,res) => {
+
+    const productId = new mongoose.Types.ObjectId(req.query.productId)
+    try{
+        
+        const [categories,brand,product] = await Promise.all([
+          
+            Category.find({}).exec(),
+            Brand.find({}).exec(),
+            Product.findOne({_id : productId})
+        ])
+        if(!product){
+            return res.status(404).send("Product not Found")
+        }
+
+        return res.status(200).render('edit-product',{categories,brand,product})
+
+    }catch(error){
+
+        console.log("Internal Error while loading addNewProduct\n",error);
+        return res.status(500).send('Error while loading addNewProduct');
+    }
+
+}
+
+const updateProduct = async(req,res) => {
+
+    const productId = new mongoose.Types.ObjectId(req.query.productId);
+
+    try{
+
+        const product = await Product.findOne({_id : productId}).exec();
+        console.log(product,"asdflkjh");
+        if(!product){
+            throw new Error('Product not found');
+        }
+
+        Object.keys(req.body).forEach(key => {
+          
+            if(req.body[key] !== undefined){
+                product[key] = req.body[key];
+            }
+        })
+
+    
+        let newImages = null;
+        if(req.files && req.files.length > 0){
+            newImages = req.files.map(file => file.filename)
+        
+        }
+        if(newImages){
+
+            product.image = [...newImages,...product.image];
+        }
+     
+        const updatedProduct = await product.save();
+        if(updatedProduct){
+            return res.status(200).json({status : true, redirect : `/admin/productslist/edit_product?productId=${productId}`});
+        }
+
+    }catch(error){
+        console.log("Internal Error while updating product details.",error);
+    }
+}
+
+
+
 
 const loadOrderList = async(req,res) => {
 
     const page = parseInt(req.query.page) || 1 ;
-    const limit = 10;
+    const limit = 5;
 
     try{
 
@@ -518,7 +594,10 @@ module.exports = {
     loadAllProducts,
     loadAddNewProduct,
     addNewProduct,
+    loadEditProduct,
+    updateProduct,
     softDeleteProducts,
+
     loadOrderList,
     loadOrderDetails,
     updateOrderStatus
