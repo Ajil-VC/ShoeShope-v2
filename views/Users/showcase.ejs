@@ -25,12 +25,12 @@
 
                         <div class="widget-category mb-30">
                             <h5 class="section-title style-1 mb-30 wow fadeIn animated">Brand</h5>
-                            <ul class="categories">
+                            <ul class="categories" >
 
                                 <% for(let i = 0 ; i < brand.length ; i++){ %>
                                 <li>
                                     <label for="checkboxForBrand<%=i%>">
-                                        <input class="form-check-input checkbox mx-1" type="checkbox" value="" id="checkboxForBrand<%=i%>" >
+                                        <input class="form-check-input showcase-brand checkbox mx-1" data-group="<%=targetGroup%>" data-brand ="<%=brand[i].name%>" type="checkbox" value="" id="checkboxForBrand<%=i%>" >
                                         
                                         <span><%=brand[i].name%></span>
                                     </label>
@@ -46,7 +46,13 @@
                             <ul class="categories">
 
                                 <% for(let i = 0 ; i < category.length ; i++){ %>
-                                <li><a href="shop-grid-right.html"><%=category[i].name%></a></li>
+                                
+
+                                <label for="checkboxForCategory<%=i%>">
+                                    <input class="form-check-input showcase-category checkbox mx-1" data-group="<%=targetGroup%>" data-category ="<%=category[i].name%>" type="checkbox" value="" id="checkboxForCategory<%=i%>" >
+                                    
+                                    <span><%=category[i].name%></span>
+                                </label> <br>
 
                                 <% } %>
                             
@@ -57,12 +63,42 @@
                         <div class="widget-category mb-30">
                             <h5 class="section-title style-1 mb-30 wow fadeIn animated">Price Range</h5>
                             <ul class="categories">
-    
-                                <li><a href="shop-grid-right.html">₹5500-₹6500</a></li>
-                                <li><a href="shop-grid-right.html">₹6500-₹7500</a></li>
-                                <li><a href="shop-grid-right.html">₹7500-₹8500</a></li>
-                                <li><a href="shop-grid-right.html">₹8500-₹9500</a></li>
-                                <li><a href="shop-grid-right.html">₹9500+</a></li>
+
+                                <label for="checkboxForPrice1" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="3000" id="checkboxForPrice1" >
+                                    
+                                    <span>Max ₹ 3000</span>
+                                </label>
+
+                                <label for="checkboxForPrice2" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="5000" id="checkboxForPrice2" >
+                                    
+                                    <span>Max ₹ 5000</span>
+                                </label>
+
+                                <label for="checkboxForPrice3" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="7000" id="checkboxForPrice3" >
+                                    
+                                    <span>Max ₹ 7000</span>
+                                </label>
+
+                                <label for="checkboxForPrice4" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="10000" id="checkboxForPrice4" >
+                                    
+                                    <span>Max ₹ 10000</span>
+                                </label>
+
+                                <label for="checkboxForPrice5" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="15000" id="checkboxForPrice5" >
+                                    
+                                    <span>Max ₹ 15000</span>
+                                </label>
+
+                                <label for="checkboxForPrice6" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="" id="checkboxForPrice6" >
+                                    
+                                    <span>Above ₹ 15000</span>
+                                </label>
 
                             </ul>
                         </div>

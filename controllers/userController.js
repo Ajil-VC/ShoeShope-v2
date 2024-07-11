@@ -208,7 +208,7 @@ const loadHomePage = async(req,res) => {
 
     try {
 
-        const products = await Product.find().sort({_id : -1}).limit(8) ;
+        const products = await Product.find({isActive : 1}).sort({_id : -1}).limit(8) ;
        
         res.status(200).render('home',{products}) ;
 
@@ -220,27 +220,47 @@ const loadHomePage = async(req,res) => {
 
 const loadShowcase = async(req,res) => {
 
-    try{
-     
-        const targetGroup = req.query.group ;
-        const category = await Category.find().exec(); 
-        const brand = await Brand.find().exec();
+    if(req.accepts('html')){
 
-        const groupProducts = await Product.find({targetGroup : targetGroup}).exec(); 
-
-        if(category.length == 0){
-            console.log("\n\n\n Category is empty\n\n\n");
+        try{
+         
+            const targetGroup = req.query.group ;
+            const [category, brand, groupProducts] = await Promise.all([
+                Category.find().exec(),
+                Brand.find().exec(),
+                Product.find({targetGroup : targetGroup}).exec()
+            ])
+    
+            if(category.length == 0){
+                console.log("\n\n\n Category is empty\n\n\n");
+            }
+            if(brand.length == 0){
+                console.log("\n\n\n Brand is empty\n\n\n");
+            }
+            
+            return res.status(200).render('showcase',{category,brand,groupProducts,targetGroup}) ;
+    
+            
+        }catch(error){
+            console.log("Internal error while loading showcase");
+            return res.status(500).send("Internal error while loading showcase");
         }
-        if(brand.length == 0){
-            console.log("\n\n\n Brand is empty\n\n\n");
-        }
-        
-        return res.status(200).render('showcase',{category,brand,groupProducts,targetGroup}) ;
+    }else{
 
-        
-    }catch(error){
-        console.log("Internal error while loading showcase");
-        return res.status(500).send("Internal error while loading showcase");
+        try{
+
+            const brands = req.query.brands ? req.query.brands.split(',') : [] ;
+            
+            console.log(brands, req.query.group)
+            const products = await Product.aggregate([
+                {$match: { targetGroup : req.query.group}}
+            ])
+
+            console.log(products)
+
+        }catch(error){
+            console.log("Interal error while trying to search documents.",error);
+        }
     }
 }
 
