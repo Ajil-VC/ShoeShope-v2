@@ -249,20 +249,33 @@ const loadShowcase = async(req,res) => {
 
         try{
 
+            // console.log("THis is the sort value :",typeof req.query.sortValue)
+            // console.log("THis is the brand:",req.query.brands)
+            // console.log("THis is the categories :",req.query.categories)
             let query = {targetGroup : req.query.group};
+            const queryArray = []
+            const matchQuery = {$match : null};
+
             const brands = (req.query.brands === "undefined" || req.query.brands === '') ? [] : req.query.brands.split(',') ;
             const categories = req.query.categories === "undefined" || req.query.categories=== '' ? [] : req.query.categories.split(',');
-          
+            const sortvalue = parseInt(req.query.sortValue) ;
+            
             if(brands.length > 0){
                 query.Brand = {$in : brands}
             }
             if(categories.length > 0){
                 query.Category = {$in : categories}
             }
-           
-            const products = await Product.aggregate([
-                {$match: query}
-            ])
+          
+            matchQuery.$match = query;
+            queryArray.push(matchQuery);
+
+            if(sortvalue && (sortvalue !== 'undefined')){
+                const sortQuery = {$sort : { salePrice : sortvalue}}
+                queryArray.push(sortQuery);
+            }
+            console.log(queryArray)
+            const products = await Product.aggregate(queryArray)
 
             if(products.length > 0){
 

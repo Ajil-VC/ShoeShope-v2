@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded',function() {
 
 
     function makeProductCard(product){
-        console.log(product,"This is from function")
+        
         return `
             <div class="col-lg-4 col-md-4 col-12 col-sm-6">
                 <div class="product-cart-wrap mb-30">
@@ -47,9 +47,10 @@ document.addEventListener('DOMContentLoaded',function() {
     }
 
     function updateSearch(targetGroup,selections){
-
+      
         const selectedBrands = selections.brands;
         const selectedCategories = selections.category;
+        const sortValue = selections.sortvalue;
     
         let brands = [];
         let categories = [];
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded',function() {
             var categoryQuerypara = categories.join(',');
         }
       
-        if((brands.length === 0) && (categories.length === 0)){
+        if((brands.length === 0) && (categories.length === 0) && sortValue === 0 ){
             window.location.href = `http://localhost:2000/showcase?group=${targetGroup}`;
             return;
         }
@@ -71,7 +72,7 @@ document.addEventListener('DOMContentLoaded',function() {
 
 
         console.log(categoryQuerypara,brandQuerypara)
-        fetch(`http://localhost:2000/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}`,{
+        fetch(`http://localhost:2000/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}`,{
             headers:{  'Accept': 'application/json' }
         })
         .then(response => {
@@ -143,6 +144,35 @@ document.addEventListener('DOMContentLoaded',function() {
             selections.category = checkedCategory;
             updateSearch(targetGroup,selections);
         })
+   })
+
+   const sortLtoH = document.getElementById('sortLtoH');
+   const sortHtoL = document.getElementById('sortHtoL');
+
+   sortLtoH.addEventListener('change',function() {
+
+        if(sortLtoH.checked){
+            sortHtoL.checked = false;
+            selections.sortvalue = 1;
+        }else{
+            selections.sortvalue = 0;
+
+        }
+        targetGroup = this.getAttribute('data-group');
+        updateSearch(targetGroup,selections);
+        
+   })
+   sortHtoL.addEventListener('change',function() {
+
+        if(sortHtoL.checked){
+            sortLtoH.checked = false;
+            selections.sortvalue = -1;
+        }else{
+            selections.sortvalue = 0;
+        }
+        targetGroup = this.getAttribute('data-group');
+        updateSearch(targetGroup,selections);
+
    })
 
 })//DOMContentLoaded ends here
