@@ -566,7 +566,18 @@ const updateOrderStatus = async(req,res) => {
             
             await Promise.all(prome);
               
-        } 
+        }else if( (order.confirmation ===  0) && (orderStatus === 'Cancelled')) {
+
+            order = await Order.findOneAndUpdate({_id : orderId},{$set:{confirmation : 1}},{new : true});
+            
+            const prome = order.items.map(async item => {
+                return Product.updateOne({_id : item.product.id},
+                    {$inc : { reserved : -item.quantity, stockQuantity : item.quantity }}).exec();
+            });
+            
+            await Promise.all(prome);
+            
+        }
         
         return res.status(200).json({status : true, message : `Successfully set the status to ${orderStatus}`,orderstatus : orderStatus })
             

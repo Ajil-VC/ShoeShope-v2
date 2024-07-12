@@ -64,40 +64,18 @@
                             <h5 class="section-title style-1 mb-30 wow fadeIn animated">Price Range</h5>
                             <ul class="categories">
 
-                                <label for="checkboxForPrice1" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="3000" id="checkboxForPrice1" >
+                           
+
+                                <label for="sortLtoH" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" type="checkbox" value="L" id="sortLtoH" >
                                     
-                                    <span>Max ₹ 3000</span>
+                                    <span>₹ Price Low to High </span>
                                 </label>
 
-                                <label for="checkboxForPrice2" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="5000" id="checkboxForPrice2" >
+                                <label for="sortHtoL" class="d-flex align-items-center" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" type="checkbox" value="H" id="sortHtoL" >
                                     
-                                    <span>Max ₹ 5000</span>
-                                </label>
-
-                                <label for="checkboxForPrice3" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="7000" id="checkboxForPrice3" >
-                                    
-                                    <span>Max ₹ 7000</span>
-                                </label>
-
-                                <label for="checkboxForPrice4" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="10000" id="checkboxForPrice4" >
-                                    
-                                    <span>Max ₹ 10000</span>
-                                </label>
-
-                                <label for="checkboxForPrice5" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="15000" id="checkboxForPrice5" >
-                                    
-                                    <span>Max ₹ 15000</span>
-                                </label>
-
-                                <label for="checkboxForPrice6" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" data-price ="price" type="checkbox" value="" id="checkboxForPrice6" >
-                                    
-                                    <span>Above ₹ 15000</span>
+                                    <span>₹ Price High to Low</span>
                                 </label>
 
                             </ul>
@@ -114,18 +92,18 @@
                         <!--End nav-tabs-->
                         <div class="tab-content wow fadeIn animated" id="myTabContent">
                             <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
-                                <div class="row product-grid-4">
+                                <div class="row product-grid-4" id="target-products" >
 
 
-                                <% for( let i = 0 ; i < groupProducts.length ; i++){ %>
+                                <% for( let i = 0 ; i < groupProducts?.length ; i++){ %>
                                         
                                     <div class="col-lg-4 col-md-4 col-12 col-sm-6">
                                         <div class="product-cart-wrap mb-30">
                                             <div class="product-img-action-wrap">
                                                 <div class="product-img product-img-zoom">
-                                                    <a href="/product_details/?product_id=<%=groupProducts[i]._id%>">
-                                                        <img class="default-img" src="/ProductImage/<%=groupProducts[i].image[0]%>" alt="">
-                                                        <img class="hover-img" src="/ProductImage/<%=groupProducts[i].image[1]%>" alt="">
+                                                    <a href="/product_details/?product_id=<%=groupProducts[i]?._id%>">
+                                                        <img class="default-img" src="/ProductImage/<%=groupProducts[i]?.image[0]%>" alt="">
+                                                        <img class="hover-img" src="/ProductImage/<%=groupProducts[i]?.image[1]%>" alt="">
                                                     </a>
                                                 </div>
                                                 
@@ -141,11 +119,11 @@
                                             </div>
                                             <div class="product-content-wrap">
                                               
-                                                <h2><a href="shop-product-right.html"><%=groupProducts[i].ProductName%></a></h2>
+                                                <h2><a><%=groupProducts[i]?.ProductName%></a></h2>
                                             
                                                 <div class="product-price">
-                                                    <span>₹ <%=groupProducts[i].salePrice%> </span>
-                                                    <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=groupProducts[i].salePrice+345%> </span>
+                                                    <span>₹ <%=groupProducts[i]?.salePrice%> </span>
+                                                    <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=groupProducts[i]?.salePrice%> </span>
                                                 </div>
                                                
                                             </div>

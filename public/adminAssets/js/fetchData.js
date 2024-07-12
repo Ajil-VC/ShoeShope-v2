@@ -524,22 +524,22 @@ async function updateOrderStatus(orderId){
     const selectStatus = document.getElementById('selectStatus').value;
 
     try{
-
-        if(selectStatus === 'Delivered'){
+        
+        if((selectStatus === 'Delivered') || (selectStatus === 'Cancelled')){
 
             let takeConfirmation = await swalConfirm()
             if(!takeConfirmation){
                 return
             }
         }
-        console.log("Hahaaha")
+   
         const response = await fetch(`http://localhost:2000/admin/order-list/order-details?orderId=${orderId}&orderStatus=${selectStatus}`,{method : 'PATCH'});
         if(!response.ok){
             throw new Error('Network response was not ok while fetching operation of update order status.');
         }
 
         const data = await response.json();
-        console.log(data);
+     
         if(data.status && (data.orderstatus !== 'Delivered')){
             
             Swal.fire({

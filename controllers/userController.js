@@ -249,14 +249,27 @@ const loadShowcase = async(req,res) => {
 
         try{
 
-            const brands = req.query.brands ? req.query.brands.split(',') : [] ;
-            
-            console.log(brands, req.query.group)
+            let query = {targetGroup : req.query.group};
+            const brands = (req.query.brands === "undefined" || req.query.brands === '') ? [] : req.query.brands.split(',') ;
+            const categories = req.query.categories === "undefined" || req.query.categories=== '' ? [] : req.query.categories.split(',');
+          
+            if(brands.length > 0){
+                query.Brand = {$in : brands}
+            }
+            if(categories.length > 0){
+                query.Category = {$in : categories}
+            }
+           
             const products = await Product.aggregate([
-                {$match: { targetGroup : req.query.group}}
+                {$match: query}
             ])
 
-            console.log(products)
+            if(products.length > 0){
+
+                return res.status(200).json({status:true, products});
+            }else{
+                return res.status(200).json({status:false, message : 'No products in this combination'});
+            }
 
         }catch(error){
             console.log("Interal error while trying to search documents.",error);
@@ -318,8 +331,7 @@ const loadUserProfile = async(req,res) => {
         }  
 
         const userDetails = await User.findOne({_id : userID}).exec() ;
-        // const defaultAddress =await Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec ();
-        // const otherAddress =await Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec ();
+   
         //Fetching other 2 data concurrently using Promise.all
         const [defaultAddress,otherAddress,orders] = await Promise.all([
             Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec(),
