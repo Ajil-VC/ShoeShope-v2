@@ -20,6 +20,7 @@ userRouter.get('/',(req,res) => {
     res.send('This is user route')
 })
 
+
 //Registration
 userRouter.get('/signup',userController.loadRegister) ;
 userRouter.post('/signup',userController.gen_otp) ;

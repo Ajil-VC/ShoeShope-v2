@@ -1,8 +1,18 @@
+// const noCacheMid = (req , res, next) => {
+//     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+//     next();
+// }
 
+// res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+// res.setHeader('Pragma', 'no-cache');
+// res.setHeader('Expires', '0');
+// res.redirect('/login');
 
 const isLoggedIn = async(req,res,next) => {
 
     try{
+        
+        
         if( !req.session.user_id && !req.user ){
 
             const acceptHeader = req.headers.accept || "";
@@ -41,7 +51,10 @@ const isLoggedOut = async(req,res,next) => {
 const isBlocked = async(req,res,next) => {
 
     try{
-        
+        if(req.session.isBlocked || req.user.isBlocked){
+            return res.status(401).send("Unauthorized");
+        }
+        next();
 
     }catch(error){
         console.log("Interal error occured while checking user isblocked",error);
@@ -52,5 +65,6 @@ const isBlocked = async(req,res,next) => {
 module.exports = {
     isLoggedOut,
     isLoggedIn,
-    isBlocked
+    isBlocked,
+    // noCacheMid
 }

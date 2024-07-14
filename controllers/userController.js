@@ -175,9 +175,11 @@ const loginUser = async (req,res) => {
         const {email,password} = req.body;
 
         const userData = await User.findOne({email}).exec();
-        console.log(userData)
+        console.log(userData,"This is user data\n\n\n\n")
         if(userData.google_id){
             return res.status(200).redirect('/auth/google')
+        }else if(userData.isBlocked){
+            return res.status(401).send("Unauthorized");
         }
         else if(userData){
             const passwordMatch = await bcrypt.compare(password,userData.password)
@@ -187,7 +189,6 @@ const loginUser = async (req,res) => {
                 req.session.user_id = userData._id; 
                 req.session.isAuthorised = userData.isAuthorised; 
                 req.session.isBlocked = userData.isBlocked;
-                console.log(req.session)
     
                 return res.status(200).redirect('home')
             }else{
@@ -226,7 +227,7 @@ const loadShowcase = async(req,res) => {
          
             const targetGroup = req.query.group ;
             const [category, brand, groupProducts] = await Promise.all([
-                Category.find().exec(),
+                Category.find({isActive : 1}).exec(),
                 Brand.find().exec(),
                 Product.find({targetGroup : targetGroup}).exec()
             ])
@@ -249,9 +250,7 @@ const loadShowcase = async(req,res) => {
 
         try{
 
-            // console.log("THis is the sort value :",typeof req.query.sortValue)
-            // console.log("THis is the brand:",req.query.brands)
-            // console.log("THis is the categories :",req.query.categories)
+      
             let query = {targetGroup : req.query.group};
             const queryArray = []
             const matchQuery = {$match : null};
@@ -345,7 +344,7 @@ const loadUserProfile = async(req,res) => {
 
         const userDetails = await User.findOne({_id : userID}).exec() ;
    
-        //Fetching other 2 data concurrently using Promise.all
+      
         const [defaultAddress,otherAddress,orders] = await Promise.all([
             Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec(),
             Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec(),
@@ -370,7 +369,7 @@ const getOrderDetails = async(req,res) => {
         const address = order.shippingAddress;
         const orderDate = order.orderDate;
         const orderStatus = order.status
-        
+        console.log(order)
         return res.status(200).json({status : true, products,address,orderDate,orderStatus});
 
     }catch(error){
@@ -983,7 +982,11 @@ const getItemsAndReserve = async(cartItemsArray) =>{
     
         });
 
-        //Reserving the products using promise.all
+        if(productsToOrder.length < 1){
+            
+            return null;
+        }
+       
         try{
             const concurrentReservation = productsToOrder.map(async item => {
 
@@ -1085,6 +1088,8 @@ const placeOrder = async(req,res) => {
                 console.log("Couldn't make the order")
                 return res.json({status : false,message:"Couldn't place the order"})
             }
+        }else{
+            return res.json({status : false,message:"Need ateleast 1 item to proceed"})
         }
 
     }catch(error){

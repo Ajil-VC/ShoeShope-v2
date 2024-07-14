@@ -14,9 +14,15 @@ passport.use(new GoogleStrategy({
     console.log(profile)
     try {
         const user = await User.findOne({ email: profile._json.email }).exec();
-        if (user) {
+        
+        if(user) {
           // User exists, authenticate
           console.log("User found");
+
+          if(user.isBlocked){
+            console.log("User is blocked.");
+            return cb(null,false);
+          }
           return cb(null, user);
         } else {
           // User does not exist, create a new user

@@ -150,7 +150,7 @@ const blockOrUnblockUser = async (req,res) => {
         const userData = await User.findOne({_id:idToBlockorUnblock})
         if(!userData.isBlocked){
             const user = await User.findByIdAndUpdate({_id:idToBlockorUnblock},{$set:{isBlocked:1}});
-            //should send the json data to frontend and update it there.
+            req.session.idToBlockorUnblock = false;
             return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
             
         }else{
@@ -158,7 +158,6 @@ const blockOrUnblockUser = async (req,res) => {
             //should send the json data to frontend and update it there.    
             return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
         }
-     
 
     }catch(error){
         console.log('Internal Error while blocking or unblocking ',error)
@@ -230,30 +229,6 @@ const addBrandOrCategory = async (req,res) => {
     }
 
 
-    if(req.query.color){
-
-        const newBrand = req.query.brand;
-
-        try{
-
-            // await new Brand({
-            //     name : newBrand
-            // }).save()
-            
-    
-            console.log("Added Successfully Give a sweet alert here");
-            return;
-    
-        }catch(error){
-    
-            console.log('Error while adding new Brand\n');
-            return res.status(500).send("Error while adding new Brand");
-    
-        }
-
-    }
-
-
     if(req.body.category.trim() && req.body.description.trim()){
 
         const category = req.body.category.trim() ;
@@ -267,13 +242,15 @@ const addBrandOrCategory = async (req,res) => {
                 description : description
             })
             await newCategory.save();
-            const categoryDetails = await Category.find({});
-            return res.status(201).render('categories',{categoryDetails})
+            // const categoryDetails = await Category.find({});
+            // return res.status(201).render('categories',{categoryDetails});
+            return res.status(201).json({status : true});
 
         }catch(error){
 
             console.log("Error occured while creating Category\n",error)
-            return res.status(500).send("Category already saved in database.")
+            // return res.status(500).send("Category already saved in database.")
+            return res.status(201).json({status : false,message : "Category already saved in database."});
         }
         
     }else{
@@ -284,22 +261,22 @@ const addBrandOrCategory = async (req,res) => {
 
 const softDeleteCategory = async(req,res) => {
 
-    const itemID = req.query.categoryID;
+    const itemID = new mongoose.Types.ObjectId(req.query.categoryID);
+   
     try{
 
         const category = await Category.findOne({_id:itemID}).exec();
-        
+      
         if(category.isActive){
             
-            await Category.updateOne({_id:itemID},{$set:{isActive : 0}}).exec();
-            const categoryDetails = await Category.find({});
-            return res.status(200).render('categories',{categoryDetails})
+            const categoryDetails = await Category.findOneAndUpdate({_id:itemID},{$set:{isActive : 0}},{new : true}).exec();
+            console.log(categoryDetails)
+            return res.status(200).json({status : false,message : `${categoryDetails.name} Successfully deactivated.`});
         }else{
 
-            await Category.updateOne({_id:itemID},{$set:{isActive : 1}}).exec();
-            const categoryDetails = await Category.find({});
-            return res.status(200).render('categories',{categoryDetails})
-
+            const categoryDetails = await Category.findOneAndUpdate({_id:itemID},{$set:{isActive : 1}},{new : true}).exec();
+            console.log(categoryDetails)
+            return res.status(200).json({status : true,message : `${categoryDetails.name} Successfully Activated.`});
         }
 
     }catch(error){
@@ -312,18 +289,30 @@ const softDeleteCategory = async(req,res) => {
 
 const updateCategory = async(req,res) => {
 
-    const id = req.query.id;
+    const categoryId = new mongoose.Types.ObjectId(req.query.id);
     const name = req.query.category_name;
     const description = req.query.description;
 
     try{
 
-        const updpatedCategory = await Category.findByIdAndUpdate(id,{$set:{name:name,description:description}},{new:true});
-        console.log("updpatedCategory HHH",updpatedCategory)
-        return res.status(201).json(updpatedCategory);
+        const updpatedCategory = await Category.updateOne({_id : categoryId},{$set:{name:name,description:description}}).exec();
+
+        if(updpatedCategory.modifiedCount){
         
+            return res.status(200).json({status : true});
+        }else{
+        
+            console.log("Could not update category.")
+            return res.status(200).json({status : false,message : "Couldnt update category."});
+        }
 
     }catch(error){
+
+        if(error.code === 11000){
+            console.log("1100000000 hahaha")
+            return res.json({status : false,message : "Category already exist."});
+        }
+
         console.log("Internal server error while performing udpation of categories.",error);
         return res.status(500).send("Internal server error while performing udpation of categories.",error);
     }

@@ -149,30 +149,36 @@ document.addEventListener('DOMContentLoaded',function() {
    const sortLtoH = document.getElementById('sortLtoH');
    const sortHtoL = document.getElementById('sortHtoL');
 
-   sortLtoH.addEventListener('change',function() {
+   if(sortLtoH){
 
-        if(sortLtoH.checked){
-            sortHtoL.checked = false;
-            selections.sortvalue = 1;
-        }else{
-            selections.sortvalue = 0;
+       sortLtoH.addEventListener('change',function() {
+    
+            if(sortLtoH.checked){
+                sortHtoL.checked = false;
+                selections.sortvalue = 1;
+            }else{
+                selections.sortvalue = 0;
+    
+            }
+            targetGroup = this.getAttribute('data-group');
+            updateSearch(targetGroup,selections);
+            
+       })
+   }
+   if(sortHtoL){
 
-        }
-        targetGroup = this.getAttribute('data-group');
-        updateSearch(targetGroup,selections);
-        
-   })
-   sortHtoL.addEventListener('change',function() {
-
-        if(sortHtoL.checked){
-            sortLtoH.checked = false;
-            selections.sortvalue = -1;
-        }else{
-            selections.sortvalue = 0;
-        }
-        targetGroup = this.getAttribute('data-group');
-        updateSearch(targetGroup,selections);
-
-   })
+       sortHtoL.addEventListener('change',function() {
+    
+            if(sortHtoL.checked){
+                sortLtoH.checked = false;
+                selections.sortvalue = -1;
+            }else{
+                selections.sortvalue = 0;
+            }
+            targetGroup = this.getAttribute('data-group');
+            updateSearch(targetGroup,selections);
+    
+       })
+   }
 
 })//DOMContentLoaded ends here

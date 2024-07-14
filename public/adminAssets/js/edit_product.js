@@ -129,9 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // }
     
     
-    // const regularPrice_error = document.getElementById('regularPrice-error');
-    // const salePrice_error = document.getElementById('salePrice-error');
-    // const stockQuantity_error = document.getElementById('stockQuantity-error');
+    const regularPrice_error = document.getElementById('regularPrice-error');
+    const salePrice_error = document.getElementById('salePrice-error');
+    const stockQuantity_error = document.getElementById('stockQuantity-error');
     // const descriptionOfProduct_error = document.getElementById('descriptionOfProduct-error');
 
     
@@ -143,35 +143,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
         publishBtnForAddProduct.addEventListener('click',() => {
 
-            // let formValidation = true;
-            // regularPrice_error.textContent = "";
-            // salePrice_error.textContent = "";
-            // stockQuantity_error.textContent = "";
+            let formValidation = true;
+            regularPrice_error.textContent = "";
+            salePrice_error.textContent = "";
+            stockQuantity_error.textContent = "";
             // product_name_error.textContent = "";
             // descriptionOfProduct_error.textContent = "";
             // product_name_error.classList.add('d-none');
 
-            // let regularPrice = document.getElementById('regularPrice').value.trim();
-            // let salePrice = document.getElementById('salePrice').value.trim();
-            // let stockQuantity = document.getElementById('stockQuantity').value.trim();
+            let regularPrice = document.getElementById('regularPrice').value.trim();
+            let salePrice = document.getElementById('salePrice').value.trim();
+            let stockQuantity = document.getElementById('stockQuantity').value.trim();
             // let productName = product_name.value.trim();
             // let descriptionOfProduct = document.getElementById('descriptionOfProduct').value.trim();
 
-            // if(!/^[1-9]\d*$/.test(regularPrice)){
+            if(!/^[1-9]\d*$/.test(regularPrice)){
                 
-            //     regularPrice_error.textContent = "Must be a positive number.";
-            //     formValidation = false;
-            // }
-            // if(!/^[1-9]\d*$/.test(salePrice)){
+                regularPrice_error.textContent = "Must be a positive number.";
+                formValidation = false;
+            }
+            if(!/^[1-9]\d*$/.test(salePrice)){
                 
-            //     salePrice_error.textContent = "Must be a positive number.";
-            //     formValidation = false;
-            // }
-            // if(!/^[1-9]\d*$/.test(stockQuantity)){
+                salePrice_error.textContent = "Must be a positive number.";
+                formValidation = false;
+            }
+            if(!/^[1-9]\d*$/.test(stockQuantity)){
 
-            //     stockQuantity_error.textContent = "Must be a positive number.";
-            //     formValidation = false;
-            // }
+                stockQuantity_error.textContent = "Must be a positive number.";
+                formValidation = false;
+            }
             // if(productName === ""){
                 
             //     product_name_error.textContent = "This field should not be empty.";
@@ -190,79 +190,82 @@ document.addEventListener('DOMContentLoaded', function() {
             // }
             
 
-            const category = document.getElementById('category').value;
-            const brand = document.getElementById('brand').value;
-          
             
-            Array.from(form.elements).forEach(element => {
-
-                if(element.name && element.type !== 'file'){
-                    formDataForAddNewProduct.append(element.name, element.value);
-                }
-            })
-
-
-            const hiddenCategory = document.createElement('input');
-            const hiddenBrand = document.createElement('input');
-
-            
-            //Adding the hidden field to the form.
-            hiddenCategory.type = 'hidden';
-            hiddenCategory.name = 'category';
-            hiddenCategory.value = category;
-            
-            hiddenBrand.type = 'hidden';
-            hiddenBrand.name = 'brand';
-            hiddenBrand.value = brand;
-            
-            formDataForAddNewProduct.append(hiddenCategory.name, hiddenCategory.value);
-            formDataForAddNewProduct.append(hiddenBrand.name, hiddenBrand.value);
-            
-            Object.entries(imageBlobs).forEach(([key, blob], index) => {
-                formDataForAddNewProduct.append('image', blob, `croppedimage${index + 1}.png`);
-            });
-           
-            
-            fetch(`http://localhost:2000/admin/productslist/edit_product?productId=${productId}`,{
-                method : 'PUT',
-                body : formDataForAddNewProduct
-            })
-            .then(response => {
-                if(!response.ok){
-
-                    Swal.fire({
-                        title: 'Error!',
-                        text: "Something Went wrong",
-                        icon: 'error'
-                    });
-                    throw new Error('Network response was not ok in submission of new product.')
-                }
-                return response.json();
-            })
-            .then(data => {
+            if(formValidation){
+                const category = document.getElementById('category').value;
+                const brand = document.getElementById('brand').value;
+              
                 
-                if(!data.status){
+                Array.from(form.elements).forEach(element => {
+    
+                    if(element.name && element.type !== 'file'){
+                        formDataForAddNewProduct.append(element.name, element.value);
+                    }
+                })
+    
+    
+                const hiddenCategory = document.createElement('input');
+                const hiddenBrand = document.createElement('input');
+    
+                
+                //Adding the hidden field to the form.
+                hiddenCategory.type = 'hidden';
+                hiddenCategory.name = 'category';
+                hiddenCategory.value = category;
+                
+                hiddenBrand.type = 'hidden';
+                hiddenBrand.name = 'brand';
+                hiddenBrand.value = brand;
+                
+                formDataForAddNewProduct.append(hiddenCategory.name, hiddenCategory.value);
+                formDataForAddNewProduct.append(hiddenBrand.name, hiddenBrand.value);
+                
+                Object.entries(imageBlobs).forEach(([key, blob], index) => {
+                    formDataForAddNewProduct.append('image', blob, `croppedimage${index + 1}.png`);
+                });
 
-                    Swal.fire({
-                        title: 'Error!',
-                        text: data.message,
-                        icon: 'error'
-                    });
-
-                }else{
-
-                    // Swal.fire({
-                    //     title: '',
-                    //     text: data.message,
-                    //     icon: 'success'
-                    // });
-                    window.location.href = data.redirect;
-                }
-                                 
-            })
-            .catch(error => {
-                console.log("There was a problem with submission of add new pRoduct operation",error)
-            });
+                
+                fetch(`http://localhost:2000/admin/productslist/edit_product?productId=${productId}`,{
+                    method : 'PUT',
+                    body : formDataForAddNewProduct
+                })
+                .then(response => {
+                    if(!response.ok){
+    
+                        Swal.fire({
+                            title: 'Error!',
+                            text: "Something Went wrong",
+                            icon: 'error'
+                        });
+                        throw new Error('Network response was not ok in submission of new product.')
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    
+                    if(!data.status){
+    
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message,
+                            icon: 'error'
+                        });
+    
+                    }else{
+    
+                        // Swal.fire({
+                        //     title: '',
+                        //     text: data.message,
+                        //     icon: 'success'
+                        // });
+                        window.location.href = data.redirect;
+                    }
+                                     
+                })
+                .catch(error => {
+                    console.log("There was a problem with submission of add new pRoduct operation",error)
+                });
+            }
  
 
         })

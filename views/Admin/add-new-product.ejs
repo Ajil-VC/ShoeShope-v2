@@ -120,12 +120,14 @@
                                     <div class="col-lg-6">
                                         <label class="form-label">Target Group</label> 
                                         <select class="form-select" name="targetGroup" id="targetGroup" >
-                                            
+                                          
+                                            <option selected value="" disabled > Select Group </option>
                                             <option> Men </option>
                                             <option> Women </option>
                                             <option> Kids </option>
                                             
                                         </select>
+                                        <span  class="text-danger" style="font-size: smaller;" id="targetGroup-error"></span>
                                     </div>
                                     
                                 </div>
@@ -174,14 +176,15 @@
                     
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h4>Organization</h4>
+                            <h4>Classification</h4>
                         </div>
                         <div class="card-body">
                             <div class="row gx-2">
                                 <div class="col-sm-6 mb-3">
                                     <label class="form-label">Category</label> 
                                     <select class="form-select" name="category" id="category" >
-                                        
+
+                                            <option disabled value="" selected >Select Category </option>
                                         <% for(let i = 0 ; i < categories.length ; i++){ %>
                                             
                                             <option> <%=categories[i].name %> </option>
@@ -190,11 +193,13 @@
 
                                         
                                     </select>
+                                    <span  class="text-danger" style="font-size: smaller;" id="category-error"></span>
                                 </div>
                                 <div class="col-sm-6 mb-3">
                                     <label class="form-label">Brand</label>
                                     <select class="form-select" name="brand" id="brand" >
 
+                                            <option disabled value="" selected >Select Brand </option>
                                         <% for(let i = 0 ; i < brand.length ; i++){ %>
                                             
                                             <option> <%= brand[i].name %> </option>
@@ -202,6 +207,7 @@
                                         <% } %>
                                    
                                     </select>
+                                    <span  class="text-danger" style="font-size: smaller;" id="brand-error"></span>
                                 </div>
                             
                             </div> <!-- row.// -->

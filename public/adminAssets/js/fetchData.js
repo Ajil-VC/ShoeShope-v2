@@ -141,6 +141,44 @@ if(btnForAddBrand){
 }
 
 
+const category_form = document.getElementById('category-form');
+if(category_form){
+
+    category_form.addEventListener('submit',function(e){
+
+        e.preventDefault();
+        const formdata = new FormData(this);
+        
+        
+        fetch(`http://localhost:2000/admin/category`,{
+            method : 'post',
+            body : new URLSearchParams(formdata) 
+        })
+        .then(response => {
+            if(!response.ok){
+                throw new Error("Network response was not ok for post request of category submission");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if(data.status){
+                window.location.href = "http://localhost:2000/admin/category"
+            }else{
+
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error'
+                });
+            }
+            console.log("data recieved :",data)
+        })
+        .catch(error => {
+            console.log("There was a problem while performing category submission.",error);
+        })
+    })
+}
+
 
 function listProduct(productID){
 
@@ -177,8 +215,22 @@ function listCategory(categoryID){
         })
         .then(data => {
 
-            console.log('data recieved : ',data)
-                             
+            if(data.status){
+
+                Swal.fire({
+                    title: 'Success!',
+                    text: data.message,
+                    icon: 'success'
+                });
+
+            }else{
+                Swal.fire({
+                    title: 'Success!',
+                    text: data.message,
+                    icon: 'success'
+                });
+            }
+           
         })
         .catch(error => {
             console.log("There was a problem while performing listcategory fetch operation",error)
@@ -276,43 +328,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let validation = false;
     let alreadyExistName = false;
+    function isProductExist(){
+        
+        product_name_error.classList.add('d-none');
+                product_name_error.textContent = ""
+        validation = true;         
+        alreadyExistName = false;     
+        let newValue = product_name.value;
+        if(newValue.trim() === ''){
+            product_name_error.classList.remove('d-none');
+            product_name_error.textContent = "Give a product name"
+            validation = false;
+          
+        }else{
+    
+            fetch(`http://localhost:2000/admin/productslist/add_new_product?product_name=${newValue.trim()}`,{method : 'post'})
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok while fetching data.");
+                }
+                return response.json();
+            })
+            .then(data =>{
+    
+                if(!data.status){
+                   
+                    product_name_error.classList.remove('d-none');
+                    product_name_error.textContent = data.message
+                    validation = false;
+                    alreadyExistName = true;
+       
+                }
+                             
+            })
+        }
+    }
     if(product_name){
         product_name.addEventListener('input',()=> {
-            product_name_error.classList.add('d-none');
-                    product_name_error.textContent = ""
-            validation = true;         
-            alreadyExistName = false;     
-            let newValue = product_name.value;
-            if(newValue.trim() === ''){
-                product_name_error.classList.remove('d-none');
-                product_name_error.textContent = "Give a product name"
-                validation = false;
-              
-            }else{
 
-                fetch(`http://localhost:2000/admin/productslist/add_new_product?product_name=${newValue.trim()}`,{method : 'post'})
-                .then(response => {
-                    if(!response.ok){
-                        throw new Error("Network response was not ok while fetching data.");
-                    }
-                    return response.json();
-                })
-                .then(data =>{
-    
-                    if(!data.status){
-                       
-                        product_name_error.classList.remove('d-none');
-                        product_name_error.textContent = data.message
-                        validation = false;
-                        alreadyExistName = true;
-           
-                    }
-                                 
-                })
-            }
-
-            console.log(validation)
-
+            isProductExist();
         })
     }
     
@@ -321,19 +375,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const salePrice_error = document.getElementById('salePrice-error');
     const stockQuantity_error = document.getElementById('stockQuantity-error');
     const descriptionOfProduct_error = document.getElementById('descriptionOfProduct-error');
+    const targetGroup_error = document.getElementById('targetGroup-error');
+    const category_error = document.getElementById('category-error');
+    const brand_error = document.getElementById('brand-error');
 
     const publishBtnForAddProduct = document.getElementById('publishBtnForAddProduct');
     if(publishBtnForAddProduct){
         const form = document.getElementById('formForAddNewProduct');
 
         publishBtnForAddProduct.addEventListener('click',() => {
-
+            
+            const isProduct = isProductExist();
+            console.log(isProduct,"Checking if product is there")
             let formValidation = true;
             regularPrice_error.textContent = "";
             salePrice_error.textContent = "";
             stockQuantity_error.textContent = "";
             product_name_error.textContent = "";
             descriptionOfProduct_error.textContent = "";
+            targetGroup_error.textContent = "";
+            category_error.textContent = "";
+            brand_error.textContent = "";
             product_name_error.classList.add('d-none');
 
             let regularPrice = document.getElementById('regularPrice').value.trim();
@@ -341,7 +403,22 @@ document.addEventListener('DOMContentLoaded', function() {
             let stockQuantity = document.getElementById('stockQuantity').value.trim();
             let productName = product_name.value.trim();
             let descriptionOfProduct = document.getElementById('descriptionOfProduct').value.trim();
+            let targetGroup = document.getElementById('targetGroup').value;
+            let category = document.getElementById('category').value;
+            let brand = document.getElementById('brand').value;
 
+            if(!brand){
+                brand_error.textContent = "Select brand";
+                formValidation = false;
+            }
+            if(!category){
+                category_error.textContent = "Select category";
+                formValidation = false;
+            }
+            if(!targetGroup){
+                targetGroup_error.textContent = "Select target group";
+                formValidation = false;
+            }
             if(!/^[1-9]\d*$/.test(regularPrice)){
                 
                 regularPrice_error.textContent = "Must be a positive number.";
@@ -493,7 +570,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btn_new_save){
         btn_new_save.addEventListener('click',(e)=> {
            
-            console.log(categoryUpdationCurrentInput)
             new_modal_close_button.click();
 
             fetch(`http://localhost:2000/admin/category?id=${categoryUpdationCurrentInput}&category_name=${categoryNameUpdate.value}&description=${categoryDescriptionUpdate.value}`,{method:"PUT"})
@@ -505,9 +581,15 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
 
-                console.log("Data",data.name)
-                td_name.textContent = data.name;
-                console.log("This is ",data)
+                if(data.status){
+                    window.location.href = "http://localhost:2000/admin/category";
+                }else{
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message,
+                        icon: 'error'
+                    });
+                }
             })
         })
     }

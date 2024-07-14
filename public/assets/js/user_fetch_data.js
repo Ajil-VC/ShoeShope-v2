@@ -883,9 +883,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Address and Order ID -->
     <div class="col-md-6 bot-address-info mt-3 mt-md-0">
       <p><span class="bot-bold">Order ID:</span> ${products?._id}</p>
-      <p><span class="bot-bold">Address:</span> ${addres.addressType}</p>
-      <p><span class="bot-bold">Place:</span> ${addres.place}, ${addres.city} city</p>
-      <p><span class="bot-bold">Landmark:</span> ${addres.landmark}, Pin: ${addres.pinCode}</p>
+      <p><span class="bot-bold">Address:</span> ${addres?.addressType}</p>
+      <p><span class="bot-bold">Place:</span> ${addres?.place}, ${addres?.city} city</p>
+      <p><span class="bot-bold">Landmark:</span> ${addres?.landmark}, Pin: ${addres?.pinCode}</p>
     </div>
 
     <!-- Price, Quantity, and Status -->
@@ -907,6 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const tableBody = document.getElementById('order-detail-table');
         tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderStatus)).join('');
+
     }
 
     //Order-Details
