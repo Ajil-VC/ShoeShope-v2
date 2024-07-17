@@ -1,4 +1,4 @@
-const {User,OTP,Product,Category,Brand,Address,Cart,Order} = require('../models/models');
+const {User,OTP,Product,Category,Brand,Address,Cart,Order,transaction} = require('../models/models');
 
 const mongoose = require('mongoose') 
 const {ObjectId} = require('mongodb')
@@ -6,7 +6,8 @@ const bcrypt = require('bcrypt');
 const otpGenerator = require('otp-generator');
 const {appPassword} = require('../config/config')
 const nodemailer = require('nodemailer')
-const {add,format} = require('date-fns')
+const {add,format} = require('date-fns');
+const crypto = require('crypto');
 
 
 const securePassword = async (password) => {
@@ -383,8 +384,9 @@ const updateUserProfile = async(req,res) => {
     const firstName = req.body.Fname;
     const lastName = req.body.Lname;
     const newPassword = req.body.npassword;
+    console.log(newPassword)
     const newHashedPassword = await securePassword(newPassword);
-    console.log(newHashedPassword);
+    
     let userID = "";
     if(req?.user?._id){
         userID = req.user._id;
@@ -559,19 +561,23 @@ const deleteAddress = async(req,res) => {
     try{
 
         const userDetails = await User.findOne({_id : userID});
-        const defaultAddress = await Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec ();
-    
-        isDefault = await User.aggregate([
-            {$match:{_id:new ObjectId(userID)}},{$project:{size:{$size:"$address"}}}
-        ]).exec();
-    
+        const [defaultAddress, deletingAddress, isDefault] = await Promise.all([
+            Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec (),
+            Address.findOne({_id : addressId}).exec(),
+            User.aggregate([
+                {$match:{_id:new ObjectId(userID)}},{$project:{size:{$size:"$address"}}}
+            ]).exec()
+        ]);
+
         const isQueryAdAndDefaultAdEq = (addressId.toString() === defaultAddress._id.toString());
-       
-        if(!isQueryAdAndDefaultAdEq || (isQueryAdAndDefaultAdEq && (isDefault[0].size == 1))){
       
+        if(!isQueryAdAndDefaultAdEq || (isQueryAdAndDefaultAdEq && (isDefault[0].size == 1))){
+            if(deletingAddress.selectedAdd && !isQueryAdAndDefaultAdEq){
+                await Address.updateOne({_id : defaultAddress._id},{$set:{selectedAdd : true}});
+            }
             const isDeleted = await Address.deleteOne({_id: addressId }).exec();
-            console.log(isDeleted)
-            if(isDeleted.acknowledged){
+
+            if(isDeleted.deletedCount){
                 
                 await User.updateOne({_id : userID},{$pull:{address:addressId}}).exec();
                 console.log("Address deleted Successfully.");
@@ -580,10 +586,21 @@ const deleteAddress = async(req,res) => {
 
         }else{
             
-            const otherAddress =await Address.findOne({_id:{$in:userDetails.address},defaultAdd:0}).exec ();
-            await Address.updateOne({_id : otherAddress._id},{$set:{defaultAdd:1}}).exec();
-            await User.updateOne({_id : userID},{$pull:{address:addressId}}).exec(); 
-            await Address.deleteOne({_id: addressId }).exec();
+            const otherAddress = await Address.findOne({_id:{$in:userDetails.address},defaultAdd:0}).exec ();
+
+            if(isQueryAdAndDefaultAdEq && deletingAddress.selectedAdd){
+                await Address.updateOne({_id : otherAddress._id},{$set:{defaultAdd:1, selectedAdd : true}}).exec();
+            }else{
+
+                await Address.updateOne({_id : otherAddress._id},{$set:{defaultAdd:1}}).exec();
+            }
+            
+            const prome = await Promise.all([
+                User.updateOne({_id : userID},{$pull:{address:addressId}}).exec(),
+                Address.deleteOne({_id: addressId }).exec()
+
+            ]);
+            console.log(prome);
             return res.json({ status : true });
         }
 
@@ -1037,6 +1054,28 @@ const getItemsAndReserve = async(cartItemsArray) =>{
 }
 
 
+const makeRazorpayment = async(razorpay, amountToPay,orderId) => {
+
+    const options = {
+
+        amount : amountToPay * 100,
+        currency : 'INR',
+        // receipt : 'receipt_' + Date.now()
+        receipt : orderId
+    };
+
+    try{
+
+        const order = await razorpay.orders.create(options);
+        return order;
+    }catch(error){
+
+        console.log("Internal error while trying to perform razorpayment",error);
+        return false;
+    }
+
+}
+
 
 const placeOrder = async(req,res) => {
 
@@ -1048,17 +1087,40 @@ const placeOrder = async(req,res) => {
     }
 
     const paymentMethod = req.query.paymentMethod;
+    const razorpay = req.razorpay;
+    const razorpay_key = req.razorpay_key;
     
-    try{
+    if(req?.params?.address_is_selected){
+        //In this block im checking if any address is selected.   
+        try{
 
+            const isAdSelected = await Address.findOne({userId : userID, selectedAdd : true}).exec();
+
+            if(isAdSelected){
+                return res.status(200).json({status : true});
+            }else{
+                return res.json({status : false, message : "Please select an address."});
+            }
+
+        }catch(error){
+            console.log("Internal error occured while trying to check if address is selected.",error);
+            return res.status(500).send("Internal error occured while trying to check if address is selected.",error);
+        }
+    }
+
+
+    try{
+      
         const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
         const address = await Address.findOne({userId : userID, selectedAdd : true});
         const productsToOrder = await getItemsAndReserve(cartItemsArray);
+        var amountToPay = totalAmount;
 
         if(productsToOrder){
 
             const newOrder = new Order({
-                
+               
+                paymentGatewayOrderId: null,
                 customer    : userID,
                 items       : productsToOrder,
                 totalItems  : totalSelectedItems,
@@ -1071,7 +1133,17 @@ const placeOrder = async(req,res) => {
     
             });
     
+
+            if(paymentMethod !== 'Cash on Delivery'){
+
+                var orderResult = await makeRazorpayment(razorpay, amountToPay,newOrder._id);
+                console.log(orderResult);
+                newOrder.paymentGatewayOrderId = orderResult.id;
+    
+            }                
+            
             const orderDetails = await newOrder.save();
+
             if(orderDetails){
                 
                 const IdsToRemoveFromCart = productsToOrder.map(item => item.product.id)
@@ -1082,12 +1154,17 @@ const placeOrder = async(req,res) => {
                     }}
                 }) 
 
+                if(paymentMethod !== 'Cash on Delivery'){
+        
+                    return res.status(201).json({status : true,razorpay_key : razorpay_key, orderResult})
+                }  
                 return res.status(201).json({status : true,redirect:`/order_placed?order_id=${orderDetails._id}`})
     
             }else{
                 console.log("Couldn't make the order")
                 return res.json({status : false,message:"Couldn't place the order"})
             }
+            
         }else{
             return res.json({status : false,message:"Need ateleast 1 item to proceed"})
         }
@@ -1100,6 +1177,47 @@ const placeOrder = async(req,res) => {
     }
 }
 
+
+const paymentVerification = async(req,res) => {
+
+    
+    try{
+        const { orderId, paymentId, signature } = req.body;
+    console.log("verify: \n",orderId,"\n" ,paymentId,"\n" ,signature)
+
+        const expectedSignature = await crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(`${orderId}|${paymentId}`)
+        .digest('hex');
+console.log(signature,'\n',expectedSignature);    
+        if(expectedSignature === signature){
+            
+            const Transaction = new transaction({
+    
+                orderId, 
+                paymentId,
+                amount : 2,
+                type : 'payment',
+                status: 'completed',
+                currency: 'INR',
+                description: ""
+            });
+    
+            const transactionSaveResult = await Transaction.save();
+            if(transactionSaveResult){
+
+                return res.status(201).json({status : true, redirect : `/order_placed?order_id=${orderId}`});
+            }else{
+                return res.json({status : false , message : 'Could not save transaction details.'});
+            }
+        }else{
+            return res.json({status : false, message : 'Invalid Signature'});
+        }
+    }catch(error){
+
+        console.log("Internal error while trying to make transaction.",error);
+    }
+}
 
 const loadOrderPlaced = async(req,res) => {
 
@@ -1143,6 +1261,7 @@ module.exports = {
     loadCheckout,
     changeDeliveryAddress,
     placeOrder,
+    paymentVerification,
     loadOrderPlaced,
     getOrderDetails
   

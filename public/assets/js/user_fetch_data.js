@@ -1,5 +1,4 @@
 
-
 $(document).ready(function(){
 
     $('.zoom_image').each(function() { 
@@ -149,6 +148,49 @@ if(otp_submit_btn){
 
    
     
+function passwordValidation(password) {
+
+    const validatedPassword = {}
+
+    if(!password){
+            
+        validatedPassword.message = "Please give password";
+        validatedPassword.status = false;
+        return validatedPassword;
+
+    }else if(!/[A-Z]/.test(password)){
+            
+        validatedPassword.message = "Password Should Contain atleast 1 Uppercase";
+        validatedPassword.status = false;
+        return validatedPassword;
+
+    }else if(!/[a-z]/.test(password)){
+        
+        validatedPassword.message = "Password Should Contain atleast 1 Lowercase";
+        validatedPassword.status = false;
+        return validatedPassword;
+
+    }else if(!/\d/.test(password)){
+        
+        validatedPassword.message = "Password Should Contain a number";
+        validatedPassword.status = false;
+        return validatedPassword;
+    
+    }else if(!/^.{5,}$/.test(password)){
+        
+        validatedPassword.message = "Password Should Contain 5 charecters minimum";
+        validatedPassword.status = false;
+        return validatedPassword;
+    
+    }else if(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(password)){
+        
+        validatedPassword.message = "";
+        validatedPassword.status = true;
+        return validatedPassword;
+     
+    }
+
+}
     
 
 
@@ -157,44 +199,23 @@ const firstNameError = document.getElementById('firstNameError');
 const emailError = document.getElementById('emailError');
 const mobError = document.getElementById('mobError');
 const passwordError = document.getElementById('passwordError');
-Reg_pass = document.getElementById('Reg-pass')
+const confirm_passwordError = document.getElementById('confirm-passwordError');
+Reg_pass = document.getElementById('Reg-pass');
+
 let Reg_pass_value;
 let valid = true;
 const passwordCheck = {condition : false,msg : ""};
 if(Reg_pass){
 
     Reg_pass.addEventListener('input',(event) => {
-        Reg_pass_value = Reg_pass.value;
-      
-        if(!/[A-Z]/.test(Reg_pass_value)){
-            
-            passwordError.textContent = "Password Should Contain atleast 1 Uppercase"
-            passwordCheck.msg = "Password Should Contain atleast 1 Uppercase"
-            passwordCheck.condition = false;
-        }else if(!/[a-z]/.test(Reg_pass_value)){
-            
-            passwordError.textContent = "Password Should Contain atleast 1 Lowercase"
-            passwordCheck.msg = "Password Should Contain atleast 1 Lowercase"
-            passwordCheck.condition = false;
-        }else if(!/\d/.test(Reg_pass_value)){
-            
-            passwordError.textContent = "Password Should Contain a number"
-            passwordCheck.msg = "Password Should Contain a number"
-            passwordCheck.condition = false;
-        }else if(!/^.{5,}$/.test(Reg_pass_value)){
-            
-            passwordError.textContent = "Password Should Contain 5 charecters minimum"
-            passwordCheck.msg = "Password Should Contain 5 charecters minimum"
-            passwordCheck.condition = false;
-        }else if(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(Reg_pass_value)){
-            
-            passwordError.textContent = ""
-            passwordCheck.msg = ""
-            passwordCheck.condition = true; 
-        }
+
+        Reg_pass_value = Reg_pass.value.trim();
         
-        
-        
+        const validatedResult = passwordValidation(Reg_pass_value);
+        passwordError.textContent = validatedResult.message;    
+        passwordCheck.msg = validatedResult.message;
+        passwordCheck.condition = validatedResult.status;
+
     })
 }
 
@@ -209,12 +230,14 @@ if(registrationForm){
         let Reg_firstName = document.getElementById('Reg-firstName').value.trim();
         let Reg_email = document.getElementById('Reg-email').value.trim();
         let Reg_mob = document.getElementById('Reg-mob').value.trim();
+        let Confirm_Reg_pass = document.getElementById('Confirm-Reg-pass').value.trim();
         Reg_pass_value = Reg_pass.value.trim();
         
         firstNameError.textContent = "";
         emailError.textContent = "";
         mobError.textContent = "";
-        passwordError.textContent = ""
+        passwordError.textContent = "";
+        confirm_passwordError.textContent = "";
     
         valid =true;
     
@@ -254,9 +277,16 @@ if(registrationForm){
             valid = false;
         }else if(!passwordCheck.condition){
             passwordError.textContent = passwordCheck.msg
-            valid = false
+            valid = false;
         }
       
+        if(!Confirm_Reg_pass){
+            confirm_passwordError.textContent = "This field cant be empty"
+            valid = false;
+        }else if(Reg_pass_value != Confirm_Reg_pass){
+            confirm_passwordError.textContent = "Password must be same as above"
+            valid = false;
+        }
     
         if(valid ){
     
@@ -401,42 +431,13 @@ if(newPassword){
     let confirmPasswordValue 
     newPassword.addEventListener('input',()=> {
         confirmPasswordValue = newPasswordConfirm.value;
-        newPasswordValue = newPassword.value;
+        newPasswordValue = newPassword.value.trim();
         console.log("First",newPasswordValue,confirmPasswordValue)
-        if(/^$/.test(newPasswordValue)){
-            
-            newPasswordError.textContent = "This field should not be empty"
-            changePasswordBtn.disabled = true;
-            
-        }
-        else if(!/[A-Z]/.test(newPasswordValue)){
-            
-            newPasswordError.textContent = "Password Should Contain atleast 1 Uppercase"
-            changePasswordBtn.disabled = true;
-           
 
-        }else if(!/[a-z]/.test(newPasswordValue)){
-            
-            newPasswordError.textContent = "Password Should Contain atleast 1 Lowercase"
-            changePasswordBtn.disabled = true;
-         
+        const validatedResult = passwordValidation(newPasswordValue);
+        newPasswordError.textContent = validatedResult.message;
+        changePasswordBtn.disabled = !validatedResult.status;
 
-        }else if(!/\d/.test(newPasswordValue)){
-            
-            newPasswordError.textContent = "Password Should Contain a number"
-            changePasswordBtn.disabled = true;
-          
-
-        }else if(!/^.{5,}$/.test(newPasswordValue)){
-            
-            newPasswordError.textContent = "Password Should Contain 5 charecters minimum"
-            changePasswordBtn.disabled = true;
-
-        }else if(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(newPasswordValue)){
-            
-            newPasswordError.textContent = ""
-    
-        }
         if(newPasswordValue != confirmPasswordValue){
             confirmPasswordError.textContent = "Password Must be same as above"
             changePasswordBtn.disabled = true;
@@ -444,6 +445,7 @@ if(newPassword){
             confirmPasswordError.textContent = "";
             changePasswordBtn.disabled = false;
         }
+        
 
     })
 }
@@ -451,7 +453,6 @@ if(newPasswordConfirm){
     
     newPasswordConfirm.addEventListener('input',()=> {
         let confirmPasswordValue = newPasswordConfirm.value;
-        console.log("Second",newPasswordValue,confirmPasswordValue)
 
         if(confirmPasswordValue != newPasswordValue){
             confirmPasswordError.textContent = "Password Must be same as above"
@@ -462,6 +463,16 @@ if(newPasswordConfirm){
         }
     })
 }
+
+//Existing password
+// const chage_password_form = document.getElementById('chage-password-form');
+// if(chage_password_form){
+
+//     chage_password_form.addEventListener('submit',(e)=> {
+//         e.preventDefault();
+//         console.log(newPassword.value.trim(),"HAHAHAHA")
+//     })
+// }
 
 
 
@@ -801,47 +812,114 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.currentTarget.classList.add('selected');
                 
                 paymentMethod = e.currentTarget.querySelector('input').value;
-                
+                console.log(paymentMethod,"This is the methods")
                 
             })
         })
     }
+
+    const placeOrderByCheckingAddress = async()=>{
+
+        try{
+
+            const response = await fetch(`http://localhost:2000/checkout_page/check_address`);
+            if(!response.ok){
+                throw new Error('Network response was not ok while checking address is selected.');
+            }
+
+            const data = await response.json();
+            if(!data.status){
+           
+                Swal.fire({
+                    title: "Order not placed",
+                    text: data.message,
+                    icon: 'error'
+                });
+                return false;
+            }
+
+        }catch(error){
+            console.log("Error occured while trying to check address is selected.")
+        }
+
+        try{
+
+            const response = await fetch(`http://localhost:2000/checkout_page?paymentMethod=${paymentMethod}`,{method : 'post'});
+            if(!response.ok){
+                throw new Error('Network response was not ok while making order.');
+            }
+            
+            const order = await response.json();
+            if(order.status && order.razorpay_key){
+console.log(order)
+                const options = {
+
+                    key : order.razorpay_key,
+                    amount : order.orderResult.amount,
+                    currency : 'INR',
+                    name : 'ShoeShope',
+                    description : 'Test Transaction',
+                    order_id : order.orderResult.id,
+                    handler : async function(response){
+
+                        const result = await fetch('/verify-payment',{  
+                            method : 'post',
+                            headers : {
+                                'Content-Type' : 'application/json',    
+                            },
+                            body : JSON.stringify({
+                                orderId : response.razorpay_order_id,
+                                paymentId : response.razorpay_payment_id,
+                                signature: response.razorpay_signature,
+                                amount: order.orderResult.amount / 100,
+                            }),
+                        });
+
+                        const data = await result.json();
+                        // alert(data.status === true ? 'Payment Successful' : 'Payment Failed');
+                        if(data.status){
+                            window.location.href = data.redirect
+                        }else{
+                            Swal.fire({
+                                title: "Order not placed",
+                                text: order.message,
+                                icon: 'error'
+                            });
+                        }
+                    },
+                };
+
+                let rzp = new Razorpay(options);
+                rzp.open();
+                
+            }else if(order.status && order.redirect){
+                
+                window.location.href = order.redirect
+
+            }else{
+    
+                Swal.fire({
+                    title: "Order not placed",
+                    text: order.message,
+                    icon: 'error'
+                });
+    
+            }
+        }
+        catch(error){
+            console.log("Error occured while making order",error)
+        }
+    }
+
 
     const place_order = document.getElementById('place-order')
     if(place_order){
 
         place_order.addEventListener('click',() => {
             if(paymentMethod){
-                console.log(paymentMethod)
-
-                fetch(`http://localhost:2000/checkout_page?paymentMethod=${paymentMethod}`,{method : 'post'})
-                .then(response => {
-                    
-                    if(!response.ok){
-                        throw new Error('Network response was not ok while making order.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if(data.status){
-                        
-                        window.location.href = data.redirect
-                      
-                    }else{
-
-                        Swal.fire({
-                            title: "Order not placed",
-                            text: data.message,
-                            icon: 'error'
-                        });
-
-                    }
-            
-                })
-             
-                .catch(error =>{
-                    console.log("Error occured while making order",error)
-                })
+                
+                placeOrderByCheckingAddress();
+                       
             }else{
                 console.log("Please select a payment option")
                 Swal.fire({

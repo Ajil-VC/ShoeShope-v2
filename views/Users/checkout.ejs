@@ -437,7 +437,7 @@
                         <div class="col-md-2 mb-3 mb-md-0">
                             <div class="product-images d-flex">
                                 <div class="product-image">
-                                    <img src="/ProductImage/<%=cartItemsArray[0].productId.image[0]%>" alt="">
+                                    <img src="/ProductImage/<%=cartItemsArray[0]?.productId?.image[0]%>" alt="">
                                 </div> 
                             </div>
                         </div>
@@ -480,11 +480,11 @@
                         <h3>Payment Method</h3>
                         <p class="text-grey" >Select any payment method</p>
                         <div class="payment-options">
-                            <label class="payment-option d-flex " id="debit-card" >
+                            <!-- <label class="payment-option d-flex " id="debit-card" >
                                 <input type="radio" name="payment" value="Debit Card / Credit Card">
                                 <span class="radio-custom"></span>
                                 <span class="label-text">Debit card / Credit card</span>
-                            </label>
+                            </label> -->
                             <label class="payment-option d-flex " id="upi" >
                                 <input type="radio" name="payment" value="UPI Method">
                                 <span class="radio-custom"></span>

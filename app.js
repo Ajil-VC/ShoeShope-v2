@@ -5,13 +5,21 @@ const methodOverride = require('method-override');
 
 const {passport} = require('./middleware/googleauth')
 
-const {PORT,sessionSecret} = require('./config/config')
+const {PORT,sessionSecret,Key_id} = require('./config/config');
+const razorpay = require('./config/razorpayconfig');
 
 const express = require('express')
 const app = express();
 
+app.use(express.json());
 app.use(morgan('dev'))
 app.use(methodOverride('_method'));
+app.use((req,res,next) => {
+
+    req.razorpay = razorpay;
+    req.razorpay_key = Key_id;
+    next();
+})
 
 
 app.use(session({
@@ -43,7 +51,6 @@ app.set('view engine','ejs')
 
 app.use('/',userRouter);
 app.use('/admin',adminRouter)
-
 
 app.listen(PORT,() => {
     console.log(`ShoeShope is listening at http://localhost:${PORT}/admin/login`)

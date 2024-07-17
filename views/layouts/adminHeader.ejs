@@ -145,6 +145,66 @@ label {
   }
 }
 
+/*styles for edit product image prerview*/
+
+.editim-product-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: flex-start;
+}
+
+.editim-product-preview-item {
+  flex: 0 0 calc(25% - 15px);
+  max-width: calc(25% - 15px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.editim-product-preview-item:hover {
+  transform: translateY(-5px);
+}
+
+.editim-product-preview-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+}
+
+@media (max-width: 1199px) {
+  .editim-product-preview-item {
+    flex: 0 0 calc(33.333% - 15px);
+    max-width: calc(33.333% - 15px);
+  }
+}
+
+@media (max-width: 991px) {
+  .editim-product-preview-item {
+    flex: 0 0 calc(33.333% - 15px);
+    max-width: calc(33.333% - 15px);
+  }
+}
+
+@media (max-width: 767px) {
+  .editim-product-preview-item {
+    flex: 0 0 calc(50% - 15px);
+    max-width: calc(50% - 15px);
+  }
+}
+
+@media (max-width: 575px) {
+  .editim-product-preview-item {
+    flex: 0 0 calc(50% - 10px);
+    max-width: calc(50% - 10px);
+  }
+  .editim-product-preview-container {
+    gap: 10px;
+  }
+}
+
     </style>
     
 

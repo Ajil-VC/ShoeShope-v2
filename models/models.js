@@ -286,6 +286,7 @@ const orderItemSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
 
+    paymentGatewayOrderId: String,
     items: [orderItemSchema],
     customer: {
         type: mongoose.Schema.Types.ObjectId,
@@ -340,8 +341,45 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: {
         type: String,
         required: true,
-        enum: ['Debit Card / Credit Card','UPI Method', 'Cash on Delivery'],
-        default: 'Debit Card / Credit Card'
+        enum: ['UPI Method', 'Cash on Delivery'],
+        default: 'UPI Method'
+    }
+
+},{timestamps : true});
+
+
+const transactionSchema = new mongoose.Schema({
+
+    orderId : {
+        type : String,
+        required : true,
+    },
+    paymentId : {
+        type : String,
+        required : true
+    },
+    amount : {
+        type: Number,
+        required: true
+    },
+    type : {
+        type: String,
+        enum: ['deposit', 'payment', 'refund', 'withdrawal'],
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'completed', 'failed'],
+        default: 'pending'
+    },
+    currency: {
+        type: String,
+        required: true,
+        default: 'INR'
+    },
+    description: {
+        type: String,
+        default: ''
     }
 
 },{timestamps : true});
@@ -353,6 +391,7 @@ const OTP = mongoose.model('OTP',otpSchema);
 const Address = mongoose.model('Address',addressSchema);
 const Cart = mongoose.model('Cart',cartSchema);
 const Order = mongoose.model('Order',orderSchema);
+const transaction = mongoose.model('transaction',transactionSchema);
 
 const Admin = mongoose.model('Admin',adminSchema);
 
@@ -372,5 +411,6 @@ module.exports = {
     Address,
     
     Cart,
-    Order
+    Order,
+    transaction
 }

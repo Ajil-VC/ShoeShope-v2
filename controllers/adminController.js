@@ -443,7 +443,7 @@ const loadEditProduct = async(req,res) => {
         if(!product){
             return res.status(404).send("Product not Found")
         }
-
+console.log(product)
         return res.status(200).render('edit-product',{categories,brand,product})
 
     }catch(error){
@@ -461,7 +461,7 @@ const updateProduct = async(req,res) => {
     try{
 
         const product = await Product.findOne({_id : productId}).exec();
-        console.log(product,"asdflkjh");
+       
         if(!product){
             throw new Error('Product not found');
         }

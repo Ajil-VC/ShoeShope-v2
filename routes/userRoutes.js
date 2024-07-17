@@ -3,7 +3,6 @@ const userRouter = express.Router();
 const authenticate = require('../middleware/user_auth');
 const {passport} = require('../middleware/googleauth');
 
-
 userRouter.use(express.urlencoded({extended:true}));
 
 
@@ -56,14 +55,16 @@ userRouter.get('/checkout_page',authenticate.isLoggedIn,userController.loadCheck
 userRouter.patch('/checkout_page',authenticate.isLoggedIn,userController.changeDeliveryAddress);
 userRouter.post('/checkout_page/addAddress',userController.addNewAddress);
 userRouter.post('/checkout_page',authenticate.isLoggedIn,userController.placeOrder);
+userRouter.get('/checkout_page/:address_is_selected',authenticate.isLoggedIn,userController.placeOrder);
+userRouter.post('/verify-payment',authenticate.isLoggedIn,userController.paymentVerification);
 userRouter.get('/order_placed',authenticate.isLoggedIn,userController.loadOrderPlaced);
 
 userRouter.get('/profile',authenticate.isLoggedIn,userController.loadUserProfile);
-userRouter.put('/profile/account-detail',userController.updateUserProfile);
-userRouter.post('/profile/address',userController.addNewAddress);
-userRouter.patch('/profile/address',userController.makeDefaultAddress);
-userRouter.delete('/profile/address',userController.deleteAddress);
-userRouter.put('/profile/address',userController.updateAddress);
+userRouter.put('/profile/account-detail',authenticate.isLoggedIn,userController.updateUserProfile);
+userRouter.post('/profile/address',authenticate.isLoggedIn,userController.addNewAddress);
+userRouter.patch('/profile/address',authenticate.isLoggedIn,userController.makeDefaultAddress);
+userRouter.delete('/profile/address',authenticate.isLoggedIn,userController.deleteAddress);
+userRouter.put('/profile/address',authenticate.isLoggedIn,userController.updateAddress);
 userRouter.get('/profile/get-order-details',authenticate.isLoggedIn,userController.getOrderDetails);
 userRouter.get('/profile/logout',authenticate.isLoggedIn,userController.logoutUser);
 
