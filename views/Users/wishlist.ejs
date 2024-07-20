@@ -1,0 +1,70 @@
+<%- include("../layouts/header.ejs")  %>
+<body>
+<%- include("../layouts/navigation.ejs")  %>
+<main class="main">
+    <section class="pt-50 pb-150" style="font-family: Arial, sans-serif; " >
+    <div class="container">
+        <h1><i class="fi-rs-heart"></i>Wishlist</h1>
+        <% if(userData?.wishlist?.length > 0 ){%>
+
+            <p id="totalItemsInWishlist" >Total <%=userData?.wishlist?.length %> items in your wishlist</p>
+        <% }else{ %>
+            <p id="totalItemsInWishlist" >Wishlist is empty</p>
+        <% } %>
+
+        <div class="container">
+          
+            <div class="row product-grid-4">
+                <% for(let i = 0 ; i < userData?.wishlist?.length ; i++){ %>
+
+                    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                        <div class="product-cart-wrap mb-30">
+
+                            <div class="product-img-action-wrap">
+                                <div class="product-img product-img-zoom">
+                                    <a href="/product_details/?product_id=<%=userData?.wishlist[i]?._id%>">
+                                        
+                                        <img class="default-img" src="/ProductImage/<%=userData?.wishlist[i]?.image[0]%>" alt="">
+                                        <img class="hover-img" src="/ProductImage/<%=userData?.wishlist[i]?.image[1]%>" alt="">
+                                    </a>
+                                </div>
+                                
+                                <!-- <div class="product-action-1">
+                                    
+                                    <a aria-label="Add To Wishlist" class="action-btn hover-up" ><i class="fi-rs-heart"></i></a>
+                                  
+                                </div> -->
+                                <div class="heart-icon ">
+                                    <a aria-label="Add to Wishlist" href="#"><i class="fi-rs-heart"></i></a>
+                                </div>
+
+                                <div class="product-badges product-badges-position product-badges-mrg d-flex justify-content-between ">          
+                                    <span class="hot d-flex align-items-center">4.4<img src="/assets/imgs/star.svg" class="mx-1" style="width: 15px;" alt="">| 1k </span>
+                                </div>
+
+                            </div>
+
+                            <div class="product-content-wrap">
+                           
+                                <h2><a href="#"><%=userData?.wishlist[i]?.ProductName%></a></h2>
+                              
+                                <div class="product-price">
+                                    <span>₹ <%=userData?.wishlist[i]?.salePrice%> </span>
+                                    <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=userData?.wishlist[i]?.salePrice%></span>
+                                </div>
+                                
+                            </div>
+
+                        </div>
+                    </div>
+
+                <% } %>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+</main>
+    
+    <%- include("../layouts/footer.ejs")  %> 

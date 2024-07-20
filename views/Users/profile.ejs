@@ -339,6 +339,9 @@
                                             <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
                                         </li>
                                         <li class="nav-item">
+                                            <a class="nav-link" id="account-wallet" data-bs-toggle="tab" href="#wallet" role="tab" aria-controls="account-wallet" aria-selected="true"><i class="fi-rs-money mr-10"></i>Wallet</a>
+                                        </li>
+                                        <li class="nav-item">
                                             <a class="nav-link" href="/profile/logout" ><i class="fi-rs-sign-out mr-10"></i>Logout</a>
                                         </li>
                                     </ul>
@@ -540,6 +543,57 @@
 
                                       
                                
+                                    </div>
+
+                                    <!--Wallet....-->
+                                    <div class="tab-pane fade" id="wallet" role="tabpanel" aria-labelledby="account-wallet">
+                                        <div class="card" >
+                                       
+                                            <div class="card-body">
+                                                
+                                                <div class="wal-container">
+                                                    <h2>My Wallet</h2>
+                                                    <div class="wal-balance">
+                                                      <span>Available Balance</span>
+                                                      <h3>₹ <%=userWallet?.balance%></h3>
+                                                    </div>
+                                                    <div class="wal-actions">
+                                                      <button class="wal-btn wal-add-funds">Add Funds</button>
+                                                      <button class="wal-btn wal-withdraw">Withdraw</button>
+                                                    </div>
+                                                    <div class="wal-transaction-history">
+                                                      <h4>Recent Transactions</h4>
+                                                      <ul>
+
+                                                        <% for(let i = 0 ; i < 3 ; i++){ %>
+
+                                                            <li>
+                                                              <span class="wal-transaction-date">
+                                                                    <%= new Date(userWallet?.transactions[i]?.createdAt).toLocaleDateString('en-US', { 
+                                                                    year: 'numeric', month: 'long', day: 'numeric' }) %>
+                                                              </span>
+                                                              <span class="wal-transaction-desc"><%=userWallet?.transactions[i]?.type%></span>
+                                                              <% if((userWallet?.transactions[i]?.type == 'refund') || (userWallet?.transactions[i]?.type == 'deposit')  ){ %>
+                                                                
+                                                                <span class="wal-transaction-amount wal-credit">+₹ <%=userWallet?.transactions[i]?.amount%></span>
+    
+                                                              <% }else if( (userWallet?.transactions[i]?.type == 'payment') || (userWallet?.transactions[i]?.type == 'withdrawal') ){ %>
+    
+                                                                <span class="wal-transaction-amount wal-debit">-₹ <%=userWallet?.transactions[i]?.amount%></span>
+    
+                                                              <% } %>
+                                                            </li>
+                                                        <% } %>
+
+                                                       
+
+                                                        
+                                                      </ul>
+                                                    </div>
+                                                  </div>
+                                           
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!--Account Details....-->

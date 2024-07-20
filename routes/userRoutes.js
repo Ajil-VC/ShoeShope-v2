@@ -43,12 +43,17 @@ userRouter.get('/auth/failure',(req,res) => {
 
 userRouter.get('/home',userController.loadHomePage) ;
 userRouter.get('/showcase',userController.loadShowcase) ;
+userRouter.get('/search_products',userController.searchProduct);
 userRouter.get('/product_details',userController.loadProductDetails) ;
 userRouter.post('/product_details',authenticate.isLoggedIn,userController.addProductToCart);
+
 userRouter.get('/cart',authenticate.isLoggedIn,userController.loadCart);
 userRouter.delete('/cart',authenticate.isLoggedIn,userController.removeProductFromCart);
 userRouter.put('/cart',authenticate.isLoggedIn,userController.selectItemToOrder);
 userRouter.patch('/cart',authenticate.isLoggedIn,userController.changeQuantity);
+
+userRouter.patch('/wishlist',authenticate.isLoggedIn,userController.addItemToWishlist);
+userRouter.get('/wishlist',authenticate.isLoggedIn,userController.loadWishlist);
 
 userRouter.get('/checkout',authenticate.isLoggedIn,userController.validateCart);
 userRouter.get('/checkout_page',authenticate.isLoggedIn,userController.loadCheckout);
@@ -66,6 +71,9 @@ userRouter.patch('/profile/address',authenticate.isLoggedIn,userController.makeD
 userRouter.delete('/profile/address',authenticate.isLoggedIn,userController.deleteAddress);
 userRouter.put('/profile/address',authenticate.isLoggedIn,userController.updateAddress);
 userRouter.get('/profile/get-order-details',authenticate.isLoggedIn,userController.getOrderDetails);
+
+userRouter.post('/profile/returnproduct',authenticate.isLoggedIn,userController.initiateReturn);
+
 userRouter.get('/profile/logout',authenticate.isLoggedIn,userController.logoutUser);
 
 

@@ -91,6 +91,8 @@ adminRouter.put('/productslist/edit_product',upload.array('image',3),adminContro
 adminRouter.get('/order-list',adminController.loadOrderList);
 adminRouter.get('/order-list/order-details',adminController.loadOrderDetails);
 adminRouter.patch('/order-list/order-details',adminController.updateOrderStatus);
+adminRouter.get('/returned-order',adminController.loadReturnedOrders);
+adminRouter.put('/returned-order',adminController.changeReturnStatus);
 
 
 

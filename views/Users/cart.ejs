@@ -43,7 +43,12 @@
                                         <input class="form-select-cart quantity-input ml-2 " value="<%=cartItemsArray[i].quantity%>" style="height: 30px; width: 70px;" type="number" max="<%=cartItemsArray[i].productId.stockQuantity < 4 ? cartItemsArray[i].productId.stockQuantity : 4%>" min="1" data-product-id="<%=cartItemsArray[i].productId._id%>">
                                     
                                     </div>
-                                    <span class="stock-info"><%=cartItemsArray[i].productId.stockQuantity%> left</span>
+                                    <% if(cartItemsArray[i].productId.isActive === 0){ %>
+                                        <span class="stock-info">Product Unavailable</span>
+                                    <% }else{ %>
+                                            <span class="stock-info"><%=cartItemsArray[i].productId.stockQuantity%> left</span>
+                                            
+                                    <% } %>
                                 </div>
                             </div>
         

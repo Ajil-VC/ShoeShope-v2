@@ -346,14 +346,14 @@ async function makeDefaultAddress(AddressId){
 }
 
 
-function swalConfirm() {
+function swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg) {
     return new Promise((resolve, reject) => {
         Swal.fire({
             title: 'Are you sure?',
-            text: "You won't be able to revert this!",
+            text: alertMsg,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: confirmMsg,
             cancelButtonText: 'No, cancel!',
             customClass: {
                 confirmButton: 'btn btn-success',
@@ -366,8 +366,8 @@ function swalConfirm() {
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({
-                    title: 'Deleted!',
-                    text: 'Your file has been deleted.',
+                    title: commitedHead,
+                    text: commitedMsg,
                     icon: 'success',
                     timer: 1500,
                     showConfirmButton: false
@@ -376,7 +376,7 @@ function swalConfirm() {
             } else {
                 Swal.fire(
                     'Cancelled',
-                    'Your address is safe :)',
+                    safeMsg,
                     'error'
                 )
                 resolve(false);
@@ -389,7 +389,13 @@ async function deleteAddress(addressID){
 
     try{
 
-        let confirmDeletion = await swalConfirm();
+        let alertMsg = "You won't be able to revert this!";
+        let confirmMsg = 'Yes, delete it!';
+        let commitedMsg = 'Your file has been deleted.';
+        let commitedHead = 'Deleted!';
+        let safeMsg = 'Your address is safe :)'
+
+        let confirmDeletion = await swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg);
         if(confirmDeletion){
             
             const response = await fetch(`http://localhost:2000/profile/address?AddressID=${addressID}`,{method:"DELETE"});
@@ -531,7 +537,13 @@ const orderSummary_totalAmount = document.getElementById('orderSummary-totalAmou
 
 async function removeProductFromCart(productId){
     
-    let confirmDeletion = await swalConfirm();
+    let alertMsg = "You won't be able to revert this!";
+    let confirmMsg = 'Yes, remove it!';
+    let commitedMsg = '1 item has been removed from cart.';
+    let commitedHead = 'Removed!';
+    let safeMsg = 'Item is safe in cart :)'
+
+    let confirmDeletion = await swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg);
     try{
         if(confirmDeletion){
 
@@ -598,8 +610,114 @@ async function loadCheckout() {
     }
 }
 
+
+
+
+const returnProduct = async(productOrderId, orderId) =>{
+
+    console.log("This is productOrderId:",productOrderId,"\norderId: ",orderId,"End");
+
+    const { value: reason } = await Swal.fire({
+        title: "Are you sure? Want to return the product?",
+        input: "select",
+        inputOptions: {
+        
+            size_issue: 'Shoe size is different.',
+            defective_product: 'its damaged',
+            uncomfort: 'The shoe is uncomfirtable to wear',
+            appearance_issue: "Appearance is not as expected",
+            not_liked: 'I didnt like the product'
+      
+        },
+        inputPlaceholder: "Please tell us the reason, click here",
+        showCancelButton: true,
+        inputValidator: (value) => {
+          return new Promise((resolve) => {
+            if (value === "") {
+                resolve("Please select a reason.");
+            } else {
+                resolve();
+            }
+          });
+        }
+      });
+      if (reason) {
+        // Swal.fire(`You selected: ${reason}`);
+        const response = await fetch(`http://localhost:2000/profile/returnproduct?return_item_id=${productOrderId}&order_id=${orderId}&reason=${reason}`,{method : 'post'});
+        
+        if(!response.ok){
+
+            throw new Error('Network response was not ok while initiating the return');
+        }      
+        const data = await response.json();
+        if(!data.status) {
+
+            Swal.fire(
+                'Oops',
+                `${data.message}`,
+                'error'
+            )
+            return;
+        }else{
+
+            Swal.fire(
+                'Success',
+                `${data.message}`,
+                'success'
+            )
+            return;
+
+        }
+      }
+   
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     
+
+    //Add to wishlist starts here.
+    const heart_icon = document.querySelectorAll('.heart-icon');
+    if(heart_icon){
+
+        heart_icon.forEach(heart => {
+
+            heart.addEventListener('click',function() {
+                
+                const wishlist_toggle = heart.querySelector('.wishlist-toggle');
+                const productId = this.dataset.id;
+
+                fetch(`http://localhost:2000/wishlist?productId=${productId}`,{method : "PATCH",headers : {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                  }})
+                .then(response => {
+
+                    if(!response.ok){
+                        throw new Error('Network response was not ok while adding product to the wishlist.')
+                    }
+                    return response.json();
+                })
+                .then(data => {
+
+                    if(data.redirect){
+                        window.location.href = data.redirect;
+                        return
+                    }
+                    if(data.status && data.add == 1){
+                        wishlist_toggle.classList.add('active');
+                    }else if(data.status && data.add == -1){
+                        wishlist_toggle.classList.remove('active');
+                    }
+                    
+                })
+                .catch(error =>{
+                    console.log("Error while trying add product to wishlist",error)
+                })
+            })
+        })
+    }
+
+
     // Checkboxes
     document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
@@ -851,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const order = await response.json();
             if(order.status && order.razorpay_key){
-console.log(order)
+
                 const options = {
 
                     key : order.razorpay_key,
@@ -932,9 +1050,7 @@ console.log(order)
         })
     }
 
-
-
-    function createOrderDetailsRow(products,addres,orderDate,orderStatus){
+    function createOrderDetailsRow(products,addres,orderDate,orderStatus, orderId){
         
         return `<div class="container-fluid bot-order-container">
   <div class="row">
@@ -960,7 +1076,7 @@ console.log(order)
 
     <!-- Address and Order ID -->
     <div class="col-md-6 bot-address-info mt-3 mt-md-0">
-      <p><span class="bot-bold">Order ID:</span> ${products?._id}</p>
+      <p><span class="bot-bold">product Order ID:</span> ${products?._id}</p>
       <p><span class="bot-bold">Address:</span> ${addres?.addressType}</p>
       <p><span class="bot-bold">Place:</span> ${addres?.place}, ${addres?.city} city</p>
       <p><span class="bot-bold">Landmark:</span> ${addres?.landmark}, Pin: ${addres?.pinCode}</p>
@@ -972,7 +1088,7 @@ console.log(order)
       <p><span class="bot-bold">Total:</span> ₹${products?.subtotal}</p>
       <div class="bot-return-status" >
         <div class="bot-status bot-status-${orderStatus.toLowerCase()}">${orderStatus}</div>
-        ${orderStatus.toLowerCase() === 'delivered' ? '<button class="bot-return-btn mt-2">Return</button>' : ''}
+        ${orderStatus.toLowerCase() === 'delivered' ? `<button onclick="returnProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Return</button>` : ''}
       </div>
     </div>
   </div>
@@ -981,10 +1097,10 @@ console.log(order)
     }
                                                                     
 
-    function updateOrderDataTable(produts,addres,orderDate,orderStatus){
+    function updateOrderDataTable(produts,addres,orderDate,orderStatus,orderId){
 
         const tableBody = document.getElementById('order-detail-table');
-        tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderStatus)).join('');
+        tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderStatus,orderId)).join('');
 
     }
 
@@ -1010,8 +1126,8 @@ console.log(order)
                 })
                 .then(data => {
                     if(data.status){
-                        
-                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderStatus);
+                        console.log(data)
+                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderStatus,data.orderId);
                       
                     }else{
 

@@ -73,7 +73,11 @@ const userSchema = mongoose.Schema({
     },
     google_id:{
         type:String,
-    }
+    },
+    wishlist : [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    }],
 
 }, {timestamps : true});
 
@@ -279,7 +283,8 @@ const orderItemSchema = new mongoose.Schema({
             type : Array,
              
         },
-      },
+        
+    },
       quantity: { type: Number, required: true, min: 1 },
       subtotal: { type: Number, required: true }
 })
@@ -343,20 +348,65 @@ const orderSchema = new mongoose.Schema({
         required: true,
         enum: ['UPI Method', 'Cash on Delivery'],
         default: 'UPI Method'
-    }
-
+    },
+    
 },{timestamps : true});
+
+
+
+
+const returnItemSchema = new mongoose.Schema({
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Product' 
+    },
+    customer: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
+    order: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Order'
+    },
+    refundAmnt: {
+        type: Number,
+        required: true
+    },
+    returnDate: {
+        type: Date,
+        default: Date.now
+    },
+    reason: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['initiated','approved','rejected' ],
+    },
+    
+});
+
+
 
 
 const transactionSchema = new mongoose.Schema({
 
+    userId : {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
     orderId : {
         type : String,
         required : true,
     },
     paymentId : {
         type : String,
-        required : true
+        default : null
     },
     amount : {
         type: Number,
@@ -385,6 +435,26 @@ const transactionSchema = new mongoose.Schema({
 },{timestamps : true});
 
 
+const walletSchema = new mongoose.Schema({
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true
+    },
+    balance: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    transactions: [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'transaction'
+    }],
+    
+})
+
+
 
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP',otpSchema);
@@ -392,6 +462,8 @@ const Address = mongoose.model('Address',addressSchema);
 const Cart = mongoose.model('Cart',cartSchema);
 const Order = mongoose.model('Order',orderSchema);
 const transaction = mongoose.model('transaction',transactionSchema);
+const returnItem = mongoose.model('returnItem',returnItemSchema);
+const wallet = mongoose.model('wallet',walletSchema);
 
 const Admin = mongoose.model('Admin',adminSchema);
 
@@ -412,5 +484,7 @@ module.exports = {
     
     Cart,
     Order,
-    transaction
+    transaction,
+    returnItem,
+    wallet
 }

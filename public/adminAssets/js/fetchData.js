@@ -1,13 +1,14 @@
 
 
-function swalConfirm() {
+
+function swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg) {
     return new Promise((resolve, reject) => {
         Swal.fire({
             title: 'Heads Up !!!',
-            text: "This Action Cannot be undone.Please make sure",
+            text: alertMsg,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, do it!',
+            confirmButtonText: confirmMsg,
             cancelButtonText: 'No, cancel!',
             customClass: {
                 confirmButton: 'btn btn-success',
@@ -20,8 +21,8 @@ function swalConfirm() {
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({
-                    title: 'Updated!',
-                    text: 'Delivery status updated.',
+                    title: commitedHead,
+                    text: commitedMsg,
                     icon: 'success',
                     timer: 1500,
                     showConfirmButton: false
@@ -29,7 +30,7 @@ function swalConfirm() {
                 resolve(true);
             } else {
                 Swal.fire(
-                    'Cancelled',
+                    safeMsg,
                     '',
                     'error'
                 )
@@ -623,6 +624,71 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
 
+
+    async function confirmReturnCommit(returnId,returnStatus) {
+
+        let alertMsg = "This Action Cannot be undone.Please make sure!";
+        let confirmMsg = 'Yes, do it!';
+        let commitedMsg = "Fetch request sent";
+        let commitedHead = false;
+        let safeMsg = 'Cancelled';
+
+        let takeConfirmation = await swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg)
+
+        if(takeConfirmation){
+
+            const response = await fetch(`http://localhost:2000/admin/returned-order`,{
+                method : 'put',
+                headers : {
+                    'Content-Type': 'application/json'
+                },
+                body : JSON.stringify({returnId,returnStatus})
+            });
+
+            if(!response.ok){
+                throw new Error('Network response was not ok while updating the return status.');
+            }
+
+            const data = await response.json();
+
+            if(data.status){
+                
+                Swal.fire({
+                    title: '',
+                    text: data.message,
+                    icon: 'success'
+                });
+
+            }else{
+             
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error'
+                });
+            }
+        }
+
+    }
+
+    const selectReturnStatus = document.querySelectorAll('.selectReturnStatus');
+    if(selectReturnStatus){
+
+        selectReturnStatus.forEach(select => {
+
+            select.addEventListener('change',(e)=> {
+
+                const returnId = e.target.getAttribute('data-returnId');
+                const returnStatus = e.target.value;
+                console.log(returnId,"\n",returnStatus)
+                if(returnStatus){
+                    confirmReturnCommit(returnId,returnStatus);
+                }
+            })
+        })
+    }
+
+
 }) //DOMContentLoaded
 
 
@@ -638,7 +704,13 @@ async function updateOrderStatus(orderId){
         
         if((selectStatus === 'Delivered') || (selectStatus === 'Cancelled')){
 
-            let takeConfirmation = await swalConfirm()
+            let alertMsg = "This Action Cannot be undone.Please make sure!";
+            let confirmMsg = 'Yes, do it!';
+            let commitedMsg = 'Delivery status updated.';
+            let commitedHead = 'Updated!';
+            let safeMsg = 'Cancelled';
+
+            let takeConfirmation = await swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg)
             if(!takeConfirmation){
                 return
             }
@@ -666,10 +738,6 @@ async function updateOrderStatus(orderId){
         console.log("Error while fetching operation of update order status.",error);
     }
 }
-
-
-
-
 
 
 

@@ -1,6 +1,7 @@
-const {Admin,User,Category,Brand,Product,Order} = require('../models/models')
+const {Admin,User,Category,Brand,Product,Order,returnItem,transaction,wallet} = require('../models/models')
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose') 
+const mongoose = require('mongoose');
+const {format} = require('date-fns'); 
 
 const securePassword = async (password) => {
     
@@ -576,6 +577,101 @@ const updateOrderStatus = async(req,res) => {
 }
 
 
+const loadReturnedOrders = async(req,res) => {
+    
+    const page = parseInt(req.query.page) || 1 ;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+    try{
+
+        const [returnedProducts, totalDocuments] = await Promise.all([
+            returnItem.find().populate('customer').exec(),
+            returnItem.countDocuments().exec()
+        ])
+        const totalPages = Math.ceil(totalDocuments / limit);
+
+        console.log(returnedProducts,"This is the fulldetails");
+        return res.render('returned-order',{returnedProducts,totalPages : totalPages, currentPage : page});
+
+    }catch(error){
+
+        console.log("Internal error occured while trying to get the returned order details.",error);
+        return res.status(500).send("Internal error occured while trying to get the returned order details.",error);
+    }
+}
+
+
+const changeReturnStatus = async(req,res) => {
+
+    const returnId = new mongoose.Types.ObjectId(req.body.returnId);
+
+    try{
+        
+        const returnedStatus = await returnItem.findOneAndUpdate(returnId,{$set:{status : req.body.returnStatus}},{new : true});
+        const  isWallet = await wallet.findOne({userId : returnedStatus.customer}).exec();
+        console.log(returnedStatus);
+        console.log(isWallet);
+    
+        if(returnedStatus.status === 'approved'){
+    
+            var Transaction = new transaction({
+                    
+                userId : returnedStatus.customer,
+                orderId : returnedStatus.order, 
+                paymentId : null,
+                amount : returnedStatus.refundAmnt,
+                type : 'refund',
+                status: 'completed',
+                currency: 'INR',
+                description: ""
+
+            });
+
+            const trasactionData = await Transaction.save();
+            
+            if(!isWallet){
+                
+                const userWallet = new wallet({
+    
+                    userId: returnedStatus.customer,
+                    balance: returnedStatus.refundAmnt,
+                    transactions: [trasactionData._id]
+                    
+                });
+
+                const createWalletForUser = await userWallet.save();
+                console.log(createWalletForUser,"This is createWalletForUser");
+                if(createWalletForUser){
+
+                    return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
+                }else{
+                    return res.json({status : false, message : 'Return approved but fund not transffered.'});
+                }
+
+            }else{
+
+                isWallet.transactions.push(trasactionData._id);
+                isWallet.balance = isWallet.balance + returnedStatus.refundAmnt;
+                const updatedWallet = await isWallet.save();
+                
+                if(updatedWallet){
+                    return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
+                }else{
+                    return res.json({status : false, message : 'Return approved but fund not transffered.'});
+                }
+            }
+    
+        }
+        
+    }catch(error){
+
+        console.log("Internal error while return commit.",error);
+        return res.status(500).send("Internal error while return commit.",error);
+    }
+}
+
+
 module.exports = {
     adminRegistration,
     loadLogin,
@@ -600,5 +696,7 @@ module.exports = {
 
     loadOrderList,
     loadOrderDetails,
-    updateOrderStatus
+    updateOrderStatus,
+    loadReturnedOrders,
+    changeReturnStatus
 }

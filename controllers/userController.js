@@ -1,4 +1,4 @@
-const {User,OTP,Product,Category,Brand,Address,Cart,Order,transaction} = require('../models/models');
+const {User,OTP,Product,Category,Brand,Address,Cart,Order,transaction,returnItem,wallet } = require('../models/models');
 
 const mongoose = require('mongoose') 
 const {ObjectId} = require('mongodb')
@@ -206,6 +206,58 @@ const loginUser = async (req,res) => {
     }
 }
 
+
+const searchProduct = async(req,res) => {
+
+    try{
+
+        const searchkey = req.query.searchkey;
+
+        const products = await Product.aggregate([
+            {
+                $lookup: {
+                  from: 'brands',
+                  localField: 'Brand',
+                  foreignField: 'name',
+                  as: 'brandInfo'
+                }
+              },
+              {
+                $lookup: {
+                  from: 'categories',
+                  localField: 'Category',
+                  foreignField: 'name',
+                  as: 'categoryInfo'
+                }
+              },
+              {
+                $match: {
+                  $or: [
+                    { 'name': { $regex: searchkey , $options: 'i' } },
+                    { 'brandInfo.name': { $regex: searchkey , $options: 'i' } },
+                    { 'categoryInfo.name': { $regex: searchkey , $options: 'i' } },
+                    { 'ProductName': {$regex: searchkey , $options: 'i'} }
+                  ]
+                }
+              }
+        ]).exec();
+
+        if(products.length > 0){
+
+            // return res.status(200).json({status:true, products});
+            return res.status(200).render('product_search',{products});
+        }else{
+            return res.status(404).send('No products found');
+            // return res.status(200).json({status:false, message : 'No products found'});
+        }
+
+    }catch(error){
+        console.log("Internal error while fetching products from mongodb.",error);
+        return res.send("Internal error while fetching products from mongodb.",error);
+    }
+}
+
+
 const loadHomePage = async(req,res) => {
 
     try {
@@ -346,13 +398,14 @@ const loadUserProfile = async(req,res) => {
         const userDetails = await User.findOne({_id : userID}).exec() ;
    
       
-        const [defaultAddress,otherAddress,orders] = await Promise.all([
+        const [defaultAddress,otherAddress,orders,userWallet] = await Promise.all([
             Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec(),
             Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec(),
-            Order.find({customer : userID}).populate('shippingAddress').exec()
+            Order.find({customer : userID}).populate('shippingAddress').exec(),
+            wallet.findOne({userId : userID}).populate('transactions').populate().exec()
         ]);
-     
-        return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders});
+console.log(userWallet)     
+        return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders,userWallet});
     }catch(error){
 
         console.log("Internal error while loading profile",error);
@@ -369,9 +422,9 @@ const getOrderDetails = async(req,res) => {
         const products = order.items;
         const address = order.shippingAddress;
         const orderDate = order.orderDate;
-        const orderStatus = order.status
+        const orderStatus = order.status;
         console.log(order)
-        return res.status(200).json({status : true, products,address,orderDate,orderStatus});
+        return res.status(200).json({status : true, products,address,orderDate,orderStatus, orderId: order._id});
 
     }catch(error){
         console.log("Internal error while gettting order details.",error)
@@ -404,6 +457,76 @@ const updateUserProfile = async(req,res) => {
         return res.status(500).send("Internal Error whil updloading the profile details",error);
     }
 }
+
+const addItemToWishlist = async(req,res) => {
+
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+    const productId = new mongoose.Types.ObjectId(req.query.productId);
+    
+    try{
+
+        const userData = await User.findOne({_id : userID});
+        if(!userData.wishlist){
+            userData.wishlist = [productId];
+        }else{
+            if(userData.wishlist.includes(productId)){
+                //Element removal
+                console.log(userData.wishlist)
+                userData.wishlist = userData.wishlist.filter(item => !item.equals(productId));
+                console.log(userData.wishlist)
+                const isUpdated = await userData.save();
+                if(isUpdated){
+                    return res.status(200).json({status : true , add : -1});
+                }
+            }else{
+
+                userData.wishlist.push(productId);
+            }
+        }
+        const isUpdated = await userData.save();
+        if(isUpdated){
+            return res.status(200).json({status : true , add : 1});
+        }else{
+            return res.status(200).json({status : false});
+        }
+
+    }catch(error){
+        console.log("Ineternal error occured while trying to add product to wishlist.",error);
+        return res.status(500).send("Ineternal error occured while trying to add product to wishlist.",error);
+    }
+
+}
+
+
+const loadWishlist = async(req,res) => {
+
+    try{
+
+        let userID = "";
+        if(req?.user?._id){
+            userID = new mongoose.Types.ObjectId(req.user._id);
+        }else if(req.session.user_id){
+            userID = new mongoose.Types.ObjectId(req.session.user_id)
+        }
+
+        const userData = await User.findOne({_id : userID}).populate('wishlist');
+        console.log(userData);
+
+        return res.status(200).render('wishlist',{userData});
+
+    }catch(error){
+        console.log("Internal error occured while trying to load wishlist",error);
+        return res.status(500).send("Internal error occured while trying to load wishlist",error);
+    }
+
+}
+
+
 
 
 const logoutUser = async(req,res) => {
@@ -926,8 +1049,11 @@ const validateCart = async(req,res) => {
             if(totalSelectedItems < 1){
                 return res.json({status : false, message : "Need atleast 1 item selected to checkout"})
             }
+console.log(cartItemsArray)            
             for(let i = 0 ; i < cartItemsArray.length ; i++){
-                if( cartItemsArray[i].isSelected ){
+                if((cartItemsArray[i].productId.isActive === 0) && cartItemsArray[i].isSelected){
+                    return res.json({status : false , message : "Some Products are unavailable."});
+                }if( cartItemsArray[i].isSelected ){
                     if(cartItemsArray[i].productId.stockQuantity < cartItemsArray[i].quantity){
                         return res.json({status : false , message : "Stock limit exceeded for some products. Please revise your selection."});
                     }
@@ -1180,23 +1306,29 @@ const placeOrder = async(req,res) => {
 
 const paymentVerification = async(req,res) => {
 
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
     
     try{
-        const { orderId, paymentId, signature } = req.body;
-    console.log("verify: \n",orderId,"\n" ,paymentId,"\n" ,signature)
+        const { orderId, paymentId, signature,amount } = req.body;
 
         const expectedSignature = await crypto
         .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
         .update(`${orderId}|${paymentId}`)
         .digest('hex');
-console.log(signature,'\n',expectedSignature);    
+  
         if(expectedSignature === signature){
             
             const Transaction = new transaction({
-    
+                
+                userId : userID,
                 orderId, 
                 paymentId,
-                amount : 2,
+                amount : amount,
                 type : 'payment',
                 status: 'completed',
                 currency: 'INR',
@@ -1230,6 +1362,65 @@ const loadOrderPlaced = async(req,res) => {
     }
 }
 
+const initiateReturn = async(req,res) => {
+
+    try{
+
+        let userID = "";
+        if(req?.user?._id){
+            userID = new mongoose.Types.ObjectId(req.user._id);
+        }else if(req.session.user_id){
+            userID = new mongoose.Types.ObjectId(req.session.user_id)
+        }
+
+        const return_item_id = new mongoose.Types.ObjectId(req.query.return_item_id);
+        const order_id = new mongoose.Types.ObjectId(req.query.order_id);
+        const reason = req.query.reason;
+    
+        const isReturned = await returnItem.findOne({order : order_id, productId : return_item_id}).exec();
+        if(isReturned){
+            return res.json({status : false, message : `Return already Initiated with the reason: ${isReturned.reason}`});
+        }
+
+        const order = await Order.findOne({_id : order_id}).exec();
+
+        for(let i = 0 ; i < order.items.length ; i++){
+            
+            if(order.items[i].product.id.toString() === return_item_id.toString()){
+                var amount = order.items[i].subtotal;
+            
+            }
+        }
+
+
+        
+        const returnDetails = new returnItem({
+
+            productId: return_item_id,
+            customer: userID,
+            order: order_id,
+            refundAmnt: amount,
+            reason: reason,
+            status: 'initiated',
+            
+        })
+
+        const returnData = await returnDetails.save();
+        if(returnData){
+            
+            return res.status(200).json({status : true, message : 'Return initialized.'});
+        }else{
+            console.log("Couldn't initiate the return.");
+            return res.json({status : false, message : 'Couldnt initiate the return.'});
+        }
+
+
+    }catch(error){
+        console.log("Internal error while trying to post the return request",error);
+        return res.status(500).send("Internal error while trying to post the return request",error);
+    }
+}
+
 module.exports = {
 
     loadRegister,
@@ -1241,6 +1432,7 @@ module.exports = {
 
     loadHomePage,
     loadShowcase,
+    searchProduct,
     loadProductDetails,
     loadUserProfile,
     updateUserProfile,
@@ -1249,6 +1441,9 @@ module.exports = {
     makeDefaultAddress,
     deleteAddress,
     updateAddress,
+
+    addItemToWishlist,
+    loadWishlist,
 
     logoutUser,
     loadCart,
@@ -1263,6 +1458,8 @@ module.exports = {
     placeOrder,
     paymentVerification,
     loadOrderPlaced,
-    getOrderDetails
+    getOrderDetails,
+
+    initiateReturn
   
 }

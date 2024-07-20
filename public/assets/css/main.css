@@ -592,6 +592,37 @@ h4 {
 }
 
 
+/*This is wishlist*/
+.heart-icon {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.wishlist-toggle {
+  background-color: #ffffff; /* White background */
+  border-radius: 50%; /* Circular shape */
+  width: 38px; /* Adjust as needed */
+  height: 38px; /* Adjust as needed */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: adds a subtle shadow */
+}
+
+.wishlist-toggle svg {
+  color: #d3d3d3; /* Light grey color */
+  transition: color 0.3s ease;
+}
+
+.wishlist-toggle:hover svg {
+  color: #ff0000; /* Slightly darker grey on hover */
+}
+
+.wishlist-toggle.active svg {
+  color: #ff0000; /* Red color when active */
+}
+
+
 
 /* Fullstack Developer Ajil*/
 

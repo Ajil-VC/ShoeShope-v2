@@ -34,10 +34,31 @@
                   <div class="status-dropdown">
 
                     <select id="selectStatus" >
-                      <option value="Pending" <%= orderDetails.status === 'Pending' ? 'selected' : '' %> >Pending</option>
+                      <!-- <option value="Pending" <%= orderDetails.status === 'Pending' ? 'selected' : '' %> >Pending</option>
                       <option value="Shipped" <%= orderDetails.status === 'Shipped' ? 'selected' : '' %> >Shipped</option>
                       <option value="Delivered" <%= orderDetails.status === 'Delivered' ? 'selected' : '' %>  >Delivered</option>
-                      <option value="Cancelled" <%= orderDetails.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option>
+                      <option value="Cancelled" <%= orderDetails.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option> -->
+                      <% if(orderDetails.status === 'Pending'){ %>
+                        <option value="Pending" disabled selected>Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      <% }else if(orderDetails.status === 'Shipped'){ %>
+                        <option value="Pending" disabled >Pending</option>
+                        <option value="Shipped" disabled selected>Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      <% }else if(orderDetails.status === 'Delivered'){ %>
+                        <option value="Pending" disabled >Pending</option>
+                        <option value="Shipped" disabled >Shipped</option>
+                        <option value="Delivered" disabled selected >Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      <% }else if(orderDetails.status === 'Cancelled'){%>
+                        <option value="Pending" disabled >Pending</option>
+                        <option value="Shipped" disabled >Shipped</option>
+                        <option value="Delivered" disabled >Delivered</option>
+                        <option value="Cancelled" disabled selected>Cancelled</option>
+                      <% } %>
                     </select>
 
                   </div>
