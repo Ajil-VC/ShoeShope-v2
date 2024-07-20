@@ -51,6 +51,7 @@ userRouter.get('/cart',authenticate.isLoggedIn,userController.loadCart);
 userRouter.delete('/cart',authenticate.isLoggedIn,userController.removeProductFromCart);
 userRouter.put('/cart',authenticate.isLoggedIn,userController.selectItemToOrder);
 userRouter.patch('/cart',authenticate.isLoggedIn,userController.changeQuantity);
+userRouter.patch('/cart/addcoupon',authenticate.isLoggedIn,userController.addCoupon)
 
 userRouter.patch('/wishlist',authenticate.isLoggedIn,userController.addItemToWishlist);
 userRouter.get('/wishlist',authenticate.isLoggedIn,userController.loadWishlist);

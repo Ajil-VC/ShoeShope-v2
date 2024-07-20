@@ -72,6 +72,10 @@ adminRouter.get('/login',adminController.loadLogin);
 adminRouter.post('/login',adminController.loginAdmin);
 adminRouter.get('/dashboard',adminController.loadDashboard);
 
+adminRouter.get('/coupons',adminController.loadCoupons);
+adminRouter.post('/coupons',adminController.addNewCoupon);
+adminRouter.patch('/coupons',adminController.changeCouponStatus);
+
 adminRouter.get('/customers',adminController.loadCustomerList);
 adminRouter.patch('/customers',adminController.blockOrUnblockUser);
 adminRouter.delete('/customers',adminController.deleteUser);

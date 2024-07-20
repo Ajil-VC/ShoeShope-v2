@@ -1,6 +1,48 @@
 <%- include("../layouts/header.ejs")  %>
 <body>
 <%- include("../layouts/navigation.ejs")  %>
+
+
+<div class="modal fade" id="addCouponModalCenter" tabindex="-1" role="dialog" aria-labelledby="addCouponModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCouponModalLongTitle">Add Coupon</h5>
+          <button type="button" id="addCoupon-modal-close-button" class="close" data-dismiss="modal" aria-label="Close" style="background-color: transparent; border: none; font-size: 1.5rem; color: gray; padding: 0.5rem 1rem;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="addCouponForm">
+            <div class="ca-scrollable-container">
+              <!-- Radio buttons for coupon options -->
+
+              <% for(let i = 0 ; i < coupons.length ; i++){ %>
+
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="couponOption" id="<%=coupons[i]._id%>" value="<%=coupons[i].couponCode%>" required>
+                  <label class="form-check-label" for="<%=coupons[i]._id%>">
+                    <span style="font-weight: bold;" ><%=coupons[i].couponName%></span> (<%=coupons[i].couponCode%>), <span style="color: green;" ><%=coupons[i].discount%> %</span> discount
+                  </label>
+                </div>
+
+              <% } %>
+          
+              
+              <!-- Add more radio button options as needed -->
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="btn-addCoupon-save">Use Selected Coupon</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+ 
+  
+
 <main class="main">
     <section class="pt-50 pb-150" style="font-family: Arial, sans-serif; " >
     <div class="container">
@@ -86,13 +128,18 @@
                     </div>
                     <div class="summary-item discount">
                         <span id="orderSummary-discount" > Discount 0%</span>
-                        <span>₹ 0</span>
+                        <span id="orderSummary-discountOffer" >₹ 0</span>
                     </div>
                     <div class="summary-total d-flex justify-content-between ">
                         <strong>Total Amount</strong>
                         <strong id="orderSummary-totalAmount" >₹ <%=totalAmount%></strong>
                     </div>
-                    <input type="text" class="form-control" placeholder="Enter Coupon Code (optional)">
+                    <div class="d-flex flex-column align-items-end align-items-sm-center ca-container">
+                        <input type="text" id="addedCoupon" class="form-control mb-2" placeholder="Enter Coupon Code (optional)">
+                        <button type="button" onclick="" data-toggle="modal" data-target="#addCouponModalCenter" class="ca-btn">Add Coupon</button>
+                    </div>
+                  
+                    <br>
                     <button onclick="loadCheckout()" class="btn btn-primary btn-block">Checkout</button>
                 </div>
             </div>

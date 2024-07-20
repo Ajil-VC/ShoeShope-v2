@@ -1,4 +1,4 @@
-const {User,OTP,Product,Category,Brand,Address,Cart,Order,transaction,returnItem,wallet } = require('../models/models');
+const {User,OTP,Product,Category,Brand,Address,Cart,Order,transaction,returnItem,wallet,coupon } = require('../models/models');
 
 const mongoose = require('mongoose') 
 const {ObjectId} = require('mongodb')
@@ -743,13 +743,19 @@ const updateAddress = async(req,res) => {
 //CartItems Getting function
 // --->
 // --->
-const cartItemsFindFn = async(userID) =>{
+const cartItemsFindFn = async(userID, couponCode) =>{
 
     try{
 
         let cartItemsArray = [];
         let subTotal = 0 ;
-        let totalSelectedItems = 0;        
+        let totalSelectedItems = 0;    
+        var couponDiscount = 0;
+        if(couponCode){
+            console.log("couponDiscount errrror")
+            const selectedCoupon = await coupon.findOne({couponCode : couponCode});
+            couponDiscount = selectedCoupon.discount; 
+        }
         const hasCart = await Cart.findOne({userId : userID});
      
         if(hasCart){
@@ -767,9 +773,11 @@ const cartItemsFindFn = async(userID) =>{
             }
         }
         let gst = (subTotal * (16 / 100)).toFixed(2);
-        let totalAmount = subTotal + +gst;
+        let grandTotal = subTotal + +gst;
+        let offerAmount = (((subTotal + +gst) * couponDiscount ) / 100) ?? couponDiscount ;
+        let totalAmount = grandTotal - offerAmount;
 
-        return { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems };
+        return { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems,couponDiscount,offerAmount };
         
     }catch(error){
         throw new Error("Internal server error while getting cart Details.")
@@ -788,8 +796,10 @@ const loadCart = async(req,res) => {
     }
     try{
 
+        const coupons = await coupon.find({usedBy : { $nin : [userID]}, status : true });
+        
         const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
-        return res.status(200).render('cart',{cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems})
+        return res.status(200).render('cart',{cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems,coupons})
 
     }catch(error){
         console.log("Internal server error while trying to get cart",error);
@@ -894,7 +904,7 @@ const selectItemToOrder = async(req,res) => {
     const productId = req.query.productId ;
     const productID = new mongoose.Types.ObjectId(productId);
    
-
+console.log(req.query.coupon)
     try{
 
         const product =await Cart.aggregate([
@@ -991,6 +1001,36 @@ const changeQuantity = async (req,res) => {
 
     }
 
+}
+
+
+const addCoupon = async(req,res) => {
+    
+    let userID = "";
+    if(req?.user?._id){
+        userID = new mongoose.Types.ObjectId(req.user._id);
+    }else if(req.session.user_id){
+        userID = new mongoose.Types.ObjectId(req.session.user_id)
+    }
+    const couponcode = req.query.coupon;
+    try{
+
+        const { subTotal,totalAmount,gst,totalSelectedItems,couponDiscount,offerAmount } = await cartItemsFindFn(userID, couponcode);
+        return res.status(200).json({
+            status : true,
+            subTotal : subTotal,
+            totalAmount : totalAmount,
+            gst : gst,
+            totalSelectedItems : totalSelectedItems,
+            discount : couponDiscount,
+            discountAmount : offerAmount
+          })
+
+    }catch(error){
+
+        console.log('Internal error occured while trying to add coupon.',error);
+        return res.status(500).send('Internal error occured while trying to add coupon.',error);
+    }
 }
 
 
@@ -1451,6 +1491,7 @@ module.exports = {
     removeProductFromCart,
     selectItemToOrder,
     changeQuantity,
+    addCoupon,
 
     validateCart,
     loadCheckout,

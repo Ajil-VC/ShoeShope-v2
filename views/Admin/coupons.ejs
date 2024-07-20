@@ -1,0 +1,171 @@
+<%- include("../layouts/adminHeader.ejs")  %>
+    
+<!--Aside Here-->
+<%- include("../layouts/adminAside.ejs")  %>
+
+<!--Head with search bar and other options Here-->
+<%- include("../layouts/adminHead.ejs")  %>
+    <!-- <div class="screen-overlay"></div> -->
+
+    <div class="modal fade" id="addCouponModal" tabindex="-1" role="dialog" aria-labelledby="addCouponModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addCouponModalTitle">Add New Coupon</h5>
+              <button type="button" id="coupon-modal-close" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="addCouponForm" action="/admin/coupons" method="post" >
+
+                <div class="form-group">
+                    <label for="couponName">Coupon Name</label>
+                    <input type="text" class="form-control" name="couponName" id="couponName" required>
+                  </div>
+
+                <div class="form-group">
+                  <label for="couponCode">Coupon Code</label>
+                  <input type="text" class="form-control" name="couponCode" id="couponCode" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="discountPercentage">Discount Percentage (%)</label>
+                        <input type="number" class="form-control" name="discount" id="discountPercentage" min="0" max="100" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="couponstatus">Coupon Status</label>
+                        <select class="form-control" name="status" id="couponstatus" required>
+                            <option value="" disabled selected>Select status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="MinimumAmnt">Minimum Amount</label>
+                        <input type="number" name="MinAmount" class="form-control" id="MinimumAmnt" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="MaximumAmnt">Maximum Amount</label>
+                        <input type="number" name="MaxAmount" class="form-control" id="MaximumAmnt" required>
+                    </div>
+                </div>
+
+                <!-- <div class="form-group">
+                  <label for="expirationDate">Expiration Date</label>
+                  <input type="date" class="form-control" id="expirationDate" required>
+                </div> -->
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="submit" form="addCouponForm" class="btn btn-primary" id="saveCouponBtn">Add Coupon</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+     
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Coupons </h2>
+                    <p>Mange coupons.</p>
+                </div>
+                <div>
+
+                 
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCouponModal">
+                        Add New Coupon
+                      </button>
+
+                </div>
+            </div>
+            <div class="card mb-4">
+                <header class="card-header">
+                    <div class="row gx-3">
+                        <div class="col-lg-4 col-md-6 me-auto">
+                            <input type="text" placeholder="Search..." class="form-control">
+                        </div>
+                        <div class="col-lg-2 col-6 col-md-3">
+                            <select class="form-select">
+                                <option>Status</option>
+                                <option>Active</option>
+                                <option>Disabled</option>
+                                <option>Show all</option>
+                            </select>
+                        </div>
+                      
+                    </div>
+                </header> <!-- card-header end// -->
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    
+                                    <th scope="col">Coupon name</th>
+                                    <th scope="col">Coupon code</th>
+                                    <th scope="col">Discount</th>
+                                    <th scope="col">Minimum Amount</th>
+                                    <th scope="col">Maximum Amount</th>
+                                    <th scope="col">Status</th>
+                                   
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <% for(let i = 0 ; i < coupons?.length ; i++){ %>
+
+                                    <tr>
+                                        <td><%=coupons[i]?.couponName%></td>
+                                        <td><%=coupons[i]?.couponCode%></td>
+                                        <td><%=coupons[i]?.discount%> %</td>
+                                        <td><%=coupons[i]?.MinAmount%></td>
+                                        <td><%=coupons[i]?.MaxAmount%></td>
+                                        
+                                        <td>
+
+                                            <div class="form-check d-flex align-items-center ">
+                                                <% if(coupons[i]?.status){ %>
+                                                    <input class="form-check-input" checked type="checkbox" onclick="listCoupons('<%=coupons[i]?._id%>')" >
+                                                    active
+                                                <% }else{ %>
+                                                    <input class="form-check-input"  type="checkbox" onclick="listCoupons('<%=coupons[i]?._id%>')" >
+                                                    inactive
+                                                    <% } %> 
+                                            </div>
+                                        </td>
+                                      
+                                    </tr>
+                                    
+                                <% } %>
+                                
+                            </tbody>
+                        </table>
+                    </div> <!-- table-responsive //end -->
+                </div> <!-- card-body end// -->
+            </div> <!-- card end// -->
+            <div class="pagination-area mt-15 mb-50">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-start">
+                        
+
+
+                        <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </section> <!-- content-main end// -->
+      
+  
+    
+
+
+<%- include("../layouts/adminFooter.ejs")  %>

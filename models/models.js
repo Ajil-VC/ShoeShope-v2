@@ -456,6 +456,40 @@ const walletSchema = new mongoose.Schema({
 
 
 
+const couponSchema = new mongoose.Schema({
+
+    couponName: { 
+        type: String,
+        required: true, 
+    },
+    couponCode: { 
+        type: String,
+        required: true,
+        unique: true 
+    },
+    discount: { 
+        type: Number,
+        required: true 
+    },
+    status: {
+        type: Boolean,
+        required: true
+    },
+    MaxAmount: {
+        type: Number,
+        required: true 
+    },
+    MinAmount: {
+        type: Number,
+        required: true 
+    },
+    usedBy: [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
+})
+
+
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP',otpSchema);
 const Address = mongoose.model('Address',addressSchema);
@@ -471,6 +505,7 @@ const Category = mongoose.model('Category',categorySchema);
 const Brand = mongoose.model('Brand',brandSchema);
 
 const Product = mongoose.model('Product',productSchema);
+const coupon = mongoose.model('coupon',couponSchema);
 
 module.exports = {
     User,
@@ -480,6 +515,7 @@ module.exports = {
     Category,
     Brand,
     Product,
+    coupon,
     Address,
     
     Cart,

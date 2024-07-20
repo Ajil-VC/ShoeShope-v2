@@ -1,4 +1,4 @@
-const {Admin,User,Category,Brand,Product,Order,returnItem,transaction,wallet} = require('../models/models')
+const {Admin,User,Category,Brand,Product,Order,returnItem,transaction,coupon,wallet} = require('../models/models')
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const {format} = require('date-fns'); 
@@ -85,11 +85,22 @@ const loginAdmin = async(req,res) => {
 
 }
 
-const loadDashboard = (req,res) => {
+const loadDashboard = async (req,res) => {
 
     try{
 
-        return res.status(200).render('dashboard');
+        const [productsCount,categories,deliveredOrder] = await Promise.all([
+            
+            Product.aggregate([ {$group:{_id:null,total:{$sum:"$stockQuantity"}}} ]),
+            Product.aggregate([ {$group:{_id:"$Category"}} ]),
+            Order.aggregate([
+                {$group:{_id:"$status",count:{$sum:1}}},
+                {$match:{_id:'Delivered'}}
+            ]),
+
+        ]);
+        const categoryCount = categories.length;
+        return res.status(200).render('dashboard',{productsCount,categoryCount,deliveredOrder});
 
     }catch(error){
 
@@ -98,6 +109,68 @@ const loadDashboard = (req,res) => {
     }
 }
 
+
+const addNewCoupon = async(req,res) => {
+
+    try{
+
+        if(req.body.status == 'active'){
+            var status = true;
+        }else{
+            var status = false;
+        }
+        // coupon
+        const newCoupon = new coupon({
+            couponName : req.body.couponName,
+            couponCode : req.body.couponCode,
+            discount : req.body.discount,
+            status : status,
+            MaxAmount : req.body.MaxAmount,
+            MinAmount : req.body.MinAmount
+        })
+
+        const coupondata = await newCoupon.save();
+        if(coupondata){
+            return res.status(201).redirect('/admin/coupons');
+        }
+        
+        
+    }catch(error){
+
+        console.log("Internal error while trying to add new coupon.",error);
+        return res.status(500).send("Internal error while trying to add new coupon.",error);
+    }
+}
+
+
+const changeCouponStatus = async(req,res) => {
+
+    try{
+
+        const couponId = new mongoose.Types.ObjectId(req.query.coupon);
+        const currentCoupon = await coupon.findOne({_id : couponId});
+        const updatedCoupon = await coupon.findByIdAndUpdate( {_id : couponId},{$set: { status : !currentCoupon.status }},{new :true} )
+
+    }catch(error){
+        console.log('Internal error occured while changing coupon status',error);
+        return res.status(500).send('Internal error occured while changing coupon status',error);
+    }
+}
+
+
+const loadCoupons = async(req,res) => {
+
+    try{
+
+        const coupons = await coupon.find().exec();
+        return res.status(200).render('coupons',{coupons});
+
+    }catch(error){
+        console.log("Internal error while trying to load coupons",error);
+        return res.status(500).send("Internal error while trying to load coupons",error);
+    }
+
+}
 
 
 const loadCustomerList = async(req,res) => {
@@ -678,10 +751,14 @@ module.exports = {
     loginAdmin,
     loadDashboard,
 
+    loadCoupons,
+    addNewCoupon,
+    changeCouponStatus,
+
     loadCustomerList,
     blockOrUnblockUser,
     deleteUser,
-    
+
     loadCategory,
     addBrandOrCategory,
     softDeleteCategory,

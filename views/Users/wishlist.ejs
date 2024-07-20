@@ -1,7 +1,7 @@
 <%- include("../layouts/header.ejs")  %>
 <body>
 <%- include("../layouts/navigation.ejs")  %>
-<main class="main">
+<main class="main" style="height: 80vh;" >
     <section class="pt-50 pb-150" style="font-family: Arial, sans-serif; " >
     <div class="container">
         <h1><i class="fi-rs-heart"></i>Wishlist</h1>
@@ -17,7 +17,7 @@
             <div class="row product-grid-4">
                 <% for(let i = 0 ; i < userData?.wishlist?.length ; i++){ %>
 
-                    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                    <div class="col-lg-3 col-md-4 col-12 col-sm-6" id="<%=userData?.wishlist[i]?._id%>" >
                         <div class="product-cart-wrap mb-30">
 
                             <div class="product-img-action-wrap">
@@ -29,13 +29,18 @@
                                     </a>
                                 </div>
                                 
-                                <!-- <div class="product-action-1">
-                                    
-                                    <a aria-label="Add To Wishlist" class="action-btn hover-up" ><i class="fi-rs-heart"></i></a>
-                                  
-                                </div> -->
-                                <div class="heart-icon ">
-                                    <a aria-label="Add to Wishlist" href="#"><i class="fi-rs-heart"></i></a>
+                
+                               
+
+                                <div class="heart-icon" data-card="remove" data-id="<%=userData?.wishlist[i]?._id%>">
+                                                 
+                                    <div class="wishlist-toggle" aria-label="Add to Wishlist">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                        </svg>
+                                    </div>
+
+
                                 </div>
 
                                 <div class="product-badges product-badges-position product-badges-mrg d-flex justify-content-between ">          

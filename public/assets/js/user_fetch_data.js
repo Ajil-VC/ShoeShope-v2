@@ -534,6 +534,8 @@ const orderSummary_quantity = document.getElementById('orderSummary-quantity');
 const orderSummary_subTotal = document.getElementById('orderSummary-subTotal');
 const orderSummary_GST = document.getElementById('orderSummary-GST');
 const orderSummary_totalAmount = document.getElementById('orderSummary-totalAmount');
+const orderSummary_discount = document.getElementById('orderSummary-discount');
+const orderSummary_discountOffer = document.getElementById('orderSummary-discountOffer');
 
 async function removeProductFromCart(productId){
     
@@ -579,6 +581,54 @@ async function removeProductFromCart(productId){
 
         console.log("Error while fetching operation of remove product from cart");
     }
+}
+
+
+// Add Coupon
+var selectedCoupon = null;
+const form_check_input = document.querySelectorAll('.form-check-input');
+if(form_check_input){
+
+    form_check_input.forEach(radio => {
+
+        radio.addEventListener('change', (e) => {
+
+            selectedCoupon = e.target.value;
+        })
+    })
+}
+
+
+async function addCoupon(selectedCoupon){
+
+    const response = await fetch(`http://localhost:2000/cart/addcoupon?coupon=${selectedCoupon}`,{method : 'PATCH'});
+    if(!response.ok){
+        throw new Error("Network response was not ok while adding coupon.");
+    }
+
+    const data = await response.json();
+    if(data.status){
+        
+        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+        orderSummary_GST.textContent = `₹ ${data.gst}`;  
+        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+        orderSummary_discount.textContent = `Discount ${data.discount}%`
+        orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`
+    }
+}
+
+
+const btn_addCoupon_save = document.getElementById('btn-addCoupon-save');
+const addCoupon_modal_close_button = document.getElementById('addCoupon-modal-close-button');
+if(btn_addCoupon_save){
+
+    btn_addCoupon_save.addEventListener('click',()=> {
+        
+        addCoupon(selectedCoupon);
+        document.getElementById('addedCoupon').value = selectedCoupon;
+        addCoupon_modal_close_button.click();
+    })
+
 }
 
 async function loadCheckout() {
@@ -685,6 +735,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const wishlist_toggle = heart.querySelector('.wishlist-toggle');
                 const productId = this.dataset.id;
+                const isRemoveCard = this.dataset.card;
 
                 fetch(`http://localhost:2000/wishlist?productId=${productId}`,{method : "PATCH",headers : {
                     'Accept': 'application/json',
@@ -707,6 +758,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         wishlist_toggle.classList.add('active');
                     }else if(data.status && data.add == -1){
                         wishlist_toggle.classList.remove('active');
+                        if(isRemoveCard == 'remove'){
+                            const itemCardInWishlist = document.getElementById(productId);
+                            itemCardInWishlist.remove();
+                        }
                     }
                     
                 })
@@ -722,9 +777,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const productId = this.dataset.productId;
+            selectedCoupon = document.getElementById('addedCoupon').value;
+            
             // const isChecked = this.checked;
 
-            fetch(`http://localhost:2000/cart?productId=${productId}`,{method : "PUT"})
+            fetch(`http://localhost:2000/cart?productId=${productId}&coupon=${selectedCoupon}`,{method : "PUT"})
             .then(response => {
                 
                 if(!response.ok){
