@@ -750,11 +750,18 @@ const cartItemsFindFn = async(userID, couponCode) =>{
         let cartItemsArray = [];
         let subTotal = 0 ;
         let totalSelectedItems = 0;    
-        var couponDiscount = 0;
+        let couponDiscount = 0;
+        let minimumAmount = 0;
+        let maximumAmount = Infinity;
         if(couponCode){
-            console.log("couponDiscount errrror")
-            const selectedCoupon = await coupon.findOne({couponCode : couponCode});
-            couponDiscount = selectedCoupon.discount; 
+            // const selectedCoupon = await coupon.findOne({couponCode : couponCode});
+            const selectedCoupon = await coupon.findOne({usedBy : { $nin : [userID]}, status : true,couponCode : couponCode });
+            if(selectedCoupon){
+
+                couponDiscount = selectedCoupon.discount; 
+                minimumAmount = selectedCoupon.MinAmount;
+                maximumAmount = selectedCoupon.MaxAmount;
+            }
         }
         const hasCart = await Cart.findOne({userId : userID});
      
@@ -767,17 +774,36 @@ const cartItemsFindFn = async(userID, couponCode) =>{
                 if(cartItemsArray[i].isSelected){
     
                     subTotal = subTotal + (cartItemsArray[i].productId.salePrice * cartItemsArray[i].quantity);
-                    console.log(subTotal)
                     totalSelectedItems = totalSelectedItems + cartItemsArray[i].quantity;
                 }
             }
         }
         let gst = (subTotal * (16 / 100)).toFixed(2);
         let grandTotal = subTotal + +gst;
-        let offerAmount = (((subTotal + +gst) * couponDiscount ) / 100) ?? couponDiscount ;
+        let offerAmount = 0;
+
+        if(grandTotal > minimumAmount){
+
+            offerAmount = (((subTotal + +gst) * couponDiscount ) / 100) ?? couponDiscount ;
+            if(offerAmount > maximumAmount){
+                offerAmount = maximumAmount;
+            }
+
+        }
         let totalAmount = grandTotal - offerAmount;
 
-        return { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems,couponDiscount,offerAmount };
+        return { 
+            cartItemsArray,
+            subTotal,
+            totalAmount,
+            gst,
+            totalSelectedItems,
+            couponDiscount,
+            offerAmount,
+            grandTotal,
+            minimumAmount,
+            maximumAmount             
+        };
         
     }catch(error){
         throw new Error("Internal server error while getting cart Details.")
@@ -867,6 +893,7 @@ const removeProductFromCart = async (req,res) => {
         userID = req.session.user_id
     }
     const productId = req.query.productId ;
+    const couponCode = req.query.coupon;
     
     try{
 
@@ -874,7 +901,16 @@ const removeProductFromCart = async (req,res) => {
         console.log(userCart,"This is remova")
 
         await Cart.updateOne({userId : userID},{$pull : {items : {productId : productId }}});
-        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        const { cartItemsArray,
+            subTotal,
+            totalAmount,
+            gst,
+            totalSelectedItems,
+            couponDiscount,
+            offerAmount,
+            minimumAmount,
+            maximumAmount } = await cartItemsFindFn(userID,couponCode);
+
         const totalCartItems = cartItemsArray.length;
         return res.status(200).json({
             status : true,
@@ -883,7 +919,11 @@ const removeProductFromCart = async (req,res) => {
             totalAmount : totalAmount,
             gst : gst,
             totalCartItems : totalCartItems,
-            totalSelectedItems : totalSelectedItems
+            totalSelectedItems : totalSelectedItems,
+            discount : couponDiscount,
+            discountAmount : offerAmount,
+            minimumAmount : minimumAmount,
+            maximumAmount : maximumAmount
         });
 
     }catch(error){
@@ -903,8 +943,8 @@ const selectItemToOrder = async(req,res) => {
     }
     const productId = req.query.productId ;
     const productID = new mongoose.Types.ObjectId(productId);
-   
-console.log(req.query.coupon)
+    const couponCode = req.query.coupon;
+
     try{
 
         const product =await Cart.aggregate([
@@ -920,14 +960,26 @@ console.log(req.query.coupon)
             { $set: { 'items.$.isSelected': productIsSelected } }, 
           );
 
-          const { subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+          const { subTotal,
+            totalAmount,
+            gst,
+            totalSelectedItems,
+            couponDiscount,
+            offerAmount,
+            minimumAmount,
+            maximumAmount } = await cartItemsFindFn(userID,couponCode);
+
           return res.status(200).json({
             status : true,
             productId : productId,
             subTotal : subTotal,
             totalAmount : totalAmount,
             gst : gst,
-            totalSelectedItems : totalSelectedItems
+            totalSelectedItems : totalSelectedItems,
+            discount : couponDiscount,
+            discountAmount : offerAmount,
+            minimumAmount : minimumAmount,
+            maximumAmount : maximumAmount
         });
 
     }catch(error){
@@ -950,6 +1002,8 @@ const changeQuantity = async (req,res) => {
     const productID = new mongoose.Types.ObjectId(productId);
     const newQuantity = req.query.newQuantity;
     const shoeSize =req.query.shoeSize;
+    const couponCode = req.query.coupon;
+
     if(newQuantity){
 
         try{
@@ -969,14 +1023,27 @@ const changeQuantity = async (req,res) => {
                 { $set: { 'items.$.quantity': newQuantity } }, 
               );
     
-              const { subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+              const { subTotal,
+                totalAmount,
+                gst,
+                totalSelectedItems,
+                couponDiscount,
+                offerAmount,
+                minimumAmount,
+                maximumAmount } = await cartItemsFindFn(userID,couponCode);
+
               return res.status(200).json({
                 status : true,
                 productId : productId,
                 subTotal : subTotal,
                 totalAmount : totalAmount,
                 gst : gst,
-                totalSelectedItems : totalSelectedItems
+                totalSelectedItems : totalSelectedItems,
+                discount : couponDiscount,
+                discountAmount : offerAmount,
+                minimumAmount : minimumAmount,
+                maximumAmount : maximumAmount
+                
               })
     
         }catch(error){
@@ -1015,15 +1082,26 @@ const addCoupon = async(req,res) => {
     const couponcode = req.query.coupon;
     try{
 
-        const { subTotal,totalAmount,gst,totalSelectedItems,couponDiscount,offerAmount } = await cartItemsFindFn(userID, couponcode);
+        const { subTotal,
+            totalAmount,
+            gst,
+            totalSelectedItems,
+            couponDiscount,
+            offerAmount,
+            minimumAmount,
+            maximumAmount } = await cartItemsFindFn(userID, couponcode);
+
         return res.status(200).json({
+
             status : true,
             subTotal : subTotal,
             totalAmount : totalAmount,
             gst : gst,
             totalSelectedItems : totalSelectedItems,
             discount : couponDiscount,
-            discountAmount : offerAmount
+            discountAmount : offerAmount,
+            minimumAmount : minimumAmount,
+            maximumAmount : maximumAmount
           })
 
     }catch(error){
@@ -1042,11 +1120,25 @@ const loadCheckout = async(req,res) => {
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
+    const selectedCoupon = req.query.coupon;
 
     try{
 
-        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        const { cartItemsArray,
+            subTotal,
+            totalAmount,
+            gst,
+            totalSelectedItems, 
+            couponDiscount,
+            offerAmount } = await cartItemsFindFn(userID,selectedCoupon);
         
+        if(selectedCoupon){
+
+            req.session.coupon = selectedCoupon;
+
+        }
+
+
         const currentDate = new Date();
         const deliveryDate = add(currentDate, { days: 5 });
         const expectedDeliveryDate = format(deliveryDate,'EEEE yyyy MMMM dd');
@@ -1062,7 +1154,9 @@ const loadCheckout = async(req,res) => {
         totalSelectedItems,
         expectedDeliveryDate,
         selectedAddress,
-        address
+        address,
+        discount : couponDiscount,
+        discountAmount : offerAmount,
     })
 
     }catch(error){
@@ -1081,15 +1175,16 @@ const validateCart = async(req,res) => {
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
+    const selectedCoupon = req.query.coupon;
 
     try{
 
-        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        const { cartItemsArray,totalSelectedItems } = await cartItemsFindFn(userID,selectedCoupon);
 
             if(totalSelectedItems < 1){
                 return res.json({status : false, message : "Need atleast 1 item selected to checkout"})
             }
-console.log(cartItemsArray)            
+            
             for(let i = 0 ; i < cartItemsArray.length ; i++){
                 if((cartItemsArray[i].productId.isActive === 0) && cartItemsArray[i].isSelected){
                     return res.json({status : false , message : "Some Products are unavailable."});
@@ -1102,7 +1197,7 @@ console.log(cartItemsArray)
 
             res.json({
                 status : true,
-                redirect: '/checkout_page'
+                redirect: `/checkout_page?coupon=${selectedCoupon}`
             })
 
     }catch(error){
@@ -1252,6 +1347,7 @@ const placeOrder = async(req,res) => {
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
 
+    const selectedCoupon = req.session.coupon;
     const paymentMethod = req.query.paymentMethod;
     const razorpay = req.razorpay;
     const razorpay_key = req.razorpay_key;
@@ -1277,7 +1373,7 @@ const placeOrder = async(req,res) => {
 
     try{
       
-        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems } = await cartItemsFindFn(userID);
+        const { cartItemsArray,subTotal,totalAmount,gst,totalSelectedItems,offerAmount } = await cartItemsFindFn(userID,selectedCoupon);
         const address = await Address.findOne({userId : userID, selectedAdd : true});
         const productsToOrder = await getItemsAndReserve(cartItemsArray);
         var amountToPay = totalAmount;
@@ -1292,7 +1388,7 @@ const placeOrder = async(req,res) => {
                 totalItems  : totalSelectedItems,
                 subTotal    : subTotal,
                 gstAmount   : gst,
-                discount    : 0,
+                discount    : offerAmount,
                 totalAmount : totalAmount,
                 shippingAddress : address._id,
                 paymentMethod   : paymentMethod

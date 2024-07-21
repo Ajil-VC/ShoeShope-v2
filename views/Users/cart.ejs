@@ -22,7 +22,8 @@
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="couponOption" id="<%=coupons[i]._id%>" value="<%=coupons[i].couponCode%>" required>
                   <label class="form-check-label" for="<%=coupons[i]._id%>">
-                    <span style="font-weight: bold;" ><%=coupons[i].couponName%></span> (<%=coupons[i].couponCode%>), <span style="color: green;" ><%=coupons[i].discount%> %</span> discount
+                    <%=coupons[i].couponName%> <span style="font-weight: bold; color: black;" > (<%=coupons[i].couponCode%>) </span>, <span style="color: green;" ><%=coupons[i].discount%> % Off</span>|
+                    <span  >On ₹ <%=coupons[i].MinAmount%>+</span> [Max : <%=coupons[i].MaxAmount%>]
                   </label>
                 </div>
 

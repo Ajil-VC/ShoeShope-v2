@@ -543,34 +543,57 @@ async function removeProductFromCart(productId){
     let confirmMsg = 'Yes, remove it!';
     let commitedMsg = '1 item has been removed from cart.';
     let commitedHead = 'Removed!';
-    let safeMsg = 'Item is safe in cart :)'
+    let safeMsg = 'Item is safe in cart :)';
+
+    const selectedCoupon = document.getElementById('addedCoupon').value;
 
     let confirmDeletion = await swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg);
     try{
         if(confirmDeletion){
 
-            const response = await fetch(`http://localhost:2000/cart?productId=${productId}`,{method : "delete"});
+            const response = await fetch(`http://localhost:2000/cart?productId=${productId}&coupon=${selectedCoupon}`,{method : "delete"});
             if(!response.ok)                  {
                 throw new Error('Network response was not ok while removing product from cart');
             }
             const data = await response.json();
             if(data.status){
-                console.log(data.productId,"This is from fron")
+                
                 const itemTileId = document.getElementById(`itemTileId-${productId}`);
                 itemTileId.remove();
                 if(data.totalCartItems > 0){
 
-                    totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
-                    orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
-                    orderSummary_GST.textContent = `₹ ${data.gst}`;  
-                    orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`
+                    if((data.status && data.discountAmount == 0) && selectedCoupon ){
+                        Swal.fire(
+                            'Oops',
+                            `Selected offer available only on ₹${data.minimumAmount}+ purchase`,
+                            'error'
+                        )
+                        totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
+                        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+                        orderSummary_GST.textContent = `₹ ${data.gst}`;  
+                        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+                        orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
+                        orderSummary_discount.textContent = `Discount 0%`;
+                        orderSummary_discountOffer.textContent = `₹ 0`;
+
+                    }else if(data.status){
+
+                        totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
+                        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+                        orderSummary_GST.textContent = `₹ ${data.gst}`;  
+                        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+                        orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
+                        orderSummary_discount.textContent = `Discount ${data.discount}%`
+                        orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`
+                    }
                 }else{
                     totalItemsInCart.textContent = "Your Cart is empty";
                     orderSummary_subTotal.textContent = `₹ 0`;
                     orderSummary_GST.textContent = `₹ 0`;  
                     orderSummary_totalAmount.textContent = `₹ 0`;
-                    orderSummary_quantity.textContent = "No items item added"
+                    orderSummary_quantity.textContent = "No items item added";
+                    orderSummary_discount.textContent = `Discount 0%`
+                    orderSummary_discountOffer.textContent = `₹ 0`
                 }
                
             }
@@ -601,20 +624,35 @@ if(form_check_input){
 
 async function addCoupon(selectedCoupon){
 
-    const response = await fetch(`http://localhost:2000/cart/addcoupon?coupon=${selectedCoupon}`,{method : 'PATCH'});
-    if(!response.ok){
-        throw new Error("Network response was not ok while adding coupon.");
+
+    try{
+
+        const response = await fetch(`http://localhost:2000/cart/addcoupon?coupon=${selectedCoupon}`,{method : 'PATCH'});
+        if(!response.ok){
+            throw new Error("Network response was not ok while adding coupon.");
+        }
+    
+        const data = await response.json();
+        if(data.status && data.discountAmount == 0 ){
+            Swal.fire(
+                'Oops',
+                `Selected offer available only on ₹${data.minimumAmount}+ purchase`,
+                'error'
+            )
+            orderSummary_discount.textContent = `Discount 0%`;
+        }else if(data.status && data.discountAmount > 0 ){
+            
+            orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+            orderSummary_GST.textContent = `₹ ${data.gst}`;  
+            orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+            orderSummary_discount.textContent = `Discount ${data.discount}%`;
+            orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`;
+        }
+
+    }catch(error){
+        console.log("Error while trying to add coupn",error)
     }
 
-    const data = await response.json();
-    if(data.status){
-        
-        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
-        orderSummary_GST.textContent = `₹ ${data.gst}`;  
-        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-        orderSummary_discount.textContent = `Discount ${data.discount}%`
-        orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`
-    }
 }
 
 
@@ -634,8 +672,8 @@ if(btn_addCoupon_save){
 async function loadCheckout() {
     
     try{
-
-        const response = await fetch(`http://localhost:2000/checkout`,{ redirect: 'manual' });
+        const selectedCoupon = document.getElementById('addedCoupon').value;
+        const response = await fetch(`http://localhost:2000/checkout?coupon=${selectedCoupon}`,{ redirect: 'manual' });
 
         if(!response.ok)                  {
             throw new Error('Network response was not ok while removing product from cart');
@@ -791,16 +829,27 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
 
-                if(data.status){
+                if((data.status && data.discountAmount == 0) && selectedCoupon ){
+                    Swal.fire(
+                        'Oops',
+                        `Selected offer available only on ₹${data.minimumAmount}+ purchase`,
+                        'error'
+                    )
+                    totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
+                    orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+                    orderSummary_GST.textContent = `₹ ${data.gst}`;  
+                    orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
+                    orderSummary_discount.textContent = `Discount 0%`;
+                    orderSummary_discountOffer.textContent = `₹ 0`
+                }else if(data.status){
 
                     orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
                     orderSummary_GST.textContent = `₹ ${data.gst}`;  
                     orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`
-                }else{
-             
-                    console.log("Something wrong with selecting product there is no data")
-                 
+                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
+                    orderSummary_discount.textContent = `Discount ${data.discount}%`
+                    orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`
                 }
         
             })
@@ -818,9 +867,10 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('change', function() {
             const productId = this.dataset.productId;
             const newQuantity = this.value;
+            selectedCoupon = document.getElementById('addedCoupon').value;
             console.log(`Quantity for product ${productId} changed to ${newQuantity}`);
 
-            fetch(`http://localhost:2000/cart?productId=${productId}&newQuantity=${newQuantity}`,{method : "PATCH"})
+            fetch(`http://localhost:2000/cart?productId=${productId}&newQuantity=${newQuantity}&coupon=${selectedCoupon}`,{method : "PATCH"})
             .then(response => {
                 
                 if(!response.ok){
@@ -830,12 +880,27 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
 
-                if(data.status){
+                if((data.status && data.discountAmount == 0) && selectedCoupon ){
+                    Swal.fire(
+                        'Oops',
+                        `Selected offer available only on ₹${data.minimumAmount}+ purchase`,
+                        'error'
+                    )
+                    totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
+                    orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
+                    orderSummary_GST.textContent = `₹ ${data.gst}`;  
+                    orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
+                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
+                    orderSummary_discount.textContent = `Discount 0%`;
+                    orderSummary_discountOffer.textContent = `₹ 0`
+                }else if(data.status){
 
                     orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
                     orderSummary_GST.textContent = `₹ ${data.gst}`;  
                     orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`
+                    orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
+                    orderSummary_discount.textContent = `Discount ${data.discount}%`
+                    orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`
                 }else{
                     
                     if(data.message == "Max 4 items per product"){
