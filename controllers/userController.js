@@ -191,7 +191,7 @@ const loginUser = async (req,res) => {
                 req.session.isAuthorised = userData.isAuthorised; 
                 req.session.isBlocked = userData.isBlocked;
     
-                return res.status(200).redirect('home')
+                return res.status(200).redirect('/home')
             }else{
                 return res.status(401).send('email or password incorrect');
             }
@@ -264,7 +264,7 @@ const loadHomePage = async(req,res) => {
 
         const products = await Product.find({isActive : 1}).sort({_id : -1}).limit(8) ;
        
-        res.status(200).render('home',{products}) ;
+        return res.status(200).render('home',{products});
 
     }catch(error){
         console.log("Internal Error while loading home page",error);
@@ -401,8 +401,8 @@ const loadUserProfile = async(req,res) => {
         const [defaultAddress,otherAddress,orders,userWallet] = await Promise.all([
             Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec(),
             Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec(),
-            Order.find({customer : userID}).populate('shippingAddress').exec(),
-            wallet.findOne({userId : userID}).populate('transactions').populate().exec()
+            Order.find({customer : userID}).populate('shippingAddress').sort({ createdAt : -1}).exec(),
+            wallet.findOne({userId : userID}).populate('transactions').exec()
         ]);
 console.log(userWallet)     
         return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders,userWallet});
@@ -476,12 +476,13 @@ const addItemToWishlist = async(req,res) => {
         }else{
             if(userData.wishlist.includes(productId)){
                 //Element removal
-                console.log(userData.wishlist)
+                
                 userData.wishlist = userData.wishlist.filter(item => !item.equals(productId));
-                console.log(userData.wishlist)
+                
                 const isUpdated = await userData.save();
+                const itemsLeftInWishlist = isUpdated.wishlist.length;
                 if(isUpdated){
-                    return res.status(200).json({status : true , add : -1});
+                    return res.status(200).json({status : true , add : -1, itemsLeftInWishlist});
                 }
             }else{
 
@@ -734,9 +735,16 @@ const deleteAddress = async(req,res) => {
     }
 }
 
+const getAddressDetails = async(req,res) => {
+
+    if(req.query.addressID){
+        console.log(req.query.addressId)
+       }
+}
+
 const updateAddress = async(req,res) => {
 
-    //complete this part
+   
 }
 
 
@@ -846,19 +854,27 @@ const addProductToCart = async(req,res) => {
     try{
 
         const hasCart = await Cart.findOne({userId : userID});
+        let isItemExist = [];
         if(hasCart){
+
+            isItemExist = hasCart.items.filter( element => element.productId.equals(productID) );
+        }
+        
+        if( hasCart && isItemExist.length < 1 ){
 
             const item = {
                 productId : productID,
                 quantity  : 1
             }
-            await Cart.updateOne({_id : hasCart._id},{$push:{items : item}});
+            await Cart.updateOne({_id : hasCart._id},{$addToSet:{items : item}});
             return res.status(201).json({status:true});
     
-        }else{
+        }else if(hasCart && isItemExist.length > 0){
+            return res.status(201).json({status:true});
+        }else if(!hasCart){
             
             const newCart = new Cart({
-                userId  : userID,
+                userId  : userID,   
                 items   : [
                     {
                         productId : productID,
@@ -1399,7 +1415,6 @@ const placeOrder = async(req,res) => {
             if(paymentMethod !== 'Cash on Delivery'){
 
                 var orderResult = await makeRazorpayment(razorpay, amountToPay,newOrder._id);
-                console.log(orderResult);
                 newOrder.paymentGatewayOrderId = orderResult.id;
     
             }                
@@ -1415,6 +1430,10 @@ const placeOrder = async(req,res) => {
                         productId: {$in : IdsToRemoveFromCart}
                     }}
                 }) 
+
+                //Adding userId to coupon;
+                await coupon.updateOne({couponCode : selectedCoupon},{$push : {usedBy : userID}});
+
 
                 if(paymentMethod !== 'Cash on Delivery'){
         
@@ -1498,6 +1517,23 @@ const loadOrderPlaced = async(req,res) => {
     }
 }
 
+
+const cancelOrder = async(req,res) => {
+
+    try{
+
+        const return_item_id = req.query.return_item_id ;
+        const order_id = req.query.order_id ;
+        
+        
+
+    }catch(error){
+        console.log(`Internal error while trying to cancel the order.\n${error}`);
+        return res.status(500).send(`Internal error while trying to cancel the order.\n${error}`);
+    }
+}
+
+
 const initiateReturn = async(req,res) => {
 
     try{
@@ -1577,6 +1613,7 @@ module.exports = {
     makeDefaultAddress,
     deleteAddress,
     updateAddress,
+    getAddressDetails,
 
     addItemToWishlist,
     loadWishlist,
@@ -1597,6 +1634,7 @@ module.exports = {
     loadOrderPlaced,
     getOrderDetails,
 
+    cancelOrder,
     initiateReturn
   
 }

@@ -626,16 +626,26 @@
         $('.more_slide_open').slideToggle();
     });
 
-    $('.modal').on('shown.bs.modal', function (e) {
-        $('.product-image-slider').slick('setPosition');
-        $('.slider-nav-thumbnails').slick('setPosition');
+    // $('.modal').on('shown.bs.modal', function (e) {
+    //     $('.product-image-slider').slick('setPosition');
+    //     $('.slider-nav-thumbnails').slick('setPosition');
+    //     $('.product-image-slider .slick-active img').elevateZoom({
+    //         zoomType: "inner",
+    //         cursor: "crosshair",
+    //         zoomWindowFadeIn: 500,
+    //         zoomWindowFadeOut:  750
+    //     });
+    // })
+
+    if ($.fn.elevateZoom && $('.product-image-slider .slick-active img').length) {
         $('.product-image-slider .slick-active img').elevateZoom({
             zoomType: "inner",
             cursor: "crosshair",
             zoomWindowFadeIn: 500,
             zoomWindowFadeOut: 750
         });
-    })
+    }
+
 
     /*--- VSticker ----*/
     $('#news-flash').vTicker({

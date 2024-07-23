@@ -24,6 +24,7 @@
                         <div class="col-lg-6" >
                             <label for="addressName" class="form-label">Address Type</label>
                             <select id="addressName" class="form-control" name="addressName" >
+                                <option selected disabled value="" >Select Address type</option>
                                 <option >Home</option>
                                 <option >Office</option>
                                 <option >Work place</option>
@@ -85,13 +86,14 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/profile/address/edit" method="post" id="editAddressForm">
+                <form action="/profile/address/edit?_method=PUT" method="post" id="editAddressForm">
                     <input type="hidden" id="editAddressId" name="addressId">
 
                     <div class="d-flex justify-content-between row form-group">
                         <div class="col-lg-6">
                             <label for="editAddressName" class="form-label">Address Type</label>
                             <select id="editAddressName" class="form-control" name="addressName">
+                                <option selected disabled value="" >Select Address type</option>
                                 <option>Home</option>
                                 <option>Office</option>
                                 <option>Work place</option>
@@ -134,7 +136,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+               
                 <button type="submit" form="editAddressForm" class="btn btn-primary" id="btn-editAddress-update">Update Address</button>
             </div>
         </div>
@@ -367,7 +369,13 @@
                                         <div class="card">
                                             <div class="card-header d-flex justify-content-between align-items-center ">
                                                 <h5 class="mb-0">Your Order History</h5>
-                                                <button class="btn display-order-details " id="show-all-btn" >Show all</button>
+                                                <div class="d-flex justify-content-center" >
+                                                    <span class="pr-5" >gst : 
+                                                        <br> 
+                                                        <span>Grand Total :</span> 
+                                                    </span>
+                                                    <button class="btn display-order-details " id="show-all-btn" >Show all</button>
+                                                </div>
                                             </div>
                                             
                                             <div class="card-body">
@@ -424,19 +432,7 @@
                                                             <% } %>
 
 
-                                                            <!-- <tr>
-                                                                <td><span class="ods-order-id">#2468</span></td>
-                                                                <td><img src="path_to_image.jpg" alt="Order preview" class="ods-order-preview"></td>
-                                                                <td>
-                                                                    <address class="ods-address">
-                                                                        456 Elm St,<br>
-                                                                        Other City, ST 67890
-                                                                    </address>
-                                                                </td>
-                                                                <td><span class="ods-price">$364.00</span></td>
-                                                                <td><span class="ods-status ods-status-completed">Completed</span></td>
-                                                                <td><span class="ods-date">June 29, 2024</span></td>
-                                                            </tr> -->
+                                                    
                                                         
                                                         </tbody>
                                                     </table>

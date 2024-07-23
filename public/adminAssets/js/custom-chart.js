@@ -1,104 +1,155 @@
-(function ($) {
+document.addEventListener('DOMContentLoaded', function() {
     "use strict";
 
     /*Sale statistics Chart*/
-    if ($('#myChart').length) {
+    if (document.getElementById('myChart')) {
         var ctx = document.getElementById('myChart').getContext('2d');
         var chart = new Chart(ctx, {
-            // The type of chart we want to create
             type: 'line',
-            
-            // The data for our dataset
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 datasets: [{
-                        label: 'Sales',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(44, 120, 220, 0.2)',
-                        borderColor: 'rgba(44, 120, 220)',
-                        data: [18, 17, 4, 3, 2, 20, 25, 31, 25, 22, 20, 9]
-                    },
-                    {
-                        label: 'Visitors',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
-                        borderColor: 'rgb(4, 209, 130)',
-                        data: [40, 20, 17, 9, 23, 35, 39, 30, 34, 25, 27, 17]
-                    },
-                    {
-                        label: 'Products',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
-                        borderColor: 'rgb(380, 200, 230)',
-                        data: [30, 10, 27, 19, 33, 15, 19, 20, 24, 15, 37, 6]
-                    }
-
-                ]
-            },
-            options: {
-                plugins: {
-                legend: {
-                    labels: {
-                    usePointStyle: true,
-                    },
-                }
-                }
-            }
-        });
-    } //End if
-
-    /*Sale statistics Chart*/
-    if ($('#myChart2').length) {
-        var ctx = document.getElementById("myChart2");
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-            labels: ["900", "1200", "1400", "1600"],
-            datasets: [
-                {
-                    label: "US",
-                    backgroundColor: "#5897fb",
-                    barThickness:10,
-                    data: [233,321,783,900]
-                }, 
-                {
-                    label: "Europe",
-                    backgroundColor: "#7bcf86",
-                    barThickness:10,
-                    data: [408,547,675,734]
+                    label: 'Sales',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                    borderColor: 'rgba(44, 120, 220)',
+                    data: []  // We'll fetch this data from the backend
                 },
                 {
-                    label: "Asian",
-                    backgroundColor: "#ff9076",
-                    barThickness:10,
-                    data: [208,447,575,634]
-                },
-                {
-                    label: "Africa",
-                    backgroundColor: "#d595e5",
-                    barThickness:10,
-                    data: [123,345,122,302]
-                },
-            ]
+                    label: 'Products',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                    borderColor: 'rgb(380, 200, 230)',
+                    data: []  // We'll fetch this data from the backend
+                }]
             },
             options: {
                 plugins: {
                     legend: {
                         labels: {
-                        usePointStyle: true,
+                            usePointStyle: true,
                         },
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
                     }
                 }
             }
         });
-    } //end if
+
+        // Fetch data from backend
+        fetch('/admin/api/sales-data')
+            .then(response => response.json())
+            .then(data => {
+                chart.data.datasets[0].data = data.sales;
+                chart.data.datasets[1].data = data.products;
+                chart.update();
+            })
+            .catch(error => console.error('Error fetching sales data:', error));
+    }
+
+    /*Sale statistics Chart 2*/
+    // if (document.getElementById('myChart2')) {
+    //     var ctx = document.getElementById("myChart2").getContext('2d');
+    //     var myChart = new Chart(ctx, {
+    //         type: 'bar',
+    //         data: {
+    //             labels: ["900", "1200", "1400", "1600"],
+    //             datasets: [
+    //                 {
+    //                     label: "US",
+    //                     backgroundColor: "#5897fb",
+    //                     barThickness: 10,
+    //                     data: []  // We'll fetch this data from the backend
+    //                 },
+    //                 {
+    //                     label: "Europe",
+    //                     backgroundColor: "#7bcf86",
+    //                     barThickness: 10,
+    //                     data: []  // We'll fetch this data from the backend
+    //                 },
+    //                 {
+    //                     label: "Asian",
+    //                     backgroundColor: "#ff9076",
+    //                     barThickness: 10,
+    //                     data: []  // We'll fetch this data from the backend
+    //                 },
+    //                 {
+    //                     label: "Africa",
+    //                     backgroundColor: "#d595e5",
+    //                     barThickness: 10,
+    //                     data: []  // We'll fetch this data from the backend
+    //                 },
+    //             ]
+    //         },
+    //         options: {
+    //             plugins: {
+    //                 legend: {
+    //                     labels: {
+    //                         usePointStyle: true,
+    //                     },
+    //                 }
+    //             },
+    //             scales: {
+    //                 y: {
+    //                     beginAtZero: true
+    //                 }
+    //             }
+    //         }
+    //     });
+
+    //     // Fetch data from backend
+    //     // fetch('/api/region-sales')
+    //     //     .then(response => response.json())
+    //     //     .then(data => {
+    //     //         myChart.data.datasets[0].data = data.us;
+    //     //         myChart.data.datasets[1].data = data.europe;
+    //     //         myChart.data.datasets[2].data = data.asian;
+    //     //         myChart.data.datasets[3].data = data.africa;
+    //     //         myChart.update();
+    //     //     })
+    //     //     .catch(error => console.error('Error fetching region sales data:', error));
+    // }
+
+    if (document.getElementById('myChart2')) {
+            var ctx = document.getElementById("myChart2").getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [ 'Blue', 'Yellow'],
+                    datasets: [{
+                        data: [60, 100],
+                        backgroundColor: [
+                           
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                           
+                        ],
+                        borderColor: [
+                        
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                         
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false,
+                            text: 'Doughnut Chart Example'
+                        }
+                    }
+                }
+            });
+           
+    }
+
     
-})(jQuery);
+
+});

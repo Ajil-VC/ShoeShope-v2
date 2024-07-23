@@ -85,27 +85,191 @@ const loginAdmin = async(req,res) => {
 
 }
 
+
+const getSaleData = async(req,res) => {
+
+
+    try{
+
+        const currentYear = new Date().getFullYear();
+
+        const [monthlyNetDeliveredProducts,monthlyOrderCount] = await Promise.all([
+
+            Order.aggregate([
+                {
+                  $match: { 
+                    status: 'Delivered',// Filter orders with status 'Delivered'
+                    $expr: { $eq: [{ $year: "$createdAt" }, currentYear] }
+                } 
+                },
+                {
+                  $lookup: {
+                    from: 'returnitems', // The name of the returns collection
+                    localField: 'return', // Field in the orders collection
+                    foreignField: '_id', // Field in the returns collection
+                    as: 'returnsDetails' // Alias for the joined documents
+                  }
+                },
+                {
+                  $addFields: {
+                    returnedProductIds: { $map: { input: '$returnsDetails', as: 'returnid', in: '$$returnid.productId' } }
+                  }
+                },
+                {
+                  $addFields: {
+                    nonReturnedProducts: {
+                      $filter: {
+                        input: '$items',
+                        as: 'item',
+                        cond: { $not: [{ $in: ['$$item.product.id', '$returnedProductIds'] }] }
+                      }
+                    }
+                  }
+                },
+                {
+                  $project: {
+                    nonReturnedProducts: 1,
+                    createdAt: 1,
+                    orderCount: { $literal: 1 } // Add a literal value of 1 for each order
+                  }
+                },
+                {
+                  $unwind: '$nonReturnedProducts'
+                },
+                {
+                  $group: {
+                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }, // Group by month
+                    products: { $push: '$nonReturnedProducts' },
+                    orderCount: { $sum: '$orderCount' } // Sum up the count of orders
+                  }
+                },
+                {
+                    $sort: { "_id": 1 } // Ensure sorting by month
+                }
+    
+            ]),
+
+
+            Order.aggregate([
+                {
+                  $match: { 
+                    // status: 'Delivered',// Filter orders with status 'Delivered'
+                    $expr: { $eq: [{ $year: "$createdAt" }, currentYear] }
+                } 
+                },
+                {
+                  $group: {
+                    _id: { 
+                      year: { $year: "$createdAt" },
+                      month: { $month: "$createdAt" }
+                    },
+                    totalOrders: { $sum: 1 } // Sum the totalItems field for each month
+                  }
+                },
+                {
+                  $sort: { 
+                    // "_id.year": 1,  
+                    "_id.month": 1 } // Sort the result by year and month
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    year: "$_id.year",
+                    month: "$_id.month",
+                    totalOrders: 1
+                  }
+                }
+            ])
+        ])
+
+        const products = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ;
+        for(let i = 0 ; i < monthlyNetDeliveredProducts.length ; i++){
+            
+            const month = monthlyNetDeliveredProducts[i]._id.split('-')[1];
+            const monthInt = parseInt(month);
+            products[monthInt -1 ] = monthlyNetDeliveredProducts[i].orderCount;
+        }
+        const sales = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ;
+        for(let i = 0 ; i < monthlyOrderCount.length ; i++){
+
+            const month = monthlyOrderCount[i].month;
+            sales[month -1] = monthlyOrderCount[i].totalOrders;
+        }
+
+       console.log(monthlyNetDeliveredProducts,monthlyOrderCount,products)
+
+        return res.status(200).json({
+            "sales": sales,
+            "products": products
+          }); 
+
+    }catch(error){
+        console.log("Internal error while getting sale data",error);
+        return res.status(500).send("Internal error while getting sale data",error);
+    }
+
+}
+
+
 const loadDashboard = async (req,res) => {
 
     try{
 
-        const [productsCount,categories,deliveredOrder] = await Promise.all([
+        // const currentYear = new Date().getFullYear();
+        // const startDate = new Date(`${currentYear}-01-01T00:00:00Z`);
+        const currentDate = new Date();
+
+        const monthsElapsed = currentDate.getMonth() + 1 ;
+
+        const [
+            productsCount,
+            categories,
+            orderStatics,
+            returnOrders ] = await Promise.all([
             
             Product.aggregate([ {$group:{_id:null,total:{$sum:"$stockQuantity"}}} ]),
             Product.aggregate([ {$group:{_id:"$Category"}} ]),
             Order.aggregate([
-                {$group:{_id:"$status",count:{$sum:1}}},
-                {$match:{_id:'Delivered'}}
+                {$group:{
+                    _id:"$status",
+                    count:{$sum:1},
+                    totalAmnt: {$sum : "$totalAmount"}
+                }},
             ]),
+            returnItem.aggregate([
+                {$group:{
+                    _id:'$status',
+                    count:{$sum : 1},
+                    totalAmnt: {$sum : "$refundAmnt"}
+                }},
+                {$match:{_id : 'approved'}}
+            ]) 
 
         ]);
         const categoryCount = categories.length;
-        return res.status(200).render('dashboard',{productsCount,categoryCount,deliveredOrder});
+        const deliveredOrderCount = orderStatics.filter(ob => ob._id == 'Delivered')[0].count;
+        const totalDeliveredAmount = orderStatics.filter(ob => ob._id == 'Delivered')[0].totalAmnt;
+        const totalReturnCount = returnOrders[0].count;
+        const totalReturnedAmnt = returnOrders[0].totalAmnt;
+
+        const purchasedCount = deliveredOrderCount - totalReturnCount;
+        const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2);
+        const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2) ;
+
+        return res.status(200).render('dashboard',{
+            productsCount,
+            categoryCount,
+            purchasedCount,
+            purchasedAmount,
+            avgMonthlyEarning,
+           
+        });
 
     }catch(error){
 
         console.log("Error while rendering dashboard\n",error);
         return res.status(500).send("Error while rendering dashboard")
+
     }
 }
 
@@ -398,6 +562,7 @@ const loadAllProducts = async (req,res) => {
 
     const page = parseInt(req.query.page) || 1 ;
     const limit = 6;
+   
 
     try{
      
@@ -408,7 +573,7 @@ const loadAllProducts = async (req,res) => {
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
 
-        return res.render('productslist',{products,totalPages : totalPages, currentPage : page})
+        return res.render('productslist',{products,totalPages : totalPages, currentPage : page })
 
     }catch(error){
 
@@ -574,7 +739,7 @@ const updateProduct = async(req,res) => {
 const loadOrderList = async(req,res) => {
 
     const page = parseInt(req.query.page) || 1 ;
-    const limit = 5;
+    const limit = 10;
 
     try{
 
@@ -582,7 +747,7 @@ const loadOrderList = async(req,res) => {
         
         const [orders,totalDocuments] = await Promise.all([
             
-            Order.find().skip(skip).limit(limit).populate('customer').exec(),
+            Order.find().skip(skip).limit(limit).populate('customer').sort({ createdAt : -1 }).exec(),
             Order.countDocuments().exec()
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
@@ -659,7 +824,7 @@ const loadReturnedOrders = async(req,res) => {
     try{
 
         const [returnedProducts, totalDocuments] = await Promise.all([
-            returnItem.find().populate('customer').exec(),
+            returnItem.find().populate('customer').sort({returnDate : -1}).exec(),
             returnItem.countDocuments().exec()
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
@@ -683,15 +848,15 @@ const changeReturnStatus = async(req,res) => {
         
         const returnedStatus = await returnItem.findOneAndUpdate(returnId,{$set:{status : req.body.returnStatus}},{new : true});
         const  isWallet = await wallet.findOne({userId : returnedStatus.customer}).exec();
-        console.log(returnedStatus);
-        console.log(isWallet);
-    
+        const orderId = returnedStatus.order;
+        const productId = returnedStatus.productId;
+console.log(returnedStatus,'\n',isWallet)    
         if(returnedStatus.status === 'approved'){
     
             var Transaction = new transaction({
                     
                 userId : returnedStatus.customer,
-                orderId : returnedStatus.order, 
+                orderId : orderId, 
                 paymentId : null,
                 amount : returnedStatus.refundAmnt,
                 type : 'refund',
@@ -717,6 +882,16 @@ const changeReturnStatus = async(req,res) => {
                 console.log(createWalletForUser,"This is createWalletForUser");
                 if(createWalletForUser){
 
+                    await Order.updateOne(
+                        {
+                            _id : orderId,
+                            'items.product.id': productId
+                        },{$set : {
+                           'items.$[elem].status' : 'Returned' 
+                        }},
+                        {arrayFilters : [{'elem.product.id' : productId}]}
+                    );
+
                     return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
                 }else{
                     return res.json({status : false, message : 'Return approved but fund not transffered.'});
@@ -729,11 +904,25 @@ const changeReturnStatus = async(req,res) => {
                 const updatedWallet = await isWallet.save();
                 
                 if(updatedWallet){
+
+                    await Order.updateOne(
+                        {
+                            _id : orderId,
+                            'items.product.id': productId
+                        },{$set : {
+                           'items.$[elem].status' : 'Returned' 
+                        }},
+                        {arrayFilters : [{'elem.product.id' : productId}]}
+                    );
+
                     return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
                 }else{
                     return res.json({status : false, message : 'Return approved but fund not transffered.'});
                 }
             }
+
+
+            
     
         }
         
@@ -750,6 +939,7 @@ module.exports = {
     loadLogin,
     loginAdmin,
     loadDashboard,
+    getSaleData,
 
     loadCoupons,
     addNewCoupon,

@@ -487,17 +487,21 @@ async function updateAddress(addressID){
     const modal = document.getElementById('editAddressModalCenter');
     try{
         $(modal).modal('show')
-
+console.log("hello")
+        const response = await fetch(`http://localhost:2000/profile/address/edit?addressId=${addressID}`);
+        console.log("how are")
         //Need to complete this
+
     }catch(error){
         console.log("Error occured while editing address",error)
     }
 }
 
 
-async function addProductToCart(productId){
-    
-    console.log("ProductID",productId)
+async function addProductToCart(productId,flag){
+  
+    let wishlistControl = flag ?? false;
+
     const response = await fetch(`http://localhost:2000/product_details?product_id=${productId}`,{method : "post",headers : {
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
@@ -520,6 +524,32 @@ async function addProductToCart(productId){
             IdForaddToCartFn.addEventListener('click',()=> {
                 window.location.href = "http://localhost:2000/cart"
             })
+        }else if(wishlistControl){
+            
+            document.getElementById(productId).remove();
+            
+            fetch(`http://localhost:2000/wishlist?productId=${productId}`,{method : "PATCH",headers : {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }})
+            .then(response => {
+
+                if(!response.ok){
+                    throw new Error('Network response was not ok while adding product to the wishlist.')
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data.status){
+
+                    const totalItemsInWishlist = document.getElementById('totalItemsInWishlist');
+                    totalItemsInWishlist.innerText =  `Total ${data.itemsLeftInWishlist} items in your wishlist`
+                }
+            })
+            .catch(error => {
+                console.log('Error occured while trying to fetch wishlist items.',error);
+            })
+            
         }
     }
 }
@@ -699,6 +729,47 @@ async function loadCheckout() {
 }
 
 
+const cancelProduct = async(productOrderId, orderId) => {
+    console.log("This is productOrderId:",productOrderId,"\norderId: ",orderId,"End");
+
+    let alertMsg = "Are you sure you want to cancel this product?";
+    let confirmMsg = 'Yes, cancel it!';
+    let commitedMsg = `You have cancelled the the product with id : ${productOrderId}`;
+    let commitedHead = 'Cancelled!';
+    let safeMsg = 'Order is on the way :)'
+
+    let confirmCancellation = await swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg);
+
+    if (confirmCancellation) {
+        // Swal.fire(`You selected: ${reason}`);
+        const response = await fetch(`http://localhost:2000/profile/cancelproduct?return_item_id=${productOrderId}&order_id=${orderId}`,{method : 'post'});
+        
+        if(!response.ok){
+
+            throw new Error('Network response was not ok while initiating the return');
+        }      
+        const data = await response.json();
+        if(!data.status) {
+
+            Swal.fire(
+                'Oops',
+                `${data.message}`,
+                'error'
+            )
+            return;
+        }else{
+
+            Swal.fire(
+                'Success',
+                `${data.message}`,
+                'success'
+            )
+            return;
+
+        }
+      }
+
+}
 
 
 const returnProduct = async(productOrderId, orderId) =>{
@@ -799,6 +870,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         if(isRemoveCard == 'remove'){
                             const itemCardInWishlist = document.getElementById(productId);
                             itemCardInWishlist.remove();
+
+                            const totalItemsInWishlist = document.getElementById('totalItemsInWishlist');
+                            totalItemsInWishlist.innerText =  `Total ${data.itemsLeftInWishlist} items in your wishlist`
                         }
                     }
                     
@@ -1173,7 +1247,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function createOrderDetailsRow(products,addres,orderDate,orderStatus, orderId){
-        
+        console.log(orderStatus,"THIS aisdfh;liahk")
+        let returnBtn = '';
+        if(orderStatus == 'Delivered'){
+            returnBtn = `<button onclick="returnProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Return</button>`
+        }else if(orderStatus == 'Pending'){
+            returnBtn = `<button onclick="cancelProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Cancel</button>`
+        }
+
         return `<div class="container-fluid bot-order-container">
   <div class="row">
     <!-- Image, Product Name, and Brand -->
@@ -1210,7 +1291,8 @@ document.addEventListener('DOMContentLoaded', function() {
       <p><span class="bot-bold">Total:</span> ₹${products?.subtotal}</p>
       <div class="bot-return-status" >
         <div class="bot-status bot-status-${orderStatus.toLowerCase()}">${orderStatus}</div>
-        ${orderStatus.toLowerCase() === 'delivered' ? `<button onclick="returnProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Return</button>` : ''}
+         ${returnBtn}
+            
       </div>
     </div>
   </div>
@@ -1270,7 +1352,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
        
             show_all_btn.addEventListener('click',()=> {
-                console.log("worked")
+                
                 order_details.classList.add('display-order-details');
                 show_all_btn.classList.add('display-order-details');
                 toggle_order_history.style.display = 'block';

@@ -223,6 +223,7 @@ const cartSchema = new mongoose.Schema({
     userId : {
         type : mongoose.Schema.Types.ObjectId,
         required : true,
+        unique : true,
         ref : 'User'
     },
     items : [
@@ -285,8 +286,14 @@ const orderItemSchema = new mongoose.Schema({
         },
         
     },
-      quantity: { type: Number, required: true, min: 1 },
-      subtotal: { type: Number, required: true }
+    quantity: { type: Number, required: true, min: 1 },
+    subtotal: { type: Number, required: true },
+    status: {
+        type: String,
+        required: true,
+        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned' ],
+        default: 'Pending'
+    }
 })
 
 const orderSchema = new mongoose.Schema({
@@ -349,7 +356,11 @@ const orderSchema = new mongoose.Schema({
         enum: ['UPI Method', 'Cash on Delivery'],
         default: 'UPI Method'
     },
-    
+    return : [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'returnItem'
+    }]
+        
 },{timestamps : true});
 
 

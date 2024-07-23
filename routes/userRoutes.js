@@ -70,10 +70,12 @@ userRouter.put('/profile/account-detail',authenticate.isLoggedIn,userController.
 userRouter.post('/profile/address',authenticate.isLoggedIn,userController.addNewAddress);
 userRouter.patch('/profile/address',authenticate.isLoggedIn,userController.makeDefaultAddress);
 userRouter.delete('/profile/address',authenticate.isLoggedIn,userController.deleteAddress);
-userRouter.put('/profile/address',authenticate.isLoggedIn,userController.updateAddress);
+userRouter.get('/profile/address/edit',authenticate.isLoggedIn,userController.getAddressDetails);
+userRouter.put('/profile/address/edit',authenticate.isLoggedIn,userController.updateAddress);
 userRouter.get('/profile/get-order-details',authenticate.isLoggedIn,userController.getOrderDetails);
 
 userRouter.post('/profile/returnproduct',authenticate.isLoggedIn,userController.initiateReturn);
+userRouter.post('/profile/cancelproduct',authenticate.isLoggedIn,userController.cancelOrder);
 
 userRouter.get('/profile/logout',authenticate.isLoggedIn,userController.logoutUser);
 

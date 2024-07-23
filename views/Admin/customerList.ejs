@@ -76,7 +76,10 @@
                                         </td>
                                         <td><%=user[i].mobile_no%></td>
                                      
-                                        <td><%=user[i].createdAt%></td>
+                                        <td>    
+                                            <%= new Date(user[i]?.createdAt).toLocaleDateString('en-US', { 
+                                            year: 'numeric', month: 'long', day: 'numeric' }) %>
+                                        </td>
                                         
                                         <td class="text-end">
                                             <% if(!user[i].isBlocked){ %>

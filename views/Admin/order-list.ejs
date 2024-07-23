@@ -26,11 +26,14 @@
                             <input type="text" placeholder="Search..." class="form-control">
                         </div>
                         <div class="col-lg-2 col-6 col-md-3">
-                            <select class="form-select">
-                                <option>Status</option>
-                                <option>Active</option>
-                                <option>Disabled</option>
+                            <select class="form-select" id="orderlist-sort" >
+                                <option disabled selected >Status</option>
+                                <option>Pending</option>
+                                <option>Shipped</option>
+                                <option>Delivered</option>
+                                <option>Cancelled</option>
                                 <option>Show all</option>
+
                             </select>
                         </div>
                         <div class="col-lg-2 col-6 col-md-3">
@@ -71,7 +74,10 @@
                                         <td>₹ <%=orderlist[i].totalAmount%></td>
                                         <td><span class="badge rounded-pill alert-warning"><%=orderlist[i].status%></span></td>
                                         <td><%=orderlist[i].paymentMethod%></td>
-                                        <td><%=orderlist[i].orderDate%></td>
+                                        <td>
+                                            <%= new Date(orderlist[i]?.orderDate).toLocaleDateString('en-US', { 
+                                                year: 'numeric', month: 'long', day: 'numeric' }) %>
+                                        </td>
                                       
                                     </tr>
                                     
