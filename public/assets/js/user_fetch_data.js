@@ -1247,7 +1247,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function createOrderDetailsRow(products,addres,orderDate,orderStatus, orderId){
-        console.log(orderStatus,"THIS aisdfh;liahk")
+        
         let returnBtn = '';
         if(orderStatus == 'Delivered'){
             returnBtn = `<button onclick="returnProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Return</button>`

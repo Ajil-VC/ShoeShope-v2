@@ -1522,10 +1522,133 @@ const cancelOrder = async(req,res) => {
 
     try{
 
-        const return_item_id = req.query.return_item_id ;
-        const order_id = req.query.order_id ;
-        
-        
+        let userID = "";
+        if(req?.user?._id){
+            userID = new mongoose.Types.ObjectId(req.user._id);
+        }else if(req.session.user_id){
+            userID = new mongoose.Types.ObjectId(req.session.user_id)
+        }
+
+        let flag = false; 
+        const cancelledItemId = new mongoose.Types.ObjectId(req.query.return_item_id);
+        const orderId = new mongoose.Types.ObjectId(req.query.order_id);
+
+        const [isWallet, orderData, cancelledProdWithOrder] = await Promise.all([
+
+            wallet.findOne({userId : userID}).exec(),
+            Order.findOne({_id : orderId}).exec(),
+            Order.aggregate([
+                {$match:{_id : orderId}},
+                {$unwind : '$items'},
+                {$match:{ 'items.product.id' : cancelledItemId}}
+            ])
+        ])
+    //  console.log(cancelledProdWithOrder)
+        const gstForCancelled = (cancelledProdWithOrder[0].items.subtotal / cancelledProdWithOrder[0].subTotal) * cancelledProdWithOrder[0].gstAmount ;
+        const gstAddedAmount = cancelledProdWithOrder[0].items.subtotal + gstForCancelled;
+        const totalWithoutDiscount = cancelledProdWithOrder[0].totalAmount + cancelledProdWithOrder[0].discount ;
+        const cancelledProductDiscount = (gstAddedAmount / totalWithoutDiscount) * cancelledProdWithOrder[0].discount ;
+        const refundAmount = gstAddedAmount - cancelledProductDiscount;
+
+        if(orderData && (cancelledProdWithOrder[0].items.status === 'Pending')){
+
+            var Transaction = new transaction({
+                        
+                userId : userID,
+                orderId : orderId, 
+                paymentId : null,
+                amount : refundAmount,
+                type : 'refund',
+                status: 'completed',
+                currency: 'INR',
+                description: "Transaction of Canceled product"
+    
+            });
+
+            const trasactionData = await Transaction.save();
+            
+            if(!isWallet){
+                
+                const userWallet = new wallet({
+    
+                    userId: userID,
+                    balance: refundAmount,
+                    transactions: [trasactionData._id]
+                    
+                });
+
+                const createWalletForUser = await userWallet.save();
+                // console.log(createWalletForUser,"This is createWalletForUser");
+                if(createWalletForUser){
+
+                    flag = true;
+                    console.log(createWalletForUser,"createWalletForUser created\n");
+
+                }else{
+                    return res.json({status : false, message : 'Transaction saved but fund not transffered..'});
+                }
+
+            }else{
+
+                isWallet.transactions.push(trasactionData._id);
+                isWallet.balance = isWallet.balance + refundAmount;
+                const updatedWallet = await isWallet.save();
+                
+                if(updatedWallet){
+
+                    flag = true;
+                    console.log(updatedWallet,"updatedWallet updated\n");
+                }else{
+                    return res.json({status : false, message : 'Transaction saved but fund not transffered.'});
+                }
+            }
+        }else{
+            console.log('Already cancelled maaannnnn')
+        }
+
+        if(flag){
+
+            const [updatedOrder, inventoryUpdate] = await Promise.all([
+            
+                Order.findOneAndUpdate(
+                    {
+                        _id : orderId,
+                        'items.product.id': cancelledItemId
+                    },{$set : {
+                    'items.$[elem].status' : 'Cancelled' 
+                    }},
+                    {
+                        arrayFilters : [{'elem.product.id' : cancelledItemId}],
+                        new : true
+                    }
+                    
+                ).exec(),
+
+
+                Product.updateOne(
+                    {_id : cancelledItemId},
+                    {$inc : 
+                        { 
+                            reserved : -cancelledProdWithOrder[0].items.quantity, 
+                            stockQuantity : cancelledProdWithOrder[0].items.quantity 
+                }}).exec()
+            ])
+
+            //Setting Order status to Cancelled if all the products have cancelled.
+            const isAllCancelled = updatedOrder.items.filter(item => item.status !== 'Cancelled');
+console.log(updatedOrder,"updatedOrder\n",inventoryUpdate,"inventoryUpdate\n",isAllCancelled,"isAllCancelled\n",)
+            if(isAllCancelled.length < 1){
+                 
+                updatedOrder.status = 'Cancelled';
+                await updatedOrder.save();
+            }
+
+
+
+            return res.status(201).json({status : true, message : 'Product cancelled Successfully and amount added to user wallet.'});
+        }else{
+            return res.status(201).json({status : false, message : 'Something went wrong while adding amount to user wallet.'});
+        }
 
     }catch(error){
         console.log(`Internal error while trying to cancel the order.\n${error}`);

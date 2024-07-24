@@ -850,7 +850,7 @@ const changeReturnStatus = async(req,res) => {
         const  isWallet = await wallet.findOne({userId : returnedStatus.customer}).exec();
         const orderId = returnedStatus.order;
         const productId = returnedStatus.productId;
-console.log(returnedStatus,'\n',isWallet)    
+   
         if(returnedStatus.status === 'approved'){
     
             var Transaction = new transaction({
