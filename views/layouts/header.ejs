@@ -20,6 +20,21 @@
 
     <style>
 
+      .scroll-modal-content{
+        max-height: 70vh; /* Adjust the height as needed */
+        overflow-y: auto;
+      }
+      .adna-modal-body {
+        padding: 2rem; /* Adjust padding if necessary */
+      }
+
+      .adna-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 1050; /* Make sure it's above other content */
+        background-color: #fff; /* Set background color to avoid transparency issues */
+        border-bottom: 1px solid #dee2e6; /* Add a border if needed */
+      }
 .ods-order-table th:last-child,
 .ods-order-table td:last-child {
     width: 15%;  /* Reduced from the default 20% */
@@ -183,6 +198,11 @@
   margin-top: 10px;
 }
 
+.bot-status-shipped {
+  background-color: #fdff77;
+  color: #c20000;
+}
+
 .bot-status-pending {
   background-color: #ffeeba;
   color: #856404;
@@ -191,6 +211,11 @@
 .bot-status-delivered {
   background-color: #d4edda;
   color: #155724;
+}
+
+.bot-status-cancelled {
+  background-color: #edd4d4;
+  color: #ff0000;
 }
 
 .bot-return-btn {

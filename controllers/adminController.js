@@ -547,7 +547,7 @@ const updateCategory = async(req,res) => {
     }catch(error){
 
         if(error.code === 11000){
-            console.log("1100000000 hahaha")
+           
             return res.json({status : false,message : "Category already exist."});
         }
 
@@ -784,15 +784,39 @@ const updateOrderStatus = async(req,res) => {
 
         let order = await Order.findOneAndUpdate({_id : orderId},{$set:{status : orderStatus}},{new : true});
 
+        let pendingItems = order.items.filter(item => ((item.status == 'Pending') || (item.status == 'Shipped')) ).map((elem) => {
+           
+            return {productId : elem.product.id}
+        });
+    
         if((order.confirmation ===  0) && (orderStatus === 'Delivered')){
         
             order = await Order.findOneAndUpdate({_id : orderId},{$set:{confirmation : 1}},{new : true});
             
-            const prome = order.items.map(async item => {
+            const prome = order.items.filter(prod => ((prod.status == 'Pending') || (prod.status == 'Shipped')) ).map(async item => {
                 return Product.updateOne({_id : item.product.id},{$inc : { reserved : -item.quantity }}).exec();
             });
             
             await Promise.all(prome);
+
+            const promeOfProductStatus = pendingItems.map(productId => {
+                return Order.updateOne(
+                    {
+                        _id : orderId,
+                        'items.product.id': productId.productId
+                    },{$set : {
+                    'items.$[elem].status' : 'Delivered' 
+                    }},
+                    {
+                        arrayFilters : [{'elem.product.id' : productId.productId}],
+                        new : true
+                    }
+                    
+                ).exec()
+            })
+            await Promise.all(promeOfProductStatus);
+            console.log(promeOfProductStatus,"promeOfProductStatuspromeOfProductStatus");
+            
               
         }else if( (order.confirmation ===  0) && (orderStatus === 'Cancelled')) {
 
@@ -804,6 +828,24 @@ const updateOrderStatus = async(req,res) => {
             });
             
             await Promise.all(prome);
+
+            const promeOfProductStatus = pendingItems.map(productId => {
+                return Order.updateOne(
+                    {
+                        _id : orderId,
+                        'items.product.id': productId.productId
+                    },{$set : {
+                    'items.$[elem].status' : 'Cancelled' 
+                    }},
+                    {
+                        arrayFilters : [{'elem.product.id' : productId.productId}],
+                        new : true
+                    }
+                    
+                ).exec()
+            })
+            await Promise.all(promeOfProductStatus);
+            console.log(promeOfProductStatus,"promeOfProductStatuspromeOfProductStatus");
             
         }
         
@@ -824,7 +866,7 @@ const loadReturnedOrders = async(req,res) => {
     try{
 
         const [returnedProducts, totalDocuments] = await Promise.all([
-            returnItem.find().populate('customer').sort({returnDate : -1}).exec(),
+            returnItem.find().sort({returnDate : -1}).skip(skip).limit(limit).populate('customer').exec(),
             returnItem.countDocuments().exec()
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
@@ -882,7 +924,7 @@ const changeReturnStatus = async(req,res) => {
                 console.log(createWalletForUser,"This is createWalletForUser");
                 if(createWalletForUser){
 
-                    await Order.updateOne(
+                    const updatedOrder = await Order.updateOne(
                         {
                             _id : orderId,
                             'items.product.id': productId
@@ -891,6 +933,9 @@ const changeReturnStatus = async(req,res) => {
                         }},
                         {arrayFilters : [{'elem.product.id' : productId}]}
                     );
+
+                    updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
+                    const orderProdCount = updatedOrder.items.length;//stpped here
 
                     return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
                 }else{

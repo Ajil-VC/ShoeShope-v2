@@ -319,7 +319,7 @@ const orderSchema = new mongoose.Schema({
         type : Number,
         default : 0
     },
-    discount : {
+    couponDiscount : {
         type : Number,
         required : true,
         default : 0

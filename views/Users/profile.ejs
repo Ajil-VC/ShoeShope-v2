@@ -9,20 +9,21 @@
 <!-- Add New Address Modal -->
 <div class="modal fade" id="addNewAddressModalCenter" tabindex="-1" role="dialog" aria-labelledby="addNewAddressModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content scroll-modal-content ">
+            <div class="modal-header adna-modal-header">
                 <h5 class="modal-title" id="addNewAddressModalLongTitle">Add New Address</h5>
                 <button type="button" id="addNewAddress-modal-close-button" class="close" data-dismiss="modal" aria-label="Close" style="background-color: transparent; border: none; font-size: 1.5rem; color: gray; padding: 0.5rem 1rem;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body adna-modal-body ">
                 <!-- Add New Address Data here -->
                 <form action="/profile/address" method="post" id="addNewAddressForm" >
 
                     <div class="d-flex justify-content-between row form-group " >
                         <div class="col-lg-6" >
                             <label for="addressName" class="form-label">Address Type</label>
+                            
                             <select id="addressName" class="form-control" name="addressName" >
                                 <option selected disabled value="" >Select Address type</option>
                                 <option >Home</option>
@@ -30,10 +31,13 @@
                                 <option >Work place</option>
                                 <option >Other</option>
                             </select>
+                            <span class="error ml-5 " id="addressName-error" ></span>
+                        
                         </div>
                         <div class="col-lg-6" >
                             <label for="addressPincode" class="form-label">Pincode</label>
                             <input type="text" placeholder="Type here" class="form-control" id="addressPincode" name="addressPincode">
+                            <span class="error ml-5 " id="addressPincode-error" ></span>
                         </div>
                     </div>
 
@@ -41,11 +45,13 @@
                         <div class="col-lg-6" >
                             <label for="addressState" class="form-label">State</label>
                             <input type="text" placeholder="Type here" class="form-control" id="addressState" name="addressState">
+                            <span class="error ml-5 " id="addressState-error" ></span>
                             
                         </div>
                         <div class="col-lg-6" >
                             <label for="addressDistrict" class="form-label">District</label>
                             <input type="text" placeholder="Type here" class="form-control" id="addressDistrict" name="addressDistrict">
+                            <span class="error ml-5 " id="addressDistrict-error" ></span>
 
                         </div>
                     </div>
@@ -54,16 +60,27 @@
                         <div class="col-lg-6" >
                             <label for="addressCity" class="form-label">City</label>
                             <input type="text" placeholder="Type here" class="form-control" id="addressCity" name="addressCity">
+                            <span class="error ml-5 " id="addressCity-error" ></span>
                         </div>
                         <div class="col-lg-6" >
                             <label for="addressPlace" class="form-label">Place</label>
                             <input type="text" placeholder="Type here" class="form-control" id="addressPlace" name="addressPlace">
+                            <span class="error ml-5 " id="addressPlace-error" ></span>
                         </div>
                     </div>
-                    <label for="addressMobile" class="form-label">Mobile</label>
-                    <input type="text" placeholder="Type here" class="form-control" id="addressMobile" name="addressMobile">
-                    <label for="addressLandmark" class="form-label">Landmark</label>
-                    <input type="text" placeholder="Type here" class="form-control" id="addressLandmark" name="addressLandmark">
+
+                    <div>
+
+                        <label for="addressMobile" class="form-label">Mobile</label>
+                        <input type="text" placeholder="Type here" class="form-control" id="addressMobile" name="addressMobile">
+                        <span class="error ml-5 " id="addressMobile-error" ></span>
+                    </div>
+                    <div>
+
+                        <label for="addressLandmark" class="form-label">Landmark</label>
+                        <input type="text" placeholder="Type here" class="form-control" id="addressLandmark" name="addressLandmark">
+                        <span class="error ml-5 " id="addressLandmark-error" ></span>
+                    </div>
 
                 </form>
             </div>
@@ -78,21 +95,22 @@
 <!--Address Editing -->
 <div class="modal fade" id="editAddressModalCenter" tabindex="-1" role="dialog" aria-labelledby="editAddressModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content scroll-modal-content ">
+            <div class="modal-header adna-modal-header ">
                 <h5 class="modal-title" id="editAddressModalLongTitle">Edit Address</h5>
                 <button type="button" id="editAddress-modal-close-button" class="close" data-dismiss="modal" aria-label="Close" style="background-color: transparent; border: none; font-size: 1.5rem; color: gray; padding: 0.5rem 1rem;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form action="/profile/address/edit?_method=PUT" method="post" id="editAddressForm">
+            <div class="modal-body adna-modal-body ">
+                <form method="post" action="/profile/address/edit?_method=PUT" id="editAddressForm">
+                    
                     <input type="hidden" id="editAddressId" name="addressId">
 
                     <div class="d-flex justify-content-between row form-group">
                         <div class="col-lg-6">
                             <label for="editAddressName" class="form-label">Address Type</label>
-                            <select id="editAddressName" class="form-control" name="addressName">
+                            <select id="editAddressName" class="form-control" name="addressType">
                                 <option selected disabled value="" >Select Address type</option>
                                 <option>Home</option>
                                 <option>Office</option>
@@ -102,37 +120,42 @@
                         </div>
                         <div class="col-lg-6">
                             <label for="editAddressPincode" class="form-label">Pincode</label>
-                            <input type="text" placeholder="Enter pincode" class="form-control" id="editAddressPincode" name="addressPincode">
+                            <input type="text" placeholder="Enter pincode" class="form-control" id="editAddressPincode" name="pinCode">
+                            <span class="error ml-5 " id="editAddressPincode-error" ></span>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between row form-group">
                         <div class="col-lg-6">
                             <label for="editAddressState" class="form-label">State</label>
-                            <input type="text" placeholder="Enter state" class="form-control" id="editAddressState" name="addressState">
+                            <input type="text" placeholder="Enter state" class="form-control" id="editAddressState" name="state">
                         </div>
                         <div class="col-lg-6">
                             <label for="editAddressDistrict" class="form-label">District</label>
-                            <input type="text" placeholder="Enter district" class="form-control" id="editAddressDistrict" name="addressDistrict">
+                            <input type="text" placeholder="Enter district" class="form-control" id="editAddressDistrict" name="district">
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between row form-group">
                         <div class="col-lg-6">
                             <label for="editAddressCity" class="form-label">City</label>
-                            <input type="text" placeholder="Enter city" class="form-control" id="editAddressCity" name="addressCity">
+                            <input type="text" placeholder="Enter city" class="form-control" id="editAddressCity" name="city">
                         </div>
                         <div class="col-lg-6">
                             <label for="editAddressPlace" class="form-label">Place</label>
-                            <input type="text" placeholder="Enter place" class="form-control" id="editAddressPlace" name="addressPlace">
+                            <input type="text" placeholder="Enter place" class="form-control" id="editAddressPlace" name="place">
                         </div>
                     </div>
 
-                    <label for="editAddressMobile" class="form-label">Mobile</label>
-                    <input type="text" placeholder="Enter mobile number" class="form-control" id="editAddressMobile" name="addressMobile">
+                    <div>
+
+                        <label for="editAddressMobile" class="form-label">Mobile</label>
+                        <input type="text" placeholder="Enter mobile number" class="form-control" id="editAddressMobile" name="mobile_no">
+                        <span class="error ml-5 " id="editAddressMobile-error" ></span>
+                    </div>
 
                     <label for="editAddressLandmark" class="form-label">Landmark</label>
-                    <input type="text" placeholder="Enter landmark" class="form-control" id="editAddressLandmark" name="addressLandmark">
+                    <input type="text" placeholder="Enter landmark" class="form-control" id="editAddressLandmark" name="landmark">
                 </form>
             </div>
             <div class="modal-footer">
@@ -426,7 +449,9 @@
                                                                     </td>
                                                                     <td><span class="ods-price">₹ <%=orders[i]?.totalAmount%></span></td>
                                                                     <td><span class="ods-date"><%=orders[i]?.orderDate%></span></td>
-                                                                    <td><span class="ods-status ods-status-processing"><%=orders[i]?.status%></span></td>
+                                                                    <td><span class="ods-status  bot-status-<%= orders[i]?.status.toLowerCase() %>"><%= orders[i]?.status %></span></td>
+                                                                    
+
                                                                 </tr>
                                                              
                                                             <% } %>
@@ -458,7 +483,7 @@
 
                                     <!--Address management....-->
                                     <div class="container mt-5 tab-pane fade " id="address" >
-                                        <button type="button" class="btn  mb-3" data-toggle="modal" data-target="#addNewAddressModalCenter" >Add New Address</button>
+                                        <button type="button" class="btn  mb-3" data-toggle="modal" onclick="disableScroll()" data-target="#addNewAddressModalCenter" >Add New Address</button>
                                    <!-- Button to trigger the modal -->
                                        
                                         <% if(!defaultAddress){ %>

@@ -423,8 +423,17 @@ const getOrderDetails = async(req,res) => {
         const address = order.shippingAddress;
         const orderDate = order.orderDate;
         const orderStatus = order.status;
-        console.log(order)
-        return res.status(200).json({status : true, products,address,orderDate,orderStatus, orderId: order._id});
+        const deliveryDate = order.updatedAt;
+        
+        return res.status(200).json({
+            status : true,
+            products,
+            address,
+            orderDate,
+            orderStatus,
+            orderId: order._id,
+            deliveryDate
+        });
 
     }catch(error){
         console.log("Internal error while gettting order details.",error)
@@ -737,14 +746,59 @@ const deleteAddress = async(req,res) => {
 
 const getAddressDetails = async(req,res) => {
 
-    if(req.query.addressID){
-        console.log(req.query.addressId)
-       }
+
+    try{
+        //Finding address to populate on frontend in edit.
+        const addressId = new mongoose.Types.ObjectId(req.query.addressId);    
+        const addressDetails = await Address.findOne({_id: addressId});
+
+        if(addressDetails){
+            return res.status(200).json({status: true, addressDetails});
+        }else{
+            return res.status(404).json({status : false, message : "Address not found in database"});
+        }
+
+    }catch(error){
+
+        console.log("Internal error occured while trying to fetch Address.",error);
+        return res.status(500).json({status :false, message : `Internal error occured while trying to fetch Address.\nError: ${error}`})
+    }
 }
 
 const updateAddress = async(req,res) => {
 
-   
+   console.log('Its putting.',req.body);
+   try{
+
+        const addressId = new mongoose.Types.ObjectId(req.body.addressId);    
+        const addressDetails = await Address.findOne({_id: addressId});
+
+        if(!addressDetails){
+            throw new Error("Address not found.");
+        }
+
+        Object.keys(req.body).forEach(key => {
+            
+            if( (req.body[key] !== undefined) && req.body[key] !== '' ){
+
+                addressDetails[key] = req.body[key];
+            }
+        })
+
+        const updatedAddress = await addressDetails.save();
+        console.log(updatedAddress)
+        if(updatedAddress){
+            console.log("hooooi")
+            return res.status(201).redirect('/profile')
+        }else{
+            return res.status(403).send('Address updation failed!');
+        }
+
+   }catch(error){
+        console.log("Internal error while trying to update the address.",error);
+        return res.status(500).send("Internal error while trying to update the address.",error);
+   }
+
 }
 
 
@@ -1404,7 +1458,7 @@ const placeOrder = async(req,res) => {
                 totalItems  : totalSelectedItems,
                 subTotal    : subTotal,
                 gstAmount   : gst,
-                discount    : offerAmount,
+                couponDiscount  : offerAmount,
                 totalAmount : totalAmount,
                 shippingAddress : address._id,
                 paymentMethod   : paymentMethod
@@ -1546,8 +1600,8 @@ const cancelOrder = async(req,res) => {
     //  console.log(cancelledProdWithOrder)
         const gstForCancelled = (cancelledProdWithOrder[0].items.subtotal / cancelledProdWithOrder[0].subTotal) * cancelledProdWithOrder[0].gstAmount ;
         const gstAddedAmount = cancelledProdWithOrder[0].items.subtotal + gstForCancelled;
-        const totalWithoutDiscount = cancelledProdWithOrder[0].totalAmount + cancelledProdWithOrder[0].discount ;
-        const cancelledProductDiscount = (gstAddedAmount / totalWithoutDiscount) * cancelledProdWithOrder[0].discount ;
+        const totalWithoutDiscount = cancelledProdWithOrder[0].totalAmount + cancelledProdWithOrder[0].couponDiscount ;
+        const cancelledProductDiscount = (gstAddedAmount / totalWithoutDiscount) * cancelledProdWithOrder[0].couponDiscount ;
         const refundAmount = gstAddedAmount - cancelledProductDiscount;
 
         if(orderData && (cancelledProdWithOrder[0].items.status === 'Pending')){
@@ -1636,7 +1690,7 @@ const cancelOrder = async(req,res) => {
 
             //Setting Order status to Cancelled if all the products have cancelled.
             const isAllCancelled = updatedOrder.items.filter(item => item.status !== 'Cancelled');
-console.log(updatedOrder,"updatedOrder\n",inventoryUpdate,"inventoryUpdate\n",isAllCancelled,"isAllCancelled\n",)
+
             if(isAllCancelled.length < 1){
                  
                 updatedOrder.status = 'Cancelled';

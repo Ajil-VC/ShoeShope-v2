@@ -15,35 +15,55 @@
                     <h2 class="content-title card-title">Order List </h2>
                     <p>Find all orders here.</p>
                 </div>
-                <div>
-                    <input type="text" placeholder="Search order ID" class="form-control bg-white">
-                </div>
+             
             </div>
             <div class="card mb-4">
                 <header class="card-header">
+
                     <div class="row gx-3">
                         <div class="col-lg-4 col-md-6 me-auto">
                             <input type="text" placeholder="Search..." class="form-control">
                         </div>
-                        <div class="col-lg-2 col-6 col-md-3">
-                            <select class="form-select" id="orderlist-sort" >
-                                <option disabled selected >Status</option>
-                                <option>Pending</option>
-                                <option>Shipped</option>
-                                <option>Delivered</option>
-                                <option>Cancelled</option>
-                                <option>Show all</option>
+                      
+                    </div>
 
-                            </select>
+                    <div class="row align-items-center">
+                        
+                        <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                            <div class="custom_select">
+                                <select class="form-select select-nice">
+                                    <option disabled selected>All Categories</option>
+                                    <option>Women's Clothing</option>
+                                    <option>Men's Clothing</option>
+                                    <option>Cellphones</option>
+                                    <option>Computer & Office</option>
+                                    <option>Consumer Electronics</option>
+                                    <option>Jewelry & Accessories</option>
+                                    <option>Home & Garden</option>
+                                    <option>Luggage & Bags</option>
+                                    <option>Shoes</option>
+                                    <option>Mother & Kids</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-lg-2 col-6 col-md-3">
-                            <select class="form-select">
-                                <option>Show 20</option>
-                                <option>Show 30</option>
-                                <option>Show 40</option>
-                            </select>
+                        <div class="col-md-2 col-6">
+                            <input type="date" value="02.05.2022" class="form-control">
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <div class="custom_select">
+                                <select class="form-select select-nice">
+                                    <option disabled selected>Status</option>
+                                    <option>All</option>
+                                    <option>Pending</option>
+                                    <option>Shipped</option>
+                                    <option>Delivered</option>
+                                    <option>Cancelled</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+
+
                 </header> <!-- card-header end// -->
                 <div class="card-body">
                     <div class="table-responsive">

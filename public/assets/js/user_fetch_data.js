@@ -20,6 +20,30 @@ function moveToNext (current,nextField){
 
 }
 
+
+function disableScroll(){
+
+    //Current page scroll position.
+    scrollTop = window.scrollY || document.documentElement.scrollTop;
+    scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+    //If any scroll is attempted set this to previous value.
+    window.onscroll = function(){
+        window.scrollTo(scrollLeft, scrollTop);
+    }
+}
+
+function enableScroll(){
+    window.onscroll = function() {};
+}
+
+$('#addNewAddressModalCenter').on('hidden.bs.modal', function () {
+    enableScroll();
+});
+
+
+
+
 const otp_submit_btn = document.getElementById('otp-submit-bn');
 const otp_success_msg = document.getElementById('otp-success-msg');
 const otp_timer = document.getElementById('otp-timer');
@@ -481,20 +505,196 @@ if(newPasswordConfirm){
 // }
 
 
+//form validation for Add new Address
+const addNewAddressForm = document.getElementById('addNewAddressForm');
+if(addNewAddressForm){
 
+    const addressName_error = document.getElementById('addressName-error'); 
+    const addressPincode_error = document.getElementById('addressPincode-error');
+    const addressState_error = document.getElementById('addressState-error');
+    const addressDistrict_error = document.getElementById('addressDistrict-error');
+    const addressCity_error = document.getElementById('addressCity-error');
+    const addressPlace_error = document.getElementById('addressPlace-error');
+    const addressMobile_error = document.getElementById('addressMobile-error');
+    const addressLandmark_error = document.getElementById('addressLandmark-error');
+
+    addNewAddressForm.addEventListener('submit',function(e) {
+
+        e.preventDefault();
+        let valid = true;
+
+        const addressName = document.getElementById('addressName').value.trim();
+        const addressPincode = document.getElementById('addressPincode').value.trim();
+        const addressState = document.getElementById('addressState').value.trim();
+        const addressDistrict = document.getElementById('addressDistrict').value.trim();
+        const addressCity = document.getElementById('addressCity').value.trim();
+        const addressPlace = document.getElementById('addressPlace').value.trim();
+        const addressMobile = document.getElementById('addressMobile').value.trim();
+        const addressLandmark = document.getElementById('addressLandmark').value.trim();
+
+
+        addressName_error.textContent = '';
+        addressPincode_error.textContent = ''; 
+        addressState_error.textContent = ''; 
+        addressDistrict_error.textContent = ''; 
+        addressCity_error.textContent = ''; 
+        addressPlace_error.textContent = ''; 
+        addressMobile_error.textContent = ''; 
+        addressLandmark_error.textContent = '';
+        
+        if(!addressName){
+            addressName_error.textContent = "This field can't be empty";
+            valid = false;
+        }
+        
+        if(!addressPincode){
+            addressPincode_error.textContent = "This field can't be empty";
+            valid = false;
+        }else if(/[^0-9]/.test(addressPincode)){
+            addressPincode_error.textContent = "Please give proper value.";
+            valid = false;
+        }
+
+        if(!addressState){
+            addressState_error.textContent = "This field can't be empty";
+            valid = false;
+        }
+
+        if(!addressDistrict){
+            addressDistrict_error.textContent = "This field can't be empty";
+            valid = false;
+        }
+        
+        if(!addressCity){
+            addressCity_error.textContent = "This field can't be empty";
+            valid = false;
+        }
+        
+        if(!addressPlace){
+            addressPlace_error.textContent = "This field can't be empty";
+            valid = false;
+        }
+
+        if(!addressMobile){
+            addressMobile_error.textContent = "This field can't be empty";
+            valid = false;
+        }else if(!/^\+?(\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(addressMobile)){
+            addressMobile_error.textContent = "Give a proper mobile number";
+            valid = false;
+        }
+
+        if(!addressLandmark){
+            addressLandmark_error.textContent = "This field can't be empty";
+            valid = false;
+        }
+
+        if(valid ){
+
+            this.submit();
+        }
+
+    })
+}
+
+$('#editAddressModalCenter').on('hidden.bs.modal', function () {
+    enableScroll();
+});
+
+$('#editAddressModalCenter').on('show.bs.modal', function () {
+    disableScroll();
+});
+
+const editAddress_modal_close_button = document.getElementById('editAddress-modal-close-button');
+if(editAddress_modal_close_button){
+
+    editAddress_modal_close_button.addEventListener('click',()=> {
+        
+        $('#editAddressModalCenter').modal('hide');
+    })
+}
 async function updateAddress(addressID){
-    event.preventDefault();
-    const modal = document.getElementById('editAddressModalCenter');
-    try{
-        $(modal).modal('show')
-console.log("hello")
-        const response = await fetch(`http://localhost:2000/profile/address/edit?addressId=${addressID}`);
-        console.log("how are")
-        //Need to complete this
 
+    const editAddressId = document.getElementById('editAddressId');
+    const editAddressName = document.getElementById('editAddressName');
+    const editAddressPincode = document.getElementById('editAddressPincode');
+    const editAddressState = document.getElementById('editAddressState');
+    const editAddressDistrict = document.getElementById('editAddressDistrict');
+    const editAddressCity = document.getElementById('editAddressCity');
+    const editAddressPlace = document.getElementById('editAddressPlace');
+    const editAddressMobile = document.getElementById('editAddressMobile');
+    const editAddressLandmark = document.getElementById('editAddressLandmark');
+
+    try{
+        $('#editAddressModalCenter').modal('show');
+        
+        console.log(addressID,"And this is from updateAddress")
+        const response = await fetch(`http://localhost:2000/profile/address/edit?addressId=${addressID}`,{
+            method : 'GET',
+            headers : {
+                'Accept': 'application/json' 
+            }
+        });
+        if(!response.ok){
+            throw new Error('Network response was not ok while trying to fetch the address detilas.')
+        }
+        const data = await response.json();
+        console.log(data);
+        
+        if(data.status){
+
+            editAddressId.value = addressID;
+            editAddressName.value = data.addressDetails.addressType;
+            editAddressPincode.value = data.addressDetails.pinCode;
+            editAddressState.value = data.addressDetails.state;
+            editAddressDistrict.value = data.addressDetails.district;
+            editAddressCity.value = data.addressDetails.city;
+            editAddressPlace.value = data.addressDetails.place;
+            editAddressMobile.value = data.addressDetails.mobile_no;
+            editAddressLandmark.value = data.addressDetails.landmark;
+        }else{
+            console.log("Coudn't findout the address.")
+        }
     }catch(error){
         console.log("Error occured while editing address",error)
     }
+}
+
+const editAddressForm = document.getElementById('editAddressForm');
+if(editAddressForm){
+
+    const editAddressPincode_error = document.getElementById('editAddressPincode-error');
+    const editAddressMobile_error = document.getElementById('editAddressMobile-error');
+
+    editAddressForm.addEventListener('submit',function(e){
+
+        e.preventDefault();
+        let valid = true;
+
+        const editAddressPincode = document.getElementById('editAddressPincode').value.trim();
+        const editAddressMobile = document.getElementById('editAddressMobile').value.trim();
+
+        if(!editAddressPincode){
+
+            editAddressPincode_error.textContent = "This Field can't be empty.";
+            valid = false;
+        }else if(/[^0-9]/.test(editAddressPincode)){
+
+            editAddressPincode_error.textContent = "Give a proper value.";
+            valid = false;
+        }
+
+        if(!editAddressMobile){
+            editAddressMobile_error.textContent = "This Field can't be empty";
+            valid = false;
+        }else if(!/^\+?(\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(editAddressMobile)){
+            editAddressMobile_error.textContent = "Give a proper value";
+            valid = false;
+        }
+
+        if(valid){
+            this.submit();
+        }
+    })
 }
 
 
@@ -1246,12 +1446,44 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
 
-    function createOrderDetailsRow(products,addres,orderDate,orderStatus, orderId){
-        
+    function createOrderDetailsRow(products,addres,orderDate, orderId,deliveryDate){
+
+        const isoDate = orderDate;
+        const date = new Date(isoDate);
+
+
+        // Formatting to a more readable format
+        const formattedDate = date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        });
+
+        //Checking If already over the time to return product.
+        const currentDate = new Date();
+        const parsedDate = new Date(deliveryDate);
+        const twoDaysLater = new Date(parsedDate);
+        twoDaysLater.setDate(parsedDate.getDate() + 2);
+
+        let derliveredOn = 'Not Delivered';
+        if(products?.status == 'Delivered'){
+        console.log(deliveryDate,"deliveryDate")
+
+            derlivery = new Date(deliveryDate);
+        console.log(derlivery,"derlivery")
+                derliveredOn = derlivery.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+        console.log(derliveredOn,"derliveredOn")
+        }
+    
+
         let returnBtn = '';
-        if(orderStatus == 'Delivered'){
+        if((products?.status == 'Delivered') && (twoDaysLater >= currentDate )){
             returnBtn = `<button onclick="returnProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Return</button>`
-        }else if(orderStatus == 'Pending'){
+        }else if(products?.status == 'Pending'){
             returnBtn = `<button onclick="cancelProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Cancel</button>`
         }
 
@@ -1272,8 +1504,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Date Information -->
     <div class="col-md-6 bot-date-info">
       <div class="bot-date-box">
-        <p><span class="bot-bold">Ordered:</span> ${orderDate}</p>
-        <p><span class="bot-bold">Delivered:</span> ${products?.deliveredDate || 'Pending'}</p>
+        <p><span class="bot-bold">Ordered:</span> ${formattedDate}</p>
+        <p><span class="bot-bold">Delivered:</span> ${derliveredOn}</p>
       </div>
     </div>
 
@@ -1290,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <p><span class="bot-bold">Price:</span> ₹${products?.product.price} <span class="bot-bold">| Qty:</span> ${products?.quantity}</p>
       <p><span class="bot-bold">Total:</span> ₹${products?.subtotal}</p>
       <div class="bot-return-status" >
-        <div class="bot-status bot-status-${orderStatus.toLowerCase()}">${orderStatus}</div>
+        <div class="bot-status ods-status bot-status-${products?.status.toLowerCase()}">${products?.status}</div>
          ${returnBtn}
             
       </div>
@@ -1301,11 +1533,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
                                                                     
 
-    function updateOrderDataTable(produts,addres,orderDate,orderStatus,orderId){
+    function updateOrderDataTable(produts,addres,orderDate,orderId,deliveryDate){
 
         const tableBody = document.getElementById('order-detail-table');
-        tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderStatus,orderId)).join('');
-
+        tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderId,deliveryDate)).join('');
+        
     }
 
     //Order-Details
@@ -1330,8 +1562,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(data => {
                     if(data.status){
-                        console.log(data)
-                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderStatus,data.orderId);
+                        
+                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderId,data.deliveryDate);
                       
                     }else{
 
