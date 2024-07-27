@@ -196,8 +196,6 @@ const getSaleData = async(req,res) => {
             sales[month -1] = monthlyOrderCount[i].totalOrders;
         }
 
-       console.log(monthlyNetDeliveredProducts,monthlyOrderCount,products)
-
         return res.status(200).json({
             "sales": sales,
             "products": products
@@ -211,6 +209,130 @@ const getSaleData = async(req,res) => {
 }
 
 
+const thisWeekSale = async() =>{
+
+    const thisWeekSaleOverAllData  = await Order.aggregate([ 
+
+        { 
+
+            $match: { 
+
+            createdAt: { 
+
+                $gte: new Date(new Date() - new Date().getDay() * 86400000), 
+
+                $lt: new Date(new Date() - new Date().getDay() * 86400000 + 7 * 86400000) 
+
+            } 
+
+            }}, 
+
+            { $group: { 
+
+                _id:null,
+
+                overAllSalesCount :{$count:{}},
+
+                overAllOrderAmount :{$sum:"$totalAmount"},
+
+                couponDiscount:{
+
+                    $sum:{
+
+                        $ifNull:["$couponDiscount",0]
+
+                    }
+
+                },
+
+                otherDiscount:{
+
+                    $sum:{
+
+                        $ifNull:["$otherDiscount",0]
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    ]);
+
+
+
+        const thisWeekOrders = await Order.aggregate([
+            { $match: {
+                 createdAt: { 
+                    $gte: new Date(new Date() - new Date().getDay() * 86400000), 
+                    $lt: new Date(new Date() - new Date().getDay() * 86400000 + 7 * 86400000) 
+                } 
+            }}
+        ]); 
+
+      
+
+        const groupedData = thisWeekOrders.reduce((acc,curr) => {
+
+            const date = new Date(curr.createdAt).toISOString().split('T')[0];
+            console.log(curr,'cueeee')
+
+            if(acc[date]){
+                acc[date].orderCount++; 
+
+                //Below im calculating the Gross sales amount using reduce method
+                //And Adding it into the desired date.
+                const grossSales = curr.items.reduce((total , currProd) => {
+                    if(currProd.status == 'Delivered'){
+                        total = total + currProd.subtotal
+                        return total;
+                    }
+                    return total;
+
+                },0)
+                if(grossSales){
+          
+                    acc[date].grossSales = acc[date].grossSales + grossSales;
+                }
+
+            }else{
+                acc[date] = {orderCount : 1, grossSales : 0};
+
+                //Below im calculating the Gross sales amount using reduce method
+                //And setting it into the desired date.
+                const grossSales = curr.items.reduce((total , currProd) => {
+
+                    if(currProd.status == 'Delivered'){
+                        total = total + currProd.subtotal
+                        return total;
+                    }
+                    return total;
+
+                },0)
+                if(grossSales){
+                    acc[date].grossSales = grossSales;
+                }
+               
+            }
+            return acc;
+        },{})
+
+        console.log(groupedData,"groupedData");
+
+
+    return {thisWeekSaleOverAllData};
+}
+
+const salesReport = async(req,res) => {
+    //for fetching sales report from frontend
+
+
+}
+
+
+
 const loadDashboard = async (req,res) => {
 
     try{
@@ -221,14 +343,17 @@ const loadDashboard = async (req,res) => {
 
         const monthsElapsed = currentDate.getMonth() + 1 ;
 
+
         const [
             productsCount,
             categories,
             orderStatics,
-            returnOrders ] = await Promise.all([
+            returnOrders,
+            {thisWeekSaleOverAllData} ] = await Promise.all([
             
             Product.aggregate([ {$group:{_id:null,total:{$sum:"$stockQuantity"}}} ]),
             Product.aggregate([ {$group:{_id:"$Category"}} ]),
+
             Order.aggregate([
                 {$group:{
                     _id:"$status",
@@ -236,6 +361,7 @@ const loadDashboard = async (req,res) => {
                     totalAmnt: {$sum : "$totalAmount"}
                 }},
             ]),
+
             returnItem.aggregate([
                 {$group:{
                     _id:'$status',
@@ -243,9 +369,14 @@ const loadDashboard = async (req,res) => {
                     totalAmnt: {$sum : "$refundAmnt"}
                 }},
                 {$match:{_id : 'approved'}}
-            ]) 
+            ]),
+
+            thisWeekSale()//Getting datas from this current week
 
         ]);
+
+        
+
         const categoryCount = categories.length;
         const deliveredOrderCount = orderStatics.filter(ob => ob._id == 'Delivered')[0].count;
         const totalDeliveredAmount = orderStatics.filter(ob => ob._id == 'Delivered')[0].totalAmnt;
@@ -262,6 +393,7 @@ const loadDashboard = async (req,res) => {
             purchasedCount,
             purchasedAmount,
             avgMonthlyEarning,
+            thisWeekSaleOverAllData
            
         });
 
@@ -272,6 +404,7 @@ const loadDashboard = async (req,res) => {
 
     }
 }
+
 
 
 const addNewCoupon = async(req,res) => {
@@ -924,18 +1057,23 @@ const changeReturnStatus = async(req,res) => {
                 console.log(createWalletForUser,"This is createWalletForUser");
                 if(createWalletForUser){
 
-                    const updatedOrder = await Order.updateOne(
+                    const updatedOrder = await Order.findOneAndUpdate(
                         {
                             _id : orderId,
                             'items.product.id': productId
                         },{$set : {
                            'items.$[elem].status' : 'Returned' 
                         }},
-                        {arrayFilters : [{'elem.product.id' : productId}]}
+                        {arrayFilters : [{'elem.product.id' : productId}]},
+                        {new : true}
                     );
+console.log(updatedOrder)
+                    const filteredProducts = updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
+                    const orderProdCount = updatedOrder.items.length;
 
-                    updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
-                    const orderProdCount = updatedOrder.items.length;//stpped here
+                    if(filteredProducts.length == orderProdCount){
+                        await Order.updateOne({_id: orderId},{$set:{status : 'Returned'}})
+                    }
 
                     return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
                 }else{
@@ -950,15 +1088,23 @@ const changeReturnStatus = async(req,res) => {
                 
                 if(updatedWallet){
 
-                    await Order.updateOne(
+                    const updatedOrder = await Order.findOneAndUpdate(
                         {
                             _id : orderId,
                             'items.product.id': productId
                         },{$set : {
                            'items.$[elem].status' : 'Returned' 
                         }},
-                        {arrayFilters : [{'elem.product.id' : productId}]}
+                        {arrayFilters : [{'elem.product.id' : productId}]},
+                        {new : true}
                     );
+console.log(updatedOrder)
+                    const filteredProducts = updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
+                    const orderProdCount = updatedOrder.items.length;
+
+                    if(filteredProducts.length == orderProdCount){
+                        await Order.updateOne({_id: orderId},{$set:{status : 'Returned'}})
+                    }
 
                     return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
                 }else{
@@ -984,6 +1130,7 @@ module.exports = {
     loadLogin,
     loginAdmin,
     loadDashboard,
+    salesReport,
     getSaleData,
 
     loadCoupons,

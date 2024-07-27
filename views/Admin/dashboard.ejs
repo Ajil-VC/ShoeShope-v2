@@ -124,15 +124,15 @@
                                 <div class="saleR-summary">
                                   <div class="saleR-summary-item">
                                     <h3>Overall Sales Count</h3>
-                                    <p id="saleR-total-sales-count">1,234</p>
+                                    <p id="saleR-total-sales-count"><%=thisWeekSaleOverAllData[0]?.overAllSalesCount%></p>
                                   </div>
                                   <div class="saleR-summary-item">
                                     <h3>Overall Order Amount</h3>
-                                    <p id="saleR-total-order-amount">$56,789.00</p>
+                                    <p id="saleR-total-order-amount">₹<%=thisWeekSaleOverAllData[0]?.overAllOrderAmount%></p>
                                   </div>
                                   <div class="saleR-summary-item">
                                     <h3>Overall Discount</h3>
-                                    <p id="saleR-total-discount">$2,345.00</p>
+                                    <p id="saleR-total-discount">₹<%=thisWeekSaleOverAllData[0]?.couponDiscount + thisWeekSaleOverAllData[0]?.otherDiscount%></p>
                                   </div>
                                 </div>
                               

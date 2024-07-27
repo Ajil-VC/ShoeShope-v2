@@ -133,6 +133,7 @@
                                     <th width="40%">Product</th>
                                     <th width="20%">Unit Price</th>
                                     <th width="20%">Quantity</th>
+                                    <th width="20%">Status</th>
                                     <th width="20%" class="text-end">Total</th>
                                 </tr>
                             </thead>
@@ -151,20 +152,25 @@
                                         </td>
                                         <td> ₹ <%=orderDetails?.items[i]?.product?.price%> </td>
                                         <td> <%=orderDetails?.items[i]?.quantity%> </td>
+                                        <td  > <%=orderDetails?.items[i]?.status%> </td>
                                         <td class="text-end"> ₹ <%=orderDetails?.items[i]?.subtotal%>  </td>
                                     </tr>
                                 <% } %>
                                 <tr>
-                                    <td colspan="4">
+                                    <td colspan="6">
                                         <article class="float-end">
                                             <dl class="dlist">
                                                 <dt>Subtotal:</dt>
-                                                <dd>₹ <%=orderDetails?.subTotal%></dd>
+                                                <dd style="color: green;" >+₹ <%=orderDetails?.subTotal%></dd>
                                             </dl>
                                             <dl class="dlist">
                                                 <dt>GST:</dt>
-                                                <dd>₹ <%=orderDetails?.gstAmount%></dd>
+                                                <dd style="color: green;" >+₹ <%=orderDetails?.gstAmount%></dd>
                                             </dl>
+                                            <dl class="dlist">
+                                              <dt>Coupon Discount:</dt>
+                                              <dd style="color: red;" >-₹ <%=orderDetails?.couponDiscount%></dd>
+                                          </dl>
                                             <dl class="dlist">
                                                 <dt>Grand total:</dt>
                                                 <dd> <b class="h5">₹ <%=orderDetails?.totalAmount%></b> </dd>

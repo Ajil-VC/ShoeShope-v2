@@ -1467,16 +1467,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let derliveredOn = 'Not Delivered';
         if(products?.status == 'Delivered'){
-        console.log(deliveryDate,"deliveryDate")
+    
 
             derlivery = new Date(deliveryDate);
-        console.log(derlivery,"derlivery")
+    
                 derliveredOn = derlivery.toLocaleString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
             });
-        console.log(derliveredOn,"derliveredOn")
+
         }
     
 

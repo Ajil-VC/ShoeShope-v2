@@ -324,6 +324,10 @@ const orderSchema = new mongoose.Schema({
         required : true,
         default : 0
     },
+    otherDiscount : {
+        type : Number,
+        default : 0
+    },
     totalAmount : {
         type : Number,
         required : true,
@@ -337,7 +341,7 @@ const orderSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
         default: 'Pending'
     },
     confirmation : {
