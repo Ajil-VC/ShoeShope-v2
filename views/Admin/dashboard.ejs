@@ -104,8 +104,9 @@
 
                         <article class="card-body">
                             
-                            <section id="saleReport" class="saleR-container">
-                                <h2 class="saleR-title">Sales Report</h2>
+                            <div id="saleReport" class="saleR-container">
+                            
+                                <h2 class="saleR-title "  id="sale-report-header" >This Week Sales Report</h2>
                                 
                                 <div class="saleR-controls">
                                   <div class="saleR-date-range">
@@ -115,24 +116,24 @@
                                     <button id="saleR-apply-date" class="saleR-button">Apply</button>
                                   </div>
                                   <div class="saleR-quick-select">
-                                    <button id="saleR-daily" class="saleR-button">1 Day</button>
-                                    <button id="saleR-weekly" class="saleR-button">1 Week</button>
-                                    <button id="saleR-monthly" class="saleR-button">1 Month</button>
+                                    <button id="saleR-daily" class="saleR-button">Today's</button>
+                                    <button id="saleR-weekly" class="saleR-button">This Week</button>
+                                    <button id="saleR-monthly" class="saleR-button">This Month</button>
                                   </div>
                                 </div>
                               
                                 <div class="saleR-summary">
                                   <div class="saleR-summary-item">
                                     <h3>Overall Sales Count</h3>
-                                    <p id="saleR-total-sales-count"><%=thisWeekSaleOverAllData[0]?.overAllSalesCount%></p>
+                                    <p id="saleR-total-sales-count"><%=givenRangeSaleOverAllData[0]?.overAllSalesCount || 0%></p>
                                   </div>
                                   <div class="saleR-summary-item">
                                     <h3>Overall Order Amount</h3>
-                                    <p id="saleR-total-order-amount">₹<%=thisWeekSaleOverAllData[0]?.overAllOrderAmount%></p>
+                                    <p id="saleR-total-order-amount">₹<%=givenRangeSaleOverAllData[0]?.overAllOrderAmount || 0%></p>
                                   </div>
                                   <div class="saleR-summary-item">
                                     <h3>Overall Discount</h3>
-                                    <p id="saleR-total-discount">₹<%=thisWeekSaleOverAllData[0]?.couponDiscount + thisWeekSaleOverAllData[0]?.otherDiscount%></p>
+                                    <p id="saleR-total-discount">₹<%=givenRangeSaleOverAllData[0]?.couponDiscount + givenRangeSaleOverAllData[0]?.otherDiscount || 0%></p>
                                   </div>
                                 </div>
                               
@@ -148,24 +149,30 @@
                                         <th>Net Sales</th>
                                       </tr>
                                     </thead>
-                                    <tbody>
-                                      <tr>
-                                        <td>2024-07-26</td>
-                                        <td>42</td>
-                                        <td>$5,230.00</td>
-                                        <td>$261.50</td>
-                                        <td>$104.60</td>
-                                        <td>$4,863.90</td>
-                                      </tr>
-                                      <tr>
-                                        <td>2024-07-25</td>
-                                        <td>39</td>
-                                        <td>$4,980.00</td>
-                                        <td>$249.00</td>
-                                        <td>$99.60</td>
-                                        <td>$4,631.40</td>
-                                      </tr>
-                                      <!-- Add more rows as needed -->
+                                    <tbody id="sale-table" >
+
+                                        <% for(let i = 0 ; i < givenRangeGroupedData.length ; i++){ %>
+
+                                            <tr>
+                                              <td><%=givenRangeGroupedData[i]?.date%></td>
+                                              <td><%=givenRangeGroupedData[i]?.orderCount%></td>
+                                              <td>₹<%=givenRangeGroupedData[i]?.prodFocusedDetails?.grossSales%></td>
+                                              <td>₹<%=givenRangeGroupedData[i]?.prodFocusedDetails?.discounts%></td>
+                                              <td>₹<%=givenRangeGroupedData[i]?.prodFocusedDetails?.couponDeductions%></td>
+                                              <td>₹<%=givenRangeGroupedData[i]?.prodFocusedDetails?.netSales%></td>
+                                            </tr>
+
+                                        <% } %>
+
+                                        <tr class="sale-report-table-total" >
+                                            <td>Total :</td>
+                                            <td><%=aggregatedRangeTotal?.orderTotal%></td>
+                                            <td>₹<%=aggregatedRangeTotal?.grossSaleTotal%></td>
+                                            <td>₹<%=aggregatedRangeTotal?.discountTotal%></td>
+                                            <td>₹<%=aggregatedRangeTotal?.couponDisTotal%></td>
+                                            <td>₹<%=aggregatedRangeTotal?.netSaleTotal%></td>
+                                          </tr>
+                                      
                                     </tbody>
                                   </table>
                                 </div>
@@ -174,7 +181,7 @@
                                   <button id="saleR-download-pdf" class="saleR-button">Download PDF</button>
                                   <button id="saleR-download-excel" class="saleR-button">Download Excel</button>
                                 </div>
-                              </section>
+                              </div>
 
                         </article>
                         

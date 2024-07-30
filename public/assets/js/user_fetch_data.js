@@ -847,6 +847,7 @@ if(form_check_input){
         radio.addEventListener('change', (e) => {
 
             selectedCoupon = e.target.value;
+            document.getElementById('btn-addCoupon-save').disabled = false;
         })
     })
 }
@@ -863,6 +864,7 @@ async function addCoupon(selectedCoupon){
         }
     
         const data = await response.json();
+        console.log(data,'forn')
         if(data.status && data.discountAmount == 0 ){
             Swal.fire(
                 'Oops',
@@ -889,13 +891,18 @@ async function addCoupon(selectedCoupon){
 const btn_addCoupon_save = document.getElementById('btn-addCoupon-save');
 const addCoupon_modal_close_button = document.getElementById('addCoupon-modal-close-button');
 if(btn_addCoupon_save){
-
+    
+    btn_addCoupon_save.disabled = true;
     btn_addCoupon_save.addEventListener('click',()=> {
         
-        addCoupon(selectedCoupon);
-        document.getElementById('addedCoupon').value = selectedCoupon;
-        addCoupon_modal_close_button.click();
-    })
+        if(selectedCoupon){
+
+            addCoupon(selectedCoupon);
+            document.getElementById('addedCoupon').value = selectedCoupon;
+            addCoupon_modal_close_button.click();
+
+        }
+    });
 
 }
 

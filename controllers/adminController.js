@@ -1,7 +1,8 @@
 const {Admin,User,Category,Brand,Product,Order,returnItem,transaction,coupon,wallet} = require('../models/models')
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const {format} = require('date-fns'); 
+const {format, setDate, endOfWeek} = require('date-fns'); 
+const exceljs = require('exceljs');
 
 const securePassword = async (password) => {
     
@@ -209,9 +210,49 @@ const getSaleData = async(req,res) => {
 }
 
 
-const thisWeekSale = async() =>{
+const saleReportByRange = async(range, start_date, end_date) =>{
 
-    const thisWeekSaleOverAllData  = await Order.aggregate([ 
+    if(range == 'currWeek'){
+
+        var startTime = new Date();
+        startTime.setUTCHours(0,0,0,0);
+        startTime.setUTCDate(startTime.getUTCDate() - startTime.getUTCDay());
+        
+        var endTime = new Date(startTime);
+        endTime.setUTCDate(endTime.getUTCDate() + 7);
+
+    }else if(range == 'currMonth'){
+
+        var startTime = new Date();
+        startTime.setUTCHours(0,0,0,0)
+        startTime.setUTCDate(1);
+
+        var endTime = new Date(startTime);
+        endTime.setUTCMonth(endTime.getUTCMonth() + 1);
+
+    }else if(start_date && end_date){
+        
+        const date1 = new Date(start_date);
+        const date2 = new Date(end_date);
+
+        if(date1 < date2){
+
+            var startTime = new Date(date1);
+            var endTime = new Date(date2);
+        }else{
+
+            var startTime = new Date(date2);
+            var endTime = new Date(date1);
+        }
+
+        //Setting time of the start day into 0
+        startTime.setUTCHours(0, 0, 0, 0);
+        //Setting time of the end day into maximum
+        endTime.setUTCHours(23, 59, 59, 999);
+        
+    }
+
+    const givenRangeSaleOverAllData  = await Order.aggregate([ 
 
         { 
 
@@ -219,10 +260,10 @@ const thisWeekSale = async() =>{
 
             createdAt: { 
 
-                $gte: new Date(new Date() - new Date().getDay() * 86400000), 
+                $gte: startTime, 
 
-                $lt: new Date(new Date() - new Date().getDay() * 86400000 + 7 * 86400000) 
-
+                $lt: endTime 
+               
             } 
 
             }}, 
@@ -266,71 +307,172 @@ const thisWeekSale = async() =>{
         const thisWeekOrders = await Order.aggregate([
             { $match: {
                  createdAt: { 
-                    $gte: new Date(new Date() - new Date().getDay() * 86400000), 
-                    $lt: new Date(new Date() - new Date().getDay() * 86400000 + 7 * 86400000) 
+                    $gte: startTime, 
+                    $lt: endTime 
                 } 
             }}
         ]); 
 
       
-
+        // Grouping data according to current week
         const groupedData = thisWeekOrders.reduce((acc,curr) => {
 
             const date = new Date(curr.createdAt).toISOString().split('T')[0];
-            console.log(curr,'cueeee')
 
             if(acc[date]){
-                acc[date].orderCount++; 
+                acc[date].orderCount++;          
 
-                //Below im calculating the Gross sales amount using reduce method
-                //And Adding it into the desired date.
-                const grossSales = curr.items.reduce((total , currProd) => {
-                    if(currProd.status == 'Delivered'){
-                        total = total + currProd.subtotal
-                        return total;
-                    }
-                    return total;
+                const updatingFocusObject = curr.items.filter(item => item.status === 'Delivered')
+                .map(product => {
 
-                },0)
-                if(grossSales){
-          
-                    acc[date].grossSales = acc[date].grossSales + grossSales;
-                }
+                    acc[date].prodFocusedDetails.grossSales = acc[date].prodFocusedDetails.grossSales + product.subtotal;
+
+                    //Below Im calculating the coupon discount for the particular product.
+                    const prodPriceProportion = product.subtotal / curr.subTotal;
+                    acc[date].prodFocusedDetails.couponDeductions = 
+                    Number((acc[date].prodFocusedDetails.couponDeductions + (prodPriceProportion * curr.couponDiscount)).toFixed(2));
+
+                    //Below Im calculating netsales.
+                    acc[date].prodFocusedDetails.netSales = 
+                    Number((acc[date].prodFocusedDetails.netSales + product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2)) ;
+
+                }) 
+
 
             }else{
-                acc[date] = {orderCount : 1, grossSales : 0};
+                
 
-                //Below im calculating the Gross sales amount using reduce method
+                //Below im calculating the Gross sales amount,discount,
+                // Coupon deductions, net sales using filter & map methods
                 //And setting it into the desired date.
-                const grossSales = curr.items.reduce((total , currProd) => {
 
-                    if(currProd.status == 'Delivered'){
-                        total = total + currProd.subtotal
-                        return total;
+                const prodFocusedDetails = curr.items.filter(item => item.status === 'Delivered')
+                .map(product => {
+
+
+                    if(acc[date]?.orderCount){
+
+                        acc[date].prodFocusedDetails.grossSales = acc[date].prodFocusedDetails.grossSales + product.subtotal;
+
+                        //Below Im calculating the coupon discount for the particular product.
+                        const prodPriceProportion = product.subtotal / curr.subTotal;
+                        acc[date].prodFocusedDetails.couponDeductions =  
+                        Number((acc[date].prodFocusedDetails.couponDeductions + (prodPriceProportion * curr.couponDiscount)).toFixed(2));
+
+                        //Below Im calculating netsales.
+                        acc[date].prodFocusedDetails.netSales = 
+                        Number((acc[date].prodFocusedDetails.netSales + product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2)) ;
+
+                    }else{
+
+                        acc[date] = {
+                            //Here Im initializing the Object to group and get detailed data.
+                            orderCount : 1, 
+                            prodFocusedDetails : {
+                                grossSales  : 0,
+                                discounts   : 0,
+                                couponDeductions : 0,
+                                netSales    : 0
+                            }
+                        };
+
+                        acc[date].prodFocusedDetails.grossSales = product.subtotal;
+
+                        //Below Im calculating the coupon discount for the particular product.
+                        const prodPriceProportion = product.subtotal / curr.subTotal;
+                        acc[date].prodFocusedDetails.couponDeductions = Number((prodPriceProportion * curr.couponDiscount).toFixed(2));
+
+                        //Below Im calculating netsales.
+                        acc[date].prodFocusedDetails.netSales = Number(( product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2)) ;
+
+
                     }
-                    return total;
 
-                },0)
-                if(grossSales){
-                    acc[date].grossSales = grossSales;
-                }
-               
+                    
+
+                })
+
             }
             return acc;
-        },{})
+        },{});
 
-        console.log(groupedData,"groupedData");
+        const givenRangeGroupedData = Object.entries(groupedData).map(([date,values]) =>{
+            return {date : date, ...values};
+        });
+        
+        //below im trying to sum up all the data in givenRangeGroupedData.
+        //The last week is already over. So Please confirm everything 
+        const aggregatedRangeTotal = givenRangeGroupedData.reduce((acc,cur) => {
+
+            acc.orderTotal     = acc.orderTotal + cur.orderCount;
+            acc.grossSaleTotal = acc.grossSaleTotal + cur.prodFocusedDetails.grossSales;
+            acc.discountTotal  = acc.discountTotal + cur.prodFocusedDetails.discounts;
+            acc.couponDisTotal = acc.couponDisTotal + cur.prodFocusedDetails.couponDeductions;
+            acc.netSaleTotal   = acc.netSaleTotal + cur.prodFocusedDetails.netSales;
+            return acc;
+
+        },{orderTotal : 0, grossSaleTotal : 0, discountTotal : 0, couponDisTotal : 0, netSaleTotal : 0})
 
 
-    return {thisWeekSaleOverAllData};
+    return {
+        givenRangeSaleOverAllData,
+        givenRangeGroupedData,
+        aggregatedRangeTotal,
+    };
 }
 
 const salesReport = async(req,res) => {
     //for fetching sales report from frontend
+    
+    var start_date = req.query.start_date ?? null; 
+    var end_date = req.query.end_date ?? null;
+    
+    try{
 
+        const range = req.query.range ?? null;
+
+        const {
+            givenRangeSaleOverAllData, 
+            givenRangeGroupedData, 
+            aggregatedRangeTotal
+        } = await saleReportByRange(range, start_date, end_date);
+    
+        if(range === 'thisDay'){
+            var message = "Today's Sales Report";
+        }else if(range === 'currWeek' ){
+            var message = 'This Week Sales Report';
+        }else if( range ===  'currMonth' ){
+            var message = "This Month Sales Report";
+        }else{
+            var message = "Custom range Sales Report";
+        }
+
+        if(givenRangeGroupedData.length < 1 ){
+
+            return res.status(200).json({
+                status : false, 
+                message,
+                noDataMessage : "No Data available in this range."
+            });
+
+        }else{
+
+            return res.status(200).json({
+                status : true, 
+                givenRangeSaleOverAllData, 
+                givenRangeGroupedData, 
+                aggregatedRangeTotal,
+                message
+            });
+        }
+
+    }catch(error){
+
+        console.log("Internal error while trying to get sales report.",error);
+        return res.status(500).send("Internal error while trying to get sales report.",error);
+    }
 
 }
-
 
 
 const loadDashboard = async (req,res) => {
@@ -349,7 +491,7 @@ const loadDashboard = async (req,res) => {
             categories,
             orderStatics,
             returnOrders,
-            {thisWeekSaleOverAllData} ] = await Promise.all([
+            {givenRangeSaleOverAllData, givenRangeGroupedData, aggregatedRangeTotal} ] = await Promise.all([
             
             Product.aggregate([ {$group:{_id:null,total:{$sum:"$stockQuantity"}}} ]),
             Product.aggregate([ {$group:{_id:"$Category"}} ]),
@@ -371,7 +513,7 @@ const loadDashboard = async (req,res) => {
                 {$match:{_id : 'approved'}}
             ]),
 
-            thisWeekSale()//Getting datas from this current week
+            saleReportByRange('currWeek')//Getting datas from this current week
 
         ]);
 
@@ -387,14 +529,16 @@ const loadDashboard = async (req,res) => {
         const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2);
         const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2) ;
 
+
         return res.status(200).render('dashboard',{
             productsCount,
             categoryCount,
             purchasedCount,
             purchasedAmount,
             avgMonthlyEarning,
-            thisWeekSaleOverAllData
-           
+            givenRangeSaleOverAllData,
+            givenRangeGroupedData,
+            aggregatedRangeTotal
         });
 
     }catch(error){
@@ -405,6 +549,79 @@ const loadDashboard = async (req,res) => {
     }
 }
 
+
+
+const exportAndDownload = async(req, res)=> {
+
+    try{
+
+        const format = req.query.format;
+
+        const start_date = req.query.start_date ?? null; 
+        const end_date = req.query.end_date ?? null;
+    
+        const range = req.query.range ?? null;
+
+        const {
+
+            givenRangeSaleOverAllData, 
+            givenRangeGroupedData, 
+            aggregatedRangeTotal
+
+        } = await saleReportByRange(range, start_date, end_date);
+
+        console.log(givenRangeSaleOverAllData, 
+            givenRangeGroupedData, 
+            aggregatedRangeTotal, range,start_date)
+
+        if(format == 'excel'){
+
+            let workbook = new exceljs.Workbook();
+
+            const sheet = workbook.addWorksheet('sale_report');
+            sheet.columns = [
+                {header : "Date", key : 'date', width : 25},
+                {header : "Orders", key : 'orders', width : 25},
+                {header : "Gross Sales", key : 'grossSales', width : 25},
+                {header : "Discounts", key : 'discounts', width : 25},
+                {header : "Coupon Deductions", key : 'couponDeductions', width : 25},
+                {header : "Net Sales", key : 'netSales', width : 25},
+            ];
+
+            await givenRangeGroupedData.forEach((value,idx) => {
+
+                sheet.addRow({
+                    date    : value.date,
+                    orders  : value.orderCount,
+                    grossSales  : value.prodFocusedDetails.grossSales,
+                    discounts   : value.prodFocusedDetails.discounts,
+                    couponDeductions : value.prodFocusedDetails.couponDeductions,
+                    netSales    : value.prodFocusedDetails.netSales
+                })
+            });
+
+            res.setHeader(
+                "Content-Type",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            );
+            res.setHeader(
+                'Content-Disposition',
+                'attachment; filename="sales_report.xlsx"');
+
+            await workbook.xlsx.write(res);
+
+            res.end();
+
+        }else if(format == 'pdf'){
+
+        }
+
+    }catch(error){
+
+        console.log("Internal Error  occured while trying to download file",error);
+        return res.status(500).send("Internal Error  occured while trying to download file",error);
+    }
+}
 
 
 const addNewCoupon = async(req,res) => {
@@ -1129,9 +1346,12 @@ module.exports = {
     adminRegistration,
     loadLogin,
     loginAdmin,
+
     loadDashboard,
     salesReport,
     getSaleData,
+
+    exportAndDownload,
 
     loadCoupons,
     addNewCoupon,
