@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const {format, setDate, endOfWeek} = require('date-fns'); 
 const exceljs = require('exceljs');
+const pdfDocument = require('pdfkit');
 
 const securePassword = async (password) => {
     
@@ -562,6 +563,16 @@ const exportAndDownload = async(req, res)=> {
     
         const range = req.query.range ?? null;
 
+        if(range === 'thisDay'){
+            var head = "Today's Sales Report";
+        }else if(range === 'currWeek' ){
+            var head = 'This Week Sales Report';
+        }else if( range ===  'currMonth' ){
+            var head = "This Month Sales Report";
+        }else{
+            var head = "Custom range Sales Report";
+        }
+
         const {
 
             givenRangeSaleOverAllData, 
@@ -569,10 +580,6 @@ const exportAndDownload = async(req, res)=> {
             aggregatedRangeTotal
 
         } = await saleReportByRange(range, start_date, end_date);
-
-        console.log(givenRangeSaleOverAllData, 
-            givenRangeGroupedData, 
-            aggregatedRangeTotal, range,start_date)
 
         if(format == 'excel'){
 
@@ -606,13 +613,100 @@ const exportAndDownload = async(req, res)=> {
             );
             res.setHeader(
                 'Content-Disposition',
-                'attachment; filename="sales_report.xlsx"');
+                'attachment; filename="sales_report.xlsx"'
+            );
+            res.setHeader('X-File-Type','excel');
 
             await workbook.xlsx.write(res);
 
             res.end();
 
         }else if(format == 'pdf'){
+
+            //creating a document.
+            const doc = new pdfDocument({size : 'A4', layout : 'portrait'});
+
+            res.setHeader('Content-Type','application/pdf');
+            res.setHeader('Content-Disposition','attachment;filename=sales_report.pdf');
+            res.setHeader('X-File-Type','pdf');
+
+            //pipe the pdf document to the response.
+            doc.pipe(res);
+
+            //add content to the pdf.
+            doc.fontSize(16).text(head,{align : 'center'});
+            doc.moveDown();
+
+            //Setting A4 page size.
+            const pageWidth  = 595.28;
+            // const pageHeight = 841.89;
+            const margin     = 40;
+
+            //Table configuration
+            const table = {
+                x : margin,
+                y : 100,
+                width : pageWidth-2 * margin,
+                rowHeight : 20
+            };
+
+            //calculate column width.
+            const columnCount = 6;
+            const columnWidth = table.width / columnCount;
+
+            //Draw table headers.
+            doc.font('Helvetica-Bold').fontSize(8);
+            const headers = ['Date','Orders','Gross Sales','Discounts','Coupon Deductions','Net Sales'];
+            headers.forEach((header,index)=> {
+                
+                doc.text(header, table.x + index * columnWidth + 5 , table.y + 5, {
+                    width : columnWidth - 4 ,
+                    align : 'left'
+                });
+            })
+
+            //Draw table content.
+            doc.font('Helvetica').fontSize(8);
+            givenRangeGroupedData.forEach((obj, index) => {
+
+                const y = table.y + table.rowHeight * (index + 1);
+                const data = [
+
+                    obj.date,
+                    obj.orderCount.toString(), 
+                    obj.prodFocusedDetails.grossSales.toString(),
+                    obj.prodFocusedDetails.discounts.toString(),
+                    obj.prodFocusedDetails.couponDeductions.toString(),
+                    obj.prodFocusedDetails.netSales.toString(),
+                ]   
+
+                data.forEach((text,columnnInd) => {
+                    
+                    doc.text(text,table.x + columnnInd * columnWidth + 5 , y + 5, {
+                        width : columnWidth - 4,
+                        align : 'left'
+                    });
+                })
+            
+            });
+
+            //Draw lines.
+            doc.lineWidth(0.5);
+
+            //horizontal lines.
+            for (let i = 0; i <= givenRangeGroupedData.length + 1; i++) {
+                const y = table.y + i * table.rowHeight;  
+                doc.moveTo(table.x, y).lineTo(table.x + table.width, y).stroke();
+            }
+
+            //vertical lines.
+            for(let i = 0 ; i <= columnCount ; i++){
+                const x = table.x + i * columnWidth;
+                doc.moveTo(x,table.y).lineTo(x, table.y + table.rowHeight * (givenRangeGroupedData.length + 1)).stroke();
+            }
+
+            //finalize the pdf and end the stream here.
+            doc.end();
 
         }
 

@@ -36,17 +36,27 @@ async function downloadFile(format,timeRange){
             throw new Error(`Network response was not ok while trying to download the ${format} file`);
         }
 
+        const fileType = response.headers.get('X-File-Type');
+        let filename = 'download';
+
         const data = await response.blob();
         
         if(data){
             
+
+            if(fileType == 'excel'){
+                filename = filename.endsWith('.xlsx') ? filename : 'sales_report.xlsx';
+            }else if(fileType == 'pdf'){
+                filename = filename.endsWith('.pdf') ? filename : 'sales_report.pdf';
+            }
+
             const url = await window.URL.createObjectURL(data);
             Swal.fire({
 
                 title: "<strong>Your file is ready</strong>",
                 icon: "info",
                 html: `
-                  <a href="${url}" id="download-link" >Click here to download</a>
+                  <a href="${url}" id="download-link" download="${filename}" >Click here to download</a>
                 `,
                 showConfirmButton: false,     
                 didOpen: ()=> {
@@ -276,8 +286,16 @@ document.addEventListener('DOMContentLoaded',() => {
 
             downloadFile('excel',timeRange);
         })
-    }
+    };
 
+    const saleR_download_pdf = document.getElementById('saleR-download-pdf');
+    if(saleR_download_pdf){
+
+        saleR_download_pdf.addEventListener('click',()=> {
+
+            downloadFile('pdf',timeRange);
+        })
+    }
 
 
 });
