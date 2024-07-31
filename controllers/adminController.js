@@ -581,6 +581,10 @@ const exportAndDownload = async(req, res)=> {
 
         } = await saleReportByRange(range, start_date, end_date);
 
+console.log(givenRangeSaleOverAllData, 
+    givenRangeGroupedData, 
+    aggregatedRangeTotal)
+
         if(format == 'excel'){
 
             let workbook = new exceljs.Workbook();
@@ -595,8 +599,22 @@ const exportAndDownload = async(req, res)=> {
                 {header : "Net Sales", key : 'netSales', width : 18},
             ];
 
+            const headerRow = sheet.getRow(1);
+            headerRow.eachCell(head => {
+                
+                head.font = {
+                    bold    : true,
+                    color   : {argb : 'FFFFFFFF'} 
+                };
+                head.fill = {
+                    type : 'pattern',
+                    pattern: 'solid',
+                    fgColor :   {argb: 'FFFF0000'}
+                }
+            });
+            
             await givenRangeGroupedData.forEach((value,idx) => {
-
+                
                 sheet.addRow({
                     date    : value.date,
                     orders  : value.orderCount,
@@ -606,6 +624,28 @@ const exportAndDownload = async(req, res)=> {
                     netSales    : value.prodFocusedDetails.netSales
                 })
             });
+            
+            sheet.addRow({
+                date    : "Total",
+                orders  : aggregatedRangeTotal.orderTotal,
+                grossSales  : aggregatedRangeTotal.grossSaleTotal,
+                discounts   : aggregatedRangeTotal.discountTotal,
+                couponDeductions    : aggregatedRangeTotal.couponDisTotal,
+                netSales    : aggregatedRangeTotal.netSaleTotal
+            });
+
+            const footerRow = sheet.lastRow;
+            footerRow.eachCell(footer => {
+
+                footer.font = {bold    : true};
+                footer.fill = {
+                    type : 'pattern',
+                    pattern: 'solid',
+                    fgColor :   {argb: 'FFF0F0F0'}
+                }
+
+            })
+
 
             res.setHeader(
                 "Content-Type",
