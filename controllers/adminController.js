@@ -730,11 +730,46 @@ console.log(givenRangeSaleOverAllData,
             
             });
 
+            //add footer row
+            const footerRowY = table.y + table.rowHeight * (givenRangeGroupedData.length + 1);
+
+            //draw light grey background for footer.
+            doc.fill('#f0f0f0')
+            .rect(table.x, footerRowY, table.width, table.rowHeight)
+            .fill();
+
+            //reseting color of text back to black.
+            doc.fill('black');
+
+            //draw footer text with bold font.
+            doc.font('Helvetica-Bold').fontSize(8);
+
+            const footerData = [
+                'Total',
+                aggregatedRangeTotal.orderTotal,
+                aggregatedRangeTotal.grossSaleTotal,
+                aggregatedRangeTotal.discountTotal,
+                aggregatedRangeTotal.couponDisTotal,
+                aggregatedRangeTotal.netSaleTotal
+            ];
+            footerData.forEach((text,columnIndex)=> {
+                
+                doc.text(text, 
+                    table.x + columnIndex * columnWidth + 5, 
+                    footerRowY + 5,  
+                    {
+                        width: columnWidth - 4,     
+                        align: 'left'
+                    }
+                );
+
+            }) 
+
             //Draw lines.
             doc.lineWidth(0.5);
 
             //horizontal lines.
-            for (let i = 0; i <= givenRangeGroupedData.length + 1; i++) {
+            for (let i = 0; i <= givenRangeGroupedData.length + 2; i++) {
                 const y = table.y + i * table.rowHeight;  
                 doc.moveTo(table.x, y).lineTo(table.x + table.width, y).stroke();
             }
@@ -742,7 +777,7 @@ console.log(givenRangeSaleOverAllData,
             //vertical lines.
             for(let i = 0 ; i <= columnCount ; i++){
                 const x = table.x + i * columnWidth;
-                doc.moveTo(x,table.y).lineTo(x, table.y + table.rowHeight * (givenRangeGroupedData.length + 1)).stroke();
+                doc.moveTo(x,table.y).lineTo(x, table.y + table.rowHeight * (givenRangeGroupedData.length + 2)).stroke();
             }
 
             //finalize the pdf and end the stream here.
