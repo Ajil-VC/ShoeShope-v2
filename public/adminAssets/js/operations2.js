@@ -37,35 +37,25 @@ async function downloadFile(format,timeRange){
         }
 
         const data = await response.blob();
+        
         if(data){
             
             const url = await window.URL.createObjectURL(data);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'sales_report.xlsx';
-            document.body.appendChild(a);
-            console.log(a)
             Swal.fire({
 
                 title: "<strong>Your file is ready</strong>",
                 icon: "info",
                 html: `
-                  <button id="download-button">Click here to download</button>
+                  <a href="${url}" id="download-link" >Click here to download</a>
                 `,
-                showConfirmButton: false,
+                showConfirmButton: false,     
                 didOpen: ()=> {
-                    document.getElementById('download-button').onclick = ()=> {
-
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
+                    document.getElementById('download-link').onclick = ()=> {
+                        Swal.close();
                     }
-                }
-                
+                }           
             });
 
-            
 
         }else{
             console.log("No data");

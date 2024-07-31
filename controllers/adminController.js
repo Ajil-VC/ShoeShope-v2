@@ -580,12 +580,12 @@ const exportAndDownload = async(req, res)=> {
 
             const sheet = workbook.addWorksheet('sale_report');
             sheet.columns = [
-                {header : "Date", key : 'date', width : 25},
-                {header : "Orders", key : 'orders', width : 25},
-                {header : "Gross Sales", key : 'grossSales', width : 25},
-                {header : "Discounts", key : 'discounts', width : 25},
-                {header : "Coupon Deductions", key : 'couponDeductions', width : 25},
-                {header : "Net Sales", key : 'netSales', width : 25},
+                {header : "Date", key : 'date', width : 18},
+                {header : "Orders", key : 'orders', width : 10},
+                {header : "Gross Sales", key : 'grossSales', width : 18},
+                {header : "Discounts", key : 'discounts', width : 18},
+                {header : "Coupon Deductions", key : 'couponDeductions', width : 18},
+                {header : "Net Sales", key : 'netSales', width : 18},
             ];
 
             await givenRangeGroupedData.forEach((value,idx) => {
