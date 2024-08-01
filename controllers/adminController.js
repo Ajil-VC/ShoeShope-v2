@@ -1148,8 +1148,15 @@ const loadAddNewProduct = async(req,res) => {
 
 const addNewProduct = async(req,res) => {
 
-    const {productName,description,regularPrice } = req.body;
-    const {salePrice,stockQuantity,category,brand,targetGroup} = req.body;
+    const {
+        productName,
+        description,
+        regularPrice,
+        salePrice,
+        stockQuantity,
+        category,
+        brand,
+        targetGroup } = req.body;
 
     const product_name = req.query.product_name;
     

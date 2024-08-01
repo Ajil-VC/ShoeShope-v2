@@ -136,18 +136,70 @@
 
 
 
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4>Classification</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row gx-2">
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="form-label">Category</label> 
+                                            <select class="form-select" name="category" id="category" >
+        
+                                                    <option disabled value="" selected >Select Category </option>
+                                                <% for(let i = 0 ; i < categories.length ; i++){ %>
+                                                    
+                                                    <option> <%=categories[i].name %> </option>
+        
+                                                <% } %>
+        
+                                                
+                                            </select>
+                                            <span  class="text-danger" style="font-size: smaller;" id="category-error"></span>
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="form-label">Brand</label>
+                                            <select class="form-select" name="brand" id="brand" >
+        
+                                                    <option disabled value="" selected >Select Brand </option>
+                                                <% for(let i = 0 ; i < brand.length ; i++){ %>
+                                                    
+                                                    <option> <%= brand[i].name %> </option>
+        
+                                                <% } %>
+                                           
+                                            </select>
+                                            <span  class="text-danger" style="font-size: smaller;" id="brand-error"></span>
+                                        </div>
+                                    
+                                    </div> <!-- row.// -->
+                                </div>
+                            </div> <!-- card end// -->
+
+
+
                         </div>
                     </div> <!-- card end// -->
                     
                 </div>
-                <div class="col-lg-3">
+                <div class="col-lg-6">
+
+                    <div class="adImUploadArea">
+                        <label for="adImFileInput" class="adImDropZone">
+                            <span>Drop your images here, or browse</span>
+                            <span>Jpeg, png are allowed</span>
+                        </label>
+                        <input type="file" id="adImFileInput" class="adImHiddenInput" multiple accept="image/jpeg, image/png">
+                    </div>
+                    <div id="adImPreviewContainer" class="adImPreviewContainer"></div>
+
 
                     <!-- Media Starts here-->
                     <!-- ============================-->
                     <!-- ============================-->
                     <!-- ============================-->
                             
-                    <div class="card mb-4">
+                    <!-- <div class="card mb-4">
                         <div class="card-header">
                             <h4>Media</h4>
                         </div>
@@ -168,55 +220,13 @@
 
                             <span  class="text-danger" style="font-size: smaller;" id="image-error"></span>
                         </div>
-                    </div>
+                    </div> -->
                     <!-- card end// -->
 
                     <!--Media ends here ============================-->
                     <!-- ============================-->
                     <!-- ============================-->
 
-
-
-                    
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Classification</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row gx-2">
-                                <div class="col-sm-6 mb-3">
-                                    <label class="form-label">Category</label> 
-                                    <select class="form-select" name="category" id="category" >
-
-                                            <option disabled value="" selected >Select Category </option>
-                                        <% for(let i = 0 ; i < categories.length ; i++){ %>
-                                            
-                                            <option> <%=categories[i].name %> </option>
-
-                                        <% } %>
-
-                                        
-                                    </select>
-                                    <span  class="text-danger" style="font-size: smaller;" id="category-error"></span>
-                                </div>
-                                <div class="col-sm-6 mb-3">
-                                    <label class="form-label">Brand</label>
-                                    <select class="form-select" name="brand" id="brand" >
-
-                                            <option disabled value="" selected >Select Brand </option>
-                                        <% for(let i = 0 ; i < brand.length ; i++){ %>
-                                            
-                                            <option> <%= brand[i].name %> </option>
-
-                                        <% } %>
-                                   
-                                    </select>
-                                    <span  class="text-danger" style="font-size: smaller;" id="brand-error"></span>
-                                </div>
-                            
-                            </div> <!-- row.// -->
-                        </div>
-                    </div> <!-- card end// -->
                 </div>
             </div>
         </section> <!-- content-main end// -->

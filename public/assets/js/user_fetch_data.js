@@ -1327,13 +1327,11 @@ document.addEventListener('DOMContentLoaded', function() {
             methodButton.addEventListener('click',(e)=> {
     
                 e.stopPropagation();
-            
-                // const currentSelection = e.currentTarget.id;
+
                 payment_options.forEach(option => option.classList.remove('selected'));
                 e.currentTarget.classList.add('selected');
                 
                 paymentMethod = e.currentTarget.querySelector('input').value;
-                console.log(paymentMethod,"This is the methods")
                 
             })
         })

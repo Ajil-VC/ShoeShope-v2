@@ -241,6 +241,59 @@ function listCategory(categoryID){
 
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    let selectedFiles = [];
+
+    function updatePreview(){
+
+        const previewContainer = document.getElementById('adImPreviewContainer');
+        
+        previewContainer.innerHTML = '';
+
+        selectedFiles.forEach((file,index) => {
+
+            if(file.type.startsWith('image/')){
+                const reader = new FileReader();
+                reader.onload = function(e){
+                    const imgContainer = document.createElement('div');
+                    imgContainer.classList.add('adImPreviewImageContainer');
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('adImPreviewImage');
+                    img.style.cursor = 'pointer';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.classList.add('adImRemoveBtn');
+                    removeBtn.onclick = () => removeFile(index);
+
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(removeBtn);
+                    previewContainer.appendChild(imgContainer);
+                }
+                reader.readAsDataURL(file);
+            }
+        })        
+    }
+
+    function removeFile(index){
+        selectedFiles.splice(index,1);
+        updatePreview();
+    }
+
+    const adImFileInput = document.getElementById('adImFileInput');
+    if(adImFileInput){
+        adImFileInput.addEventListener('change',function(event){
+
+            const newFiles = Array.from(event.target.files);
+
+            //Add new files to the selectedFiles array.
+            selectedFiles = [...selectedFiles, ...newFiles];
+            
+            updatePreview();
+        });
+    }
     
     const formDataForAddNewProduct = new FormData();
 
