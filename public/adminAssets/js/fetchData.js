@@ -244,11 +244,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let openModalBtn = document.getElementById('openModalBtn');
     const modal_close_button = document.getElementById('modal-close-button');
+    const imageCroper = document.getElementById('imageCroper');
 
     function openCropModal(index){
         
+        document.querySelector('#btn-crop').dataset.index = index;
+        
         const imgURL = URL.createObjectURL(selectedFiles[index]);
+        imageCroper.src = imgURL;
         openModalBtn.click();
+
+        if(window.cropperInstance){
+            window.cropperInstance.destroy();
+        }
+        
+        //Cropper Initializing here
+        window.cropperInstance = new Cropper(imageCroper,{
+            aspectRatio: 1,
+            full: true, // Cover the whole image
+            autoCropArea: false // Allow free expansion
+        })
     }
 
     let selectedFiles = [];
@@ -297,67 +312,25 @@ document.addEventListener('DOMContentLoaded', function() {
         adImFileInput.addEventListener('change',function(event){
 
             const newFiles = Array.from(event.target.files);
-
-            //Add new files to the selectedFiles array.
-            selectedFiles = [...selectedFiles, ...newFiles];
-            
-            updatePreview();
+            Promise.all(newFiles.map(file => 
+                new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(new Blob([e.target.result], {type: file.type}));
+                    reader.readAsArrayBuffer(file);
+                })
+            )).then(blobFiles => {
+                console.log(blobFiles);
+                
+                // Add new files to the selectedFiles array
+                selectedFiles = [...selectedFiles, ...blobFiles];
+                updatePreview();
+            });
         });
     }
  
     const formDataForAddNewProduct = new FormData();
 
-    const imageCroper = document.getElementById('imageCroper');
     const form = document.getElementById('formForAddNewProduct');
-    let currentInputField = null;
-    let imageBlobs = {};
-
-    //**reader fn start here
-    function ReadFileAndCropper(file,reader,imageCroper,openModalBtn,chooseimageElement){
-        
-        reader.onload = (event) => {
-          
-            var imageUrl = event.target.result;
-            
-            chooseimageElement.src = imageUrl;              
-            imageCroper.src = imageUrl ;
-            
-            openModalBtn.click();//Modal opening
-            
-            if(window.cropperInstance){
-                window.cropperInstance.destroy();
-            }
-            
-            
-            //Cropper Initializing here
-            window.cropperInstance = new Cropper(imageCroper,{
-                aspectRatio: 1,
-                full: true, // Cover the whole image
-                autoCropArea: false // Allow free expansion
-            })
-            
-            
-            currentInputField = chooseimageElement;
-        }
-        reader.readAsDataURL(file);
-    }
-
-
-    // document.querySelectorAll('.addProduct-image-input').forEach(inputField => {
-        
-    //     inputField.addEventListener('change',(e) => {
-    //         console.log("Thisise",e)
-    //         let file = e.target.files[0];
-    //         if(!file){
-    //             return;
-    //         }
-    //         let reader = new FileReader();
-    //         ReadFileAndCropper(file,reader,imageCroper,openModalBtn,e.target.dataset.field);
-    //     })
-
-    // })
-
-
     
     const btn_crop =  document.querySelector('#btn-crop');
     if(btn_crop){
@@ -370,13 +343,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 croppedImages.toBlob((blob) => {
     
                     if(blob){
-                        console.log(blob)
-                        console.log(currentInputField,"This is the input ha")
-                        console.log(formDataForAddNewProduct);
-                        imageBlobs[currentInputField] = blob;
-                        modal_close_button.click();
 
-                        console.log(imageBlobs,"\nUpper one is arrya of blobs ");
+                        // console.log(formDataForAddNewProduct);
+                    
+                        selectedFiles[btn_crop.dataset.index] = blob;
+                        console.log(selectedFiles)
+                        updatePreview();
+                        modal_close_button.click();
                     }
     
                 });
@@ -392,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function isProductExist(productExist){
         
         product_name_error.classList.add('d-none');
-                product_name_error.textContent = ""
+        product_name_error.textContent = ""
         validation = true;         
         alreadyExistName = false;     
         let newValue = product_name.value;
@@ -444,14 +417,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const targetGroup_error = document.getElementById('targetGroup-error');
     const category_error = document.getElementById('category-error');
     const brand_error = document.getElementById('brand-error');
-    const image_error = document.getElementById('image-error');
+    const img_adding_area = document.getElementById('img-adding-area');
 
     const publishNewProduct = async()=>{
         
             const isProduct = await isProductExist(1);
             
             if(!isProduct){
-                console.log(imageBlobs,"This is from !isProduct ha ok")
+                
                 let formValidation = true;
                 regularPrice_error.textContent = "";
                 salePrice_error.textContent = "";
@@ -461,7 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 targetGroup_error.textContent = "";
                 category_error.textContent = "";
                 brand_error.textContent = "";
-                image_error.textContent = "";
+
+                img_adding_area.style.color = 'grey';
+                img_adding_area.innerText = 'Add product images here, Only image files(jpeg,png,webp) are allowed';
+
                 product_name_error.classList.add('d-none');
     
                 let regularPrice = document.getElementById('regularPrice').value.trim();
@@ -473,11 +449,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 let category = document.getElementById('category').value;
                 let brand = document.getElementById('brand').value;
                 
-                if(Object.keys(imageBlobs).length === 0){
-                    image_error.textContent = "Select Images";
+                if(selectedFiles.length === 0){
+                    img_adding_area.style.color = 'red';
+                    img_adding_area.innerText = "Please Select Product images by clicking here."
                     formValidation = false;
-                }else if(Object.keys(imageBlobs).length < 3){
-                    image_error.textContent = "Minimum 3 images";
+                }else if(selectedFiles.length < 3){
+                    img_adding_area.style.color = 'red';
+                    img_adding_area.innerText = "Please Select atleast 3 images."
                     formValidation = false;
                 }
                 if(!brand){
@@ -528,9 +506,6 @@ document.addEventListener('DOMContentLoaded', function() {
               
                 if(validation && formValidation && !alreadyExistName){
     
-                    console.log(validation,"From publish working")
-    
-    
                     const category = document.getElementById('category').value;
                     const brand = document.getElementById('brand').value;
                   
@@ -559,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     formDataForAddNewProduct.append(hiddenCategory.name, hiddenCategory.value);
                     formDataForAddNewProduct.append(hiddenBrand.name, hiddenBrand.value);
                     
-                    Object.entries(imageBlobs).forEach(([key, blob], index) => {
+                    selectedFiles.forEach((blob, index) => {
                         formDataForAddNewProduct.append('image', blob, `croppedimage${index + 1}.png`);
                     });
                    
