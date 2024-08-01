@@ -242,8 +242,13 @@ function listCategory(categoryID){
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    let openModalBtn = document.getElementById('openModalBtn');
+    const modal_close_button = document.getElementById('modal-close-button');
+
     function openCropModal(index){
-        console.log(selectedFiles[index])
+        
+        const imgURL = URL.createObjectURL(selectedFiles[index]);
+        openModalBtn.click();
     }
 
     let selectedFiles = [];
@@ -301,9 +306,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
  
     const formDataForAddNewProduct = new FormData();
-
-    let openModalBtn = document.getElementById('openModalBtn');
-    const modal_close_button = document.getElementById('modal-close-button');
 
     const imageCroper = document.getElementById('imageCroper');
     const form = document.getElementById('formForAddNewProduct');
