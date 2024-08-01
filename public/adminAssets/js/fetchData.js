@@ -242,6 +242,10 @@ function listCategory(categoryID){
 
 document.addEventListener('DOMContentLoaded', function() {
 
+    function openCropModal(index){
+        console.log(selectedFiles[index])
+    }
+
     let selectedFiles = [];
 
     function updatePreview(){
@@ -262,6 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     img.src = e.target.result;
                     img.classList.add('adImPreviewImage');
                     img.style.cursor = 'pointer';
+                    img.onclick = () => openCropModal(index);
 
                     const removeBtn = document.createElement('button');
                     removeBtn.textContent = 'Remove';
@@ -294,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updatePreview();
         });
     }
-    
+ 
     const formDataForAddNewProduct = new FormData();
 
     let openModalBtn = document.getElementById('openModalBtn');
@@ -305,51 +310,51 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentInputField = null;
     let imageBlobs = {};
 
-
-                //**reader fn start here
-                function ReadFileAndCropper(file,reader,imageCroper,openModalBtn,chooseimageElement){
-                    
-                    reader.onload = (event) => {
-                      
-                        var imageUrl = event.target.result;
-                        
-                        chooseimageElement.src = imageUrl;              
-                        imageCroper.src = imageUrl ;
-                        
-                        openModalBtn.click();//Modal opening
-                        
-                        if(window.cropperInstance){
-                            window.cropperInstance.destroy();
-                        }
-                        
-                        
-                        //Cropper Initializing here
-                        window.cropperInstance = new Cropper(imageCroper,{
-                            aspectRatio: 1,
-                            full: true, // Cover the whole image
-                            autoCropArea: false // Allow free expansion
-                        })
-                        
-                        
-                        currentInputField = chooseimageElement;
-                    }
-                    reader.readAsDataURL(file);
-                }
-
-
-        document.querySelectorAll('.addProduct-image-input').forEach(inputField => {
+    //**reader fn start here
+    function ReadFileAndCropper(file,reader,imageCroper,openModalBtn,chooseimageElement){
+        
+        reader.onload = (event) => {
+          
+            var imageUrl = event.target.result;
             
-            inputField.addEventListener('change',(e) => {
-                console.log("Thisise",e)
-                let file = e.target.files[0];
-                if(!file){
-                    return;
-                }
-                let reader = new FileReader();
-                ReadFileAndCropper(file,reader,imageCroper,openModalBtn,e.target.dataset.field);
+            chooseimageElement.src = imageUrl;              
+            imageCroper.src = imageUrl ;
+            
+            openModalBtn.click();//Modal opening
+            
+            if(window.cropperInstance){
+                window.cropperInstance.destroy();
+            }
+            
+            
+            //Cropper Initializing here
+            window.cropperInstance = new Cropper(imageCroper,{
+                aspectRatio: 1,
+                full: true, // Cover the whole image
+                autoCropArea: false // Allow free expansion
             })
+            
+            
+            currentInputField = chooseimageElement;
+        }
+        reader.readAsDataURL(file);
+    }
 
-        })
+
+    // document.querySelectorAll('.addProduct-image-input').forEach(inputField => {
+        
+    //     inputField.addEventListener('change',(e) => {
+    //         console.log("Thisise",e)
+    //         let file = e.target.files[0];
+    //         if(!file){
+    //             return;
+    //         }
+    //         let reader = new FileReader();
+    //         ReadFileAndCropper(file,reader,imageCroper,openModalBtn,e.target.dataset.field);
+    //     })
+
+    // })
+
 
     
     const btn_crop =  document.querySelector('#btn-crop');
