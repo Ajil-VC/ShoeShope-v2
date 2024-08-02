@@ -76,6 +76,7 @@ userRouter.get('/profile/get-order-details',authenticate.isLoggedIn,userControll
 
 userRouter.post('/profile/returnproduct',authenticate.isLoggedIn,userController.initiateReturn);
 userRouter.post('/profile/cancelproduct',authenticate.isLoggedIn,userController.cancelOrder);
+userRouter.get('/profile/invoice',authenticate.isLoggedIn,userController.downloadInvoice);
 
 userRouter.get('/profile/logout',authenticate.isLoggedIn,userController.logoutUser);
 

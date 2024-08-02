@@ -9,6 +9,11 @@ const nodemailer = require('nodemailer')
 const {add,format} = require('date-fns');
 const crypto = require('crypto');
 
+const fs = require('fs');
+const path = require('path');
+const Handlebars = require('handlebars');
+const puppeteer = require('puppeteer');
+
 
 const securePassword = async (password) => {
     
@@ -1483,7 +1488,7 @@ const placeOrder = async(req,res) => {
                     items: { 
                         productId: {$in : IdsToRemoveFromCart}
                     }}
-                }) 
+                }); 
 
                 //Adding userId to coupon;
                 await coupon.updateOne({couponCode : selectedCoupon},{$push : {usedBy : userID}});
@@ -1770,6 +1775,115 @@ const initiateReturn = async(req,res) => {
     }
 }
 
+
+async function generateInvoice(invoiceData){
+
+    const templateHtml = fs.readFileSync(path.join(__dirname,'..','views','Users','invoice.html'),'utf8');
+    const template = Handlebars.compile(templateHtml);
+    const html = template(invoiceData);
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html);
+
+    const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+            top: '7mm',
+            right: '7mm',
+            bottom: '7mm',
+            left: '7mm'
+        }
+    });
+
+    await browser.close();
+    return pdfBuffer;
+}
+
+
+const downloadInvoice = async(req,res)=> {
+
+    try{
+
+        const orderId = new mongoose.Types.ObjectId(req.query.order_id);
+        const newDate = new Date();
+        const currentDate = format(newDate,'EEEE yyyy MMMM dd');
+
+        const orderDetails = await Order.findOne({_id : orderId})
+        .populate('customer')
+        .populate('shippingAddress');
+
+        const items = orderDetails.items.map(item => {
+
+            const amtRatio = item.subtotal / orderDetails.subTotal;
+            const itemGST = (amtRatio * orderDetails.gstAmount).toFixed(2);
+
+            const totalDed = orderDetails.couponDiscount + orderDetails.otherDiscount;
+            const itemDecs = (amtRatio * totalDed).toFixed(2);
+
+            const prodTotalPrice = item.subtotal + +itemGST - +itemDecs;
+            
+            return {
+                name    : item.product.name,
+                quantity: item.quantity,
+                rate    : item.product.price,
+                gst     : itemGST, 
+                deductions : itemDecs,
+                amount  : prodTotalPrice,
+                status  : item.status.slice(0,3)
+            }
+        });
+
+        let subTotal = 0;
+        let discount = 0;
+        let gst = 0;
+        items.filter(item => item.status === 'Del')
+        .forEach(obj => {
+            subTotal += +(obj.rate * obj.quantity).toFixed(2);
+            discount =  +(discount + +obj.deductions).toFixed(2);
+            gst = +(gst + +obj.gst).toFixed(2);
+        })
+        const deliveredItemsTotal = subTotal + gst - discount;
+
+        const invoiceData = {
+            invoiceNumber   : orderDetails._id.toString(),
+            date: currentDate,
+            companyName     : 'Shoe Shope',
+            companyAddress  : 'Kochi',
+            companyPhone    : '89 2171 2344',
+            customerName    : orderDetails.customer.firstName +' ' +orderDetails?.customer?.lastName,
+            customerPlace   : orderDetails.shippingAddress.place,
+            customerCity    : orderDetails.shippingAddress.city,   
+            customerLandMark: orderDetails.shippingAddress.landmark,
+            customerDistrict: orderDetails.shippingAddress.district,
+            customerPhone   : orderDetails.shippingAddress.mobile_no,
+            items   : items,
+            subtotal: subTotal,
+            discount: discount,
+            GST     : gst,
+            total: deliveredItemsTotal
+        }
+
+        const pdfBuffer = await generateInvoice(invoiceData);
+
+        res.set({
+            'Content-Type' : 'application/pdf',
+            'Content-Disposition' : 'attachment; invoice.pdf',
+            'Content-Length' : pdfBuffer.length
+        })
+
+        res.send(pdfBuffer);
+
+    }catch(error){
+
+        console.log("Internal error occured while trying to create invoice.",error);
+        return res.status(500).send("Internal error occured while trying to create invoice.",error);
+    }
+
+}
+
+
 module.exports = {
 
     loadRegister,
@@ -1812,6 +1926,7 @@ module.exports = {
     getOrderDetails,
 
     cancelOrder,
-    initiateReturn
+    initiateReturn,
+    downloadInvoice
   
 }

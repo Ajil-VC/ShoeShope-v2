@@ -1319,7 +1319,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let paymentMethod = '';
     const payment_options = document.querySelectorAll('.payment-option');
-    console.log("This is the payment option listner")
     if(payment_options){
      
         payment_options.forEach(methodButton =>{
@@ -1536,12 +1535,77 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>`
         
     }
+
+
+    const createInvoice = async(orderId,invoiceBtn) => {
+
+        try{
+
+            const response = await fetch(`http://localhost:2000/profile/invoice?order_id=${orderId}`);
+
+            if(!response.ok){
+                throw new Error("Network response was not ok whilte trying to create invoice.");
+            }
+
+            const fileType = response.headers.get('X-File-Type');
+            let filename = 'invoice.pdf';
+
+            const data = await response.blob();
+            if(data){
+
+                const url = await window.URL.createObjectURL(data);
+                Swal.fire({
+    
+                    title: "<strong>Your file is ready</strong>",
+                    icon: "info",
+                    html: `
+                      <a href="${url}" id="download-link" download="${filename}" >Click here to download</a>
+                    `,
+                    showConfirmButton: false,     
+                    didOpen: ()=> {
+                        document.getElementById('download-link').onclick = ()=> {
+                            Swal.close();
+                        }
+                    }           
+                });
+                invoiceBtn.disabled = false;
+            }else{
+                invoiceBtn.disabled = false;
+                console.log("No data recieved.");
+            }
+            
+
+        }catch(error){
+            console.log("Error occured while trying to create and  download invoice.",error);
+        }
+    }
                                                                     
 
     function updateOrderDataTable(produts,addres,orderDate,orderId,deliveryDate){
 
         const tableBody = document.getElementById('order-detail-table');
         tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderId,deliveryDate)).join('');
+
+        const orderFooter = document.createElement('div');
+        orderFooter.style.background = 'white';
+        orderFooter.style.width = '100%';
+        orderFooter.style.display = 'flex';
+        orderFooter.style.justifyContent = 'end'
+
+        const invoiceBtn = document.createElement('button');
+        invoiceBtn.classList.add('btn');
+        invoiceBtn.style.background = '#1e8449';
+        invoiceBtn.innerText = "Invoice";
+
+        invoiceBtn.addEventListener('click',()=> {
+            
+            invoiceBtn.disabled = true;
+            createInvoice(orderId,invoiceBtn);
+        })
+
+        orderFooter.appendChild(invoiceBtn);
+
+        tableBody.appendChild(orderFooter);
         
     }
 
@@ -1556,7 +1620,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const orderButton = e.target.closest('.odsIdUnifiedRow');
             if(orderButton){
-                console.log(orderButton.dataset.id)
+
                 fetch(`http://localhost:2000/profile/get-order-details?order_id=${orderButton.dataset.id}`)
                 .then(response => {
                     
