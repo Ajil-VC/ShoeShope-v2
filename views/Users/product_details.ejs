@@ -31,7 +31,7 @@
                                         <!-- MAIN SLIDES -->
                                         <div class="images" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
 
-                                            <% for(let i = 0 ; i < 3 ; i++){ %>
+                                            <% for(let i = 0 ; i < product_details.image.length ; i++){ %>
 
                                                 <figure class="border-radius-10" style="border-radius: 10px; overflow: hidden;">
                                                     <img src="/ProductImage/<%=product_details.image[i]%>" alt="product image" style="width: 100%; height: auto;" data-zoom-image="/ProductImage/<%=product_details.image[i]%>" class="zoom_image" >

@@ -1087,7 +1087,7 @@ const loadAllProducts = async (req,res) => {
      
         const skip = (page - 1) * limit; 
         const [products, totalDocuments] = await Promise.all([
-            Product.find().skip(skip).limit(limit).exec(),
+            Product.find().skip(skip).limit(limit).sort({ createdAt : -1 }).exec(),
             Product.countDocuments().exec()
         ])
         const totalPages = Math.ceil(totalDocuments / limit);

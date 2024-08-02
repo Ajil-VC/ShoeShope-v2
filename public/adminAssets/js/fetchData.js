@@ -457,6 +457,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     img_adding_area.style.color = 'red';
                     img_adding_area.innerText = "Please Select atleast 3 images."
                     formValidation = false;
+                }else if(selectedFiles.length > 4){
+                    img_adding_area.style.color = 'red';
+                    img_adding_area.innerText = "Maximum 4 images are allowed.Please remove some images."
+                    formValidation = false;
                 }
                 if(!brand){
                     brand_error.textContent = "Select brand";
