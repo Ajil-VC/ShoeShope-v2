@@ -1380,27 +1380,38 @@ document.addEventListener('DOMContentLoaded', function() {
                     order_id : order.orderResult.id,
                     handler : async function(response){
 
-                        const result = await fetch('/verify-payment',{  
-                            method : 'post',
-                            headers : {
-                                'Content-Type' : 'application/json',    
-                            },
-                            body : JSON.stringify({
-                                orderId : response.razorpay_order_id,
-                                paymentId : response.razorpay_payment_id,
-                                signature: response.razorpay_signature,
-                                amount: order.orderResult.amount / 100,
-                            }),
-                        });
+                        try{
 
-                        const data = await result.json();
-                        // alert(data.status === true ? 'Payment Successful' : 'Payment Failed');
-                        if(data.status){
-                            window.location.href = data.redirect
-                        }else{
+                            const result = await fetch('/verify-payment',{  
+                                method : 'post',
+                                headers : {
+                                    'Content-Type' : 'application/json',    
+                                },
+                                body : JSON.stringify({
+                                    orderId : response.razorpay_order_id,
+                                    paymentId : response.razorpay_payment_id,
+                                    signature: response.razorpay_signature,
+                                    amount: order.orderResult.amount / 100,
+                                }),
+                            });
+    
+                            const data = await result.json();
+                            // alert(data.status === true ? 'Payment Successful' : 'Payment Failed');
+                            if(data.status){
+                                window.location.href = data.redirect
+                            }else{
+                                Swal.fire({
+                                    title: "Order not placed",
+                                    text: order.message,
+                                    icon: 'error'
+                                });
+                            }
+                            
+                        }catch(error){
+                            console.error('Error during payment verification:', error);
                             Swal.fire({
                                 title: "Order not placed",
-                                text: order.message,
+                                text: error.message || "An error occurred during payment verification",
                                 icon: 'error'
                             });
                         }
@@ -1408,8 +1419,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
 
                 let rzp = new Razorpay(options);
-                rzp.open();
                 
+                rzp.on('payment.failed',async function(response){
+                    
+
+                    try{
+
+                        const result = await fetch('http://localhost:2000/payment-failed',{
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                orderId: response.error.metadata.order_id,
+                                paymentId: response.error.metadata.payment_id,
+                                reason: response.error.reason
+                            })
+                        });
+
+                        if(!result.ok){
+                            throw new Error('Network response was not ok while updating failed status.')
+                        }
+
+                        const data = await result.json();
+                        if(!data.status){
+                            console.error('Failed to update status on server.');
+                        }
+
+                    }catch(error){
+                        console.error("Error occured while trying to save failed status on server.",error);
+                    }
+                })
+
+                rzp.open();
+
             }else if(order.status && order.redirect){
                 
                 window.location.href = order.redirect

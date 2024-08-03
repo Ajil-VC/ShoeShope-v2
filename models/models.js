@@ -293,12 +293,18 @@ const orderItemSchema = new mongoose.Schema({
         required: true,
         enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned' ],
         default: 'Pending'
-    }
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['PENDING', 'PAID', 'FAILED', 'REFUNDED', 'CANCELLED'],
+        default: 'PENDING'
+      }
 })
 
 const orderSchema = new mongoose.Schema({
 
     paymentGatewayOrderId: String,
+    razorpayPaymentId: String,
     items: [orderItemSchema],
     customer: {
         type: mongoose.Schema.Types.ObjectId,
@@ -343,6 +349,11 @@ const orderSchema = new mongoose.Schema({
         required: true,
         enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
         default: 'Pending'
+    },
+    overallPaymentStatus: {
+        type: String,
+        enum: ['PENDING', 'PARTIALLY_PAID', 'PAID', 'PARTIALLY_REFUNDED', 'REFUNDED', 'CANCELLED','FAILED'],
+        default: 'PENDING'
     },
     confirmation : {
         type: Number,

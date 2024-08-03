@@ -62,6 +62,8 @@ userRouter.patch('/checkout_page',authenticate.isLoggedIn,userController.changeD
 userRouter.post('/checkout_page/addAddress',userController.addNewAddress);
 userRouter.post('/checkout_page',authenticate.isLoggedIn,userController.placeOrder);
 userRouter.get('/checkout_page/:address_is_selected',authenticate.isLoggedIn,userController.placeOrder);
+// userRouter.post('/razorpay-webhook',authenticate.isLoggedIn,userController.webhook);
+userRouter.post('/payment-failed',authenticate.isLoggedIn,userController.failedPayment);
 userRouter.post('/verify-payment',authenticate.isLoggedIn,userController.paymentVerification);
 userRouter.get('/order_placed',authenticate.isLoggedIn,userController.loadOrderPlaced);
 

@@ -28,16 +28,14 @@
                         </div>
                         <div class="order-date">
                           <i class="calendar-icon"></i>
-                          <span><%=orderDetails?.orderDate%></span>
+                          <span><%=new Date(orderDetails?.orderDate).toLocaleDateString('en-US', { 
+                              year: 'numeric', month: 'long', day: 'numeric' })%></span>
                         </div>
                     </div>
                   <div class="status-dropdown">
 
                     <select id="selectStatus" >
-                      <!-- <option value="Pending" <%= orderDetails.status === 'Pending' ? 'selected' : '' %> >Pending</option>
-                      <option value="Shipped" <%= orderDetails.status === 'Shipped' ? 'selected' : '' %> >Shipped</option>
-                      <option value="Delivered" <%= orderDetails.status === 'Delivered' ? 'selected' : '' %>  >Delivered</option>
-                      <option value="Cancelled" <%= orderDetails.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option> -->
+                    
                       <% if(orderDetails.status === 'Pending'){ %>
                         <option value="Pending" disabled selected>Pending</option>
                         <option value="Shipped">Shipped</option>
@@ -84,7 +82,8 @@
                     </div>
                     <div class="detail-item">
                       <label>Delivery date:</label>
-                      <span><%=orderDetails?.updatedAt%></span>
+                      <span><%=new Date(orderDetails?.updatedAt).toLocaleDateString('en-US', { 
+                          year: 'numeric', month: 'long', day: 'numeric' })%></span>
                     </div>
                   </div>
                   <div class="detail-row">
@@ -96,11 +95,16 @@
                       <label>Total Amount:</label>
                       <span>₹ <%=orderDetails?.totalAmount%></span>
                     </div>
+                    
                   </div>
                   <div class="detail-row">
                     <div class="detail-item">
                       <label>Reference code:</label>
                       <span>_______</span>
+                    </div>
+                    <div class="detail-item">
+                      <label>Payment Status:</label>
+                      <span><%=orderDetails?.overallPaymentStatus%></span>
                     </div>
                   </div>
                     <div class="detail-row">
@@ -108,7 +112,7 @@
                         <div class="align-address-detailed-order" >
                             <label>Shipping Address:</label>
                             <span>Near <%=orderDetails?.shippingAddress?.landmark%>, <%=orderDetails?.shippingAddress?.city%> city,
-                              <%=orderDetails?.shippingAddress?.place%>, <%=orderDetails?.shippingAddress?.district%> dt. <br>
+                              <br> <%=orderDetails?.shippingAddress?.place%>, <%=orderDetails?.shippingAddress?.district%> dt. <br>
                               Pin : <%=orderDetails?.shippingAddress?.pinCode%> </span>
 
                         </div>

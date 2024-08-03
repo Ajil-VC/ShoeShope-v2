@@ -8,7 +8,8 @@ const config = {
      GOOGLE_CLIENT_ID : process.env.GOOGLE_CLIENT_ID,
      GOOGLE_CLIENT_SECRET : process.env.GOOGLE_CLIENT_SECRET,
      Key_id : process.env.RazorPay_Key_Id,
-     Key_Secret : process.env.RazorPay_Key_Secret
+     Key_Secret : process.env.RazorPay_Key_Secret,
+     webhookSecret : process.env.Webhook_Secret
 }
 
 module.exports = config;

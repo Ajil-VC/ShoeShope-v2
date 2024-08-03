@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const {ObjectId} = require('mongodb')
 const bcrypt = require('bcrypt');
 const otpGenerator = require('otp-generator');
-const {appPassword} = require('../config/config')
+const {appPassword, webhookSecret} = require('../config/config')
 const nodemailer = require('nodemailer')
 const {add,format} = require('date-fns');
 const crypto = require('crypto');
@@ -409,8 +409,10 @@ const loadUserProfile = async(req,res) => {
             Order.find({customer : userID}).populate('shippingAddress').sort({ createdAt : -1}).exec(),
             wallet.findOne({userId : userID}).populate('transactions').exec()
         ]);
-console.log(userWallet)     
-        return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders,userWallet});
+
+        const latestTransactions = userWallet.transactions.reverse();
+
+        return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders,userWallet,latestTransactions});
     }catch(error){
 
         console.log("Internal error while loading profile",error);
@@ -1330,7 +1332,8 @@ const getItemsAndReserve = async(cartItemsArray) =>{
                     images : [item.productId.image[0],item.productId.image[1]],
                 },
                 quantity: item.quantity,
-                subtotal : (item.productId.salePrice) * (item.quantity)
+                subtotal : (item.productId.salePrice) * (item.quantity),
+                paymentStatus: 'PENDING'
             }
     
         });
@@ -1396,13 +1399,13 @@ const makeRazorpayment = async(razorpay, amountToPay,orderId) => {
 
         amount : amountToPay * 100,
         currency : 'INR',
-        // receipt : 'receipt_' + Date.now()
         receipt : orderId
     };
 
     try{
 
         const order = await razorpay.orders.create(options);
+console.log(order,"order from makeRazorPayment")
         return order;
     }catch(error){
 
@@ -1465,6 +1468,7 @@ const placeOrder = async(req,res) => {
                 gstAmount   : gst,
                 couponDiscount  : offerAmount,
                 totalAmount : totalAmount,
+                overallPaymentStatus: 'PENDING',
                 shippingAddress : address._id,
                 paymentMethod   : paymentMethod
     
@@ -1475,10 +1479,11 @@ const placeOrder = async(req,res) => {
 
                 var orderResult = await makeRazorpayment(razorpay, amountToPay,newOrder._id);
                 newOrder.paymentGatewayOrderId = orderResult.id;
-    
+ console.log(orderResult,"orderResult from !cod")   
             }                
             
             const orderDetails = await newOrder.save();
+console.log(orderDetails._id,"From place order")            
 
             if(orderDetails){
                 
@@ -1518,6 +1523,113 @@ const placeOrder = async(req,res) => {
 }
 
 
+// const webhook = async(req,res) => {
+
+
+//     try{
+
+//         const shasum = crypto.createHmac('sha256', webhookSecret);
+//         shasum.update(JSON.stringify(req.body));
+//         const digest = shasum.digest('hex');
+    
+//         if (digest === req.headers['x-razorpay-signature']) {
+//             const { payment } = req.body.payload.payment.entity;
+    
+//             if (req.body.event === 'payment.failed') {
+                
+//                 await Order.findOneAndUpdate(
+//                   { paymentGatewayOrderId: payment.order_id },
+//                     [
+//                         {$set:{ 
+//                             overallPaymentStatus: 'FAILED',
+//                             items:{
+//                                 $map:{
+//                                     input:"$items",
+//                                     as: "item",
+//                                     in: {
+//                                         $mergeObjects:
+//                                         ["$$item",{paymentStatus : 'FAILED'}]
+//                                     }
+//                                 }
+//                             } 
+//                         }}
+//                     ]
+//                 );
+    
+               
+    
+//             } else if (req.body.event === 'payment.captured') {
+                
+//                 await Order.findOneAndUpdate(
+//                     { paymentGatewayOrderId: payment.order_id },
+//                       [
+//                           {$set:{ 
+//                               overallPaymentStatus: 'PAID',
+//                               items:{
+//                                   $map:{
+//                                       input:"$items",
+//                                       as: "item",
+//                                       in: {
+//                                           $mergeObjects:
+//                                           ["$$item",{paymentStatus : 'PAID'}]
+//                                       }
+//                                   }
+//                               } 
+//                           }}
+//                     ]
+//                 );
+//             }
+//         }
+    
+//         res.json({ status: true });
+        
+//     }catch(error){
+//         console.log("Internal error while handling payment status in webhook",error);
+//         res.status(500).send("Internal error while handling payment status in webhook",error);
+//     }
+
+// }
+
+
+const failedPayment = async(req,res) => {
+
+    const { orderId, paymentId, reason } = req.body;
+
+    try{
+
+        const order = await Order.findOneAndUpdate(
+            { paymentGatewayOrderId: orderId },
+              [
+                  {$set:{ 
+                      overallPaymentStatus: 'FAILED',
+                      items:{
+                          $map:{
+                              input:"$items",
+                              as: "item",
+                              in: {
+                                  $mergeObjects:
+                                  ["$$item",{paymentStatus : 'FAILED'}]
+                              }
+                          }
+                      } 
+                  }}
+              ],
+              {new : true}
+        );
+
+        if (!order) {
+            return res.status(404).json({ status: false, message: 'Order not found' });
+        }
+        return res.json({ status: true, message: 'Order updated successfully' });
+            
+    }catch(error){
+        console.error('Error updating failed payment:', error);
+        res.status(500).send('Error updating failed payment:', error);
+    }
+
+}
+
+
 const paymentVerification = async(req,res) => {
 
     let userID = "";
@@ -1548,8 +1660,28 @@ const paymentVerification = async(req,res) => {
                 currency: 'INR',
                 description: ""
             });
-    
             const transactionSaveResult = await Transaction.save();
+
+            await Order.findOneAndUpdate(
+                { paymentGatewayOrderId: orderId },
+                  [
+                      {$set:{ 
+                          overallPaymentStatus: 'PAID',
+                          razorpayPaymentId : paymentId,
+                          items:{
+                              $map:{
+                                  input:"$items",
+                                  as: "item",
+                                  in: {
+                                      $mergeObjects:
+                                      ["$$item",{paymentStatus : 'PAID'}]
+                                  }
+                              }
+                          } 
+                      }}
+                ]
+            );
+            
             if(transactionSaveResult){
 
                 return res.status(201).json({status : true, redirect : `/order_placed?order_id=${orderId}`});
@@ -1557,6 +1689,7 @@ const paymentVerification = async(req,res) => {
                 return res.json({status : false , message : 'Could not save transaction details.'});
             }
         }else{
+console.log("Invalid signature from payment varification")            
             return res.json({status : false, message : 'Invalid Signature'});
         }
     }catch(error){
@@ -1602,14 +1735,15 @@ const cancelOrder = async(req,res) => {
                 {$match:{ 'items.product.id' : cancelledItemId}}
             ])
         ])
-    //  console.log(cancelledProdWithOrder)
+
         const gstForCancelled = (cancelledProdWithOrder[0].items.subtotal / cancelledProdWithOrder[0].subTotal) * cancelledProdWithOrder[0].gstAmount ;
         const gstAddedAmount = cancelledProdWithOrder[0].items.subtotal + gstForCancelled;
         const totalWithoutDiscount = cancelledProdWithOrder[0].totalAmount + cancelledProdWithOrder[0].couponDiscount ;
         const cancelledProductDiscount = (gstAddedAmount / totalWithoutDiscount) * cancelledProdWithOrder[0].couponDiscount ;
         const refundAmount = gstAddedAmount - cancelledProductDiscount;
 
-        if(orderData && (cancelledProdWithOrder[0].items.status === 'Pending')){
+
+        if(orderData && (cancelledProdWithOrder[0].items.status === 'Pending') && (cancelledProdWithOrder[0].items.paymentStatus === 'PAID') ){
 
             var Transaction = new transaction({
                         
@@ -1661,6 +1795,12 @@ const cancelOrder = async(req,res) => {
                     return res.json({status : false, message : 'Transaction saved but fund not transffered.'});
                 }
             }
+            console.log("Dont from UPI")
+        }else if( orderData && (cancelledProdWithOrder[0].items.status === 'Pending') && (orderData.paymentMethod == 'Cash on Delivery') ){
+
+            flag = true;
+            console.log("DOne from cod")
+
         }else{
             console.log('Already cancelled maaannnnn')
         }
@@ -1704,7 +1844,7 @@ const cancelOrder = async(req,res) => {
 
 
 
-            return res.status(201).json({status : true, message : 'Product cancelled Successfully and amount added to user wallet.'});
+            return res.status(201).json({status : true, message : 'Product cancelled Successfully.'});
         }else{
             return res.status(201).json({status : false, message : 'Something went wrong while adding amount to user wallet.'});
         }
@@ -1921,6 +2061,8 @@ module.exports = {
     loadCheckout,
     changeDeliveryAddress,
     placeOrder,
+    // webhook,
+    failedPayment,
     paymentVerification,
     loadOrderPlaced,
     getOrderDetails,
