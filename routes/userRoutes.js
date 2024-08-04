@@ -58,12 +58,15 @@ userRouter.get('/wishlist',authenticate.isLoggedIn,userController.loadWishlist);
 
 userRouter.get('/checkout',authenticate.isLoggedIn,userController.validateCart);
 userRouter.get('/checkout_page',authenticate.isLoggedIn,userController.loadCheckout);
+userRouter.get('/checkout_page/retry/:orderId',authenticate.isLoggedIn,userController.loadRetryCheckout);
+userRouter.post('/checkout_page/retry/make-payment',authenticate.isLoggedIn,userController.retryPaymentForFailed);
+
 userRouter.patch('/checkout_page',authenticate.isLoggedIn,userController.changeDeliveryAddress);
 userRouter.post('/checkout_page/addAddress',userController.addNewAddress);
 userRouter.post('/checkout_page',authenticate.isLoggedIn,userController.placeOrder);
 userRouter.get('/checkout_page/:address_is_selected',authenticate.isLoggedIn,userController.placeOrder);
 // userRouter.post('/razorpay-webhook',authenticate.isLoggedIn,userController.webhook);
-userRouter.post('/payment-failed',authenticate.isLoggedIn,userController.failedPayment);
+userRouter.post('/payment-failed',authenticate.isLoggedIn,userController.failedPaymentStatus);
 userRouter.post('/verify-payment',authenticate.isLoggedIn,userController.paymentVerification);
 userRouter.get('/order_placed',authenticate.isLoggedIn,userController.loadOrderPlaced);
 

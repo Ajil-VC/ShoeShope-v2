@@ -1336,6 +1336,95 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
 
+
+    const razorPayment = async(razorpay_key, orderResultAmount, orderResultId, orderErrorMessage)=>{
+
+        const options = {
+
+            key : razorpay_key,
+            amount : orderResultAmount,
+            currency : 'INR',
+            name : 'ShoeShope',
+            description : 'Test Transaction',
+            order_id : orderResultId,
+            handler : async function(response){
+
+                try{
+
+                    const result = await fetch('/verify-payment',{  
+                        method : 'post',
+                        headers : {
+                            'Content-Type' : 'application/json',    
+                        },
+                        body : JSON.stringify({
+                            orderId : response.razorpay_order_id,
+                            paymentId : response.razorpay_payment_id,
+                            signature: response.razorpay_signature,
+                            amount: orderResultAmount / 100,
+                        }),
+                    });
+
+                    const data = await result.json();
+                    // alert(data.status === true ? 'Payment Successful' : 'Payment Failed');
+                    if(data.status){
+                        window.location.href = data.redirect
+                    }else{
+                        Swal.fire({
+                            title: "Order not placed",
+                            text: orderErrorMessage,
+                            icon: 'error'
+                        });
+                    }
+                    
+                }catch(error){
+                    console.error('Error during payment verification:', error);
+                    Swal.fire({
+                        title: "Order not placed",
+                        text: error.message || "An error occurred during payment verification",
+                        icon: 'error'
+                    });
+                }
+            },
+        };
+
+        let rzp = new Razorpay(options);
+        
+        rzp.on('payment.failed',async function(response){
+            
+
+            try{
+
+                const result = await fetch('http://localhost:2000/payment-failed',{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId: response.error.metadata.order_id,
+                        paymentId: response.error.metadata.payment_id,
+                        reason: response.error.reason
+                    })
+                });
+
+                if(!result.ok){
+                    throw new Error('Network response was not ok while updating failed status.')
+                }
+
+                const data = await result.json();
+                if(!data.status){
+                    console.error('Failed to update status on server.');
+                }
+
+            }catch(error){
+                console.error("Error occured while trying to save failed status on server.",error);
+            }
+        })
+
+        rzp.open();
+        
+    }
+
+
     const placeOrderByCheckingAddress = async()=>{
 
         try{
@@ -1370,88 +1459,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const order = await response.json();
             if(order.status && order.razorpay_key){
 
-                const options = {
+                const razorpay_key = order.razorpay_key;
+                const orderResultAmount = order.orderResult.amount;
+                const orderResultId = order.orderResult.id;
+                const orderErrorMessage = order?.message ?? 'Error Occured';
 
-                    key : order.razorpay_key,
-                    amount : order.orderResult.amount,
-                    currency : 'INR',
-                    name : 'ShoeShope',
-                    description : 'Test Transaction',
-                    order_id : order.orderResult.id,
-                    handler : async function(response){
-
-                        try{
-
-                            const result = await fetch('/verify-payment',{  
-                                method : 'post',
-                                headers : {
-                                    'Content-Type' : 'application/json',    
-                                },
-                                body : JSON.stringify({
-                                    orderId : response.razorpay_order_id,
-                                    paymentId : response.razorpay_payment_id,
-                                    signature: response.razorpay_signature,
-                                    amount: order.orderResult.amount / 100,
-                                }),
-                            });
-    
-                            const data = await result.json();
-                            // alert(data.status === true ? 'Payment Successful' : 'Payment Failed');
-                            if(data.status){
-                                window.location.href = data.redirect
-                            }else{
-                                Swal.fire({
-                                    title: "Order not placed",
-                                    text: order.message,
-                                    icon: 'error'
-                                });
-                            }
-                            
-                        }catch(error){
-                            console.error('Error during payment verification:', error);
-                            Swal.fire({
-                                title: "Order not placed",
-                                text: error.message || "An error occurred during payment verification",
-                                icon: 'error'
-                            });
-                        }
-                    },
-                };
-
-                let rzp = new Razorpay(options);
-                
-                rzp.on('payment.failed',async function(response){
-                    
-
-                    try{
-
-                        const result = await fetch('http://localhost:2000/payment-failed',{
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                orderId: response.error.metadata.order_id,
-                                paymentId: response.error.metadata.payment_id,
-                                reason: response.error.reason
-                            })
-                        });
-
-                        if(!result.ok){
-                            throw new Error('Network response was not ok while updating failed status.')
-                        }
-
-                        const data = await result.json();
-                        if(!data.status){
-                            console.error('Failed to update status on server.');
-                        }
-
-                    }catch(error){
-                        console.error("Error occured while trying to save failed status on server.",error);
-                    }
-                })
-
-                rzp.open();
+                razorPayment(razorpay_key, orderResultAmount, orderResultId, orderErrorMessage);
 
             }else if(order.status && order.redirect){
                 
@@ -1622,9 +1635,66 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Error occured while trying to create and  download invoice.",error);
         }
     }
-                                                                    
+    
 
-    function updateOrderDataTable(produts,addres,orderDate,orderId,deliveryDate){
+    const makePaymentForFailed = async(paymentMethod,orderId) => {
+
+        try{
+
+            const response = await fetch(`http://localhost:2000/checkout_page/retry/make-payment?paymentMethod=${paymentMethod}&order_id=${orderId}`,{
+                method : 'post'});
+            if(!response.ok){
+                throw new Error('Network response was not ok while making order.');
+            }
+            
+            const order = await response.json();
+            if(order.status && order.razorpay_key){
+
+                const razorpay_key = order.razorpay_key;
+                const orderResultAmount = order.orderResult.amount;
+                const orderResultId = order.orderResult.id;
+                const orderErrorMessage = order?.message ?? 'Error Occured';
+
+                razorPayment(razorpay_key, orderResultAmount, orderResultId, orderErrorMessage);
+
+            }else{
+    
+                Swal.fire({
+                    title: "Order not placed",
+                    text: order.message,
+                    icon: 'error'
+                });
+    
+            }
+        }
+        catch(error){
+            console.log("Error occured while making order",error)
+        }
+    }
+
+    const make_payment = document.getElementById('make-payment');
+    if(make_payment){
+
+        make_payment.addEventListener('click',() => {
+            if(paymentMethod){
+                
+                const orderId = make_payment.dataset.order_id;
+                makePaymentForFailed(paymentMethod,orderId);
+                       
+            }else{
+                console.log("Please select a payment option")
+                Swal.fire({
+                    title: "Payment Method Required",
+                    text: "Please select a payment method to proceed.s",
+                    icon: 'error'
+                });
+            }
+
+        })
+    }
+        
+
+    function updateOrderDataTable(produts,addres,orderDate,orderId,deliveryDate,orderPaymentStatus){
 
         const tableBody = document.getElementById('order-detail-table');
         tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderId,deliveryDate)).join('');
@@ -1635,18 +1705,35 @@ document.addEventListener('DOMContentLoaded', function() {
         orderFooter.style.display = 'flex';
         orderFooter.style.justifyContent = 'end'
 
+        const retryPaymentBtn = document.createElement('button');
+        retryPaymentBtn.classList.add('btn');
+        retryPaymentBtn.style.background = '#1e8449';
+        retryPaymentBtn.innerText = 'Retry Payment';
+
         const invoiceBtn = document.createElement('button');
         invoiceBtn.classList.add('btn');
         invoiceBtn.style.background = '#1e8449';
-        invoiceBtn.innerText = "Invoice";
+        invoiceBtn.innerText = "Download Invoice";
 
-        invoiceBtn.addEventListener('click',()=> {
+        if(orderPaymentStatus == 'FAILED'){
+            orderFooter.appendChild(retryPaymentBtn);
+            retryPaymentBtn.addEventListener('click',()=> {
+                
+                window.location.href = `http://localhost:2000/checkout_page/retry/${orderId}`
+                // retryPaymentBtn.disabled = true;
+                console.log("retryPaymentBtn")
+            })
+        }else{
             
-            invoiceBtn.disabled = true;
-            createInvoice(orderId,invoiceBtn);
-        })
+            orderFooter.appendChild(invoiceBtn);
+            invoiceBtn.addEventListener('click',()=> {
+                
+                invoiceBtn.disabled = true;
+                createInvoice(orderId,invoiceBtn);
+            })
+        }
 
-        orderFooter.appendChild(invoiceBtn);
+
 
         tableBody.appendChild(orderFooter);
         
@@ -1656,7 +1743,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const order_history_table = document.getElementById('order-history-table');
     const toggle_order_history = document.getElementById('toggle-order-history');
     const show_all_btn = document.getElementById('show-all-btn');
+    const payment_status = document.getElementById('payment-status');
     const order_details = document.getElementById('order-details');
+    let orderPaymentStatus ;
     if(order_history_table){
 
         order_history_table.addEventListener('click',(e) => {
@@ -1674,12 +1763,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(data => {
                     if(data.status){
+
+                        orderPaymentStatus = data.orderPaymentStatus;
+                        payment_status.classList.remove('display-order-details');
+                        payment_status.innerText = `Overall Payment Status : ${orderPaymentStatus}`
                         
-                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderId,data.deliveryDate);
+                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderId,data.deliveryDate,orderPaymentStatus);
                       
+                        toggle_order_history.style.display = 'none';
+                        order_details.classList.remove('display-order-details');
+                        show_all_btn.classList.remove('display-order-details');
+
                     }else{
 
-                  
+                        console.error('Failed to get the data from backend');
 
                     }
             
@@ -1689,18 +1786,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log("Error occured while getting order details.",error)
                 })
                 
-                toggle_order_history.style.display = 'none';
-                order_details.classList.remove('display-order-details');
-                show_all_btn.classList.remove('display-order-details');
             }
         })
        
-            show_all_btn.addEventListener('click',()=> {
-                
-                order_details.classList.add('display-order-details');
-                show_all_btn.classList.add('display-order-details');
-                toggle_order_history.style.display = 'block';
-            })
+        show_all_btn.addEventListener('click',()=> {
+            
+            order_details.classList.add('display-order-details');
+            show_all_btn.classList.add('display-order-details');
+            payment_status.classList.add('display-order-details')
+            payment_status.innerText = '';
+            toggle_order_history.style.display = 'block';
+        })
        
     }
 

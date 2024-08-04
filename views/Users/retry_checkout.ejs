@@ -466,13 +466,13 @@
                             <p id="dAddress-dt-st" ></p>
                             <p id="dAddress-mob" ></p>
                         <% } %>
-                        <% if(address.address.length > 1 ){ %>
+                        <!-- <% if(address.address.length > 1 ){ %>
                             <button type="button" class="btn mb-3  " data-toggle="modal" data-target="#changeAddressModalCenter">Select Address</button>
                         <% } %>
                      
                         <button type="button" class="btn mb-3 " data-toggle="modal" data-target="#addNewAddressModalCenter">
                         Add New Address
-                        </button>
+                        </button> -->
   
                         
                     </div>
@@ -490,11 +490,7 @@
                                 <span class="radio-custom"></span>
                                 <span class="label-text">UPI Method</span>
                             </label>
-                            <label class="payment-option d-flex " id="cod" >
-                                <input type="radio" name="payment" value="Cash on Delivery">
-                                <span class="radio-custom"></span>
-                                <span class="label-text">Cash on Delivery</span>
-                            </label>
+                           
                         </div>
                     </div>
                 </div>
@@ -521,7 +517,7 @@
                         <span>Total Amount</span>
                         <span>₹ <%=totalAmount%></span>
                     </div>
-                    <button id="place-order" class="place-order">Place Order</button>
+                    <button id="make-payment" data-order_id="<%=orderId%>" class="place-order">make Payment</button>
                 </div>
             </div>
         </div>

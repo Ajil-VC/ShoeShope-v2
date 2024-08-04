@@ -431,6 +431,7 @@ const getOrderDetails = async(req,res) => {
         const orderDate = order.orderDate;
         const orderStatus = order.status;
         const deliveryDate = order.updatedAt;
+        const orderPaymentStatus = order.overallPaymentStatus;
         
         return res.status(200).json({
             status : true,
@@ -439,7 +440,8 @@ const getOrderDetails = async(req,res) => {
             orderDate,
             orderStatus,
             orderId: order._id,
-            deliveryDate
+            deliveryDate,
+            orderPaymentStatus
         });
 
     }catch(error){
@@ -1200,7 +1202,8 @@ const loadCheckout = async(req,res) => {
     const selectedCoupon = req.query.coupon;
 
     try{
-
+        
+        
         const { cartItemsArray,
             subTotal,
             totalAmount,
@@ -1208,23 +1211,28 @@ const loadCheckout = async(req,res) => {
             totalSelectedItems, 
             couponDiscount,
             offerAmount } = await cartItemsFindFn(userID,selectedCoupon);
-        
+
+        const sampleImage = cartItemsArray.filter(prod => (prod.isSelected == true))[0].productId.image[0];
+       
         if(selectedCoupon){
 
             req.session.coupon = selectedCoupon;
 
         }
 
-
         const currentDate = new Date();
         const deliveryDate = add(currentDate, { days: 5 });
         const expectedDeliveryDate = format(deliveryDate,'EEEE yyyy MMMM dd');
 
-        const address = await User.findById(userID).populate('address').exec();
-        const selectedAddress = await Address.findOne({userId : userID,selectedAdd : true});
+        const [address, selectedAddress] = await Promise.all([
+
+            User.findById(userID).populate('address').exec(),
+            Address.findOne({userId : userID,selectedAdd : true})
+        ])
+
         
         return res.status(200).render('checkout',{
-        cartItemsArray,
+        sampleImage,
         subTotal,
         totalAmount,
         gst,
@@ -1234,13 +1242,153 @@ const loadCheckout = async(req,res) => {
         address,
         discount : couponDiscount,
         discountAmount : offerAmount,
-    })
+        })
+        
 
     }catch(error){
 
         console.log("Internal error while loading checkout",error);
         return res.status(500).send("Internal error while loading checkout",error);
     }
+
+}
+
+
+const loadRetryCheckout = async(req,res) => {
+
+    try{
+        
+        let userID = "";
+        if(req?.user?._id){
+            userID = new mongoose.Types.ObjectId(req.user._id);
+        }else if(req.session.user_id){
+            userID = new mongoose.Types.ObjectId(req.session.user_id)
+        }
+    
+        const orderId = req.params.orderId;
+        
+        const [orderData, address] = await Promise.all([
+
+            Order.findOne({_id: orderId}).populate('shippingAddress'),
+            User.findById(userID).populate('address').exec(),
+        ])
+    
+
+        const itemsToBeDelivered = orderData.items.filter(item => (item.status !== 'Cancelled'));
+
+        let subTotal = 0;
+        let gst = 0;
+        let discountAmount = 0;
+
+        itemsToBeDelivered.forEach(product => {
+
+            const amountRatio = product.subtotal / orderData.subTotal;
+            
+            subTotal = subTotal + product.subtotal;
+
+            const prodGST = amountRatio * orderData.gstAmount;
+            gst = gst + prodGST;
+
+            const prodCouponDisc = amountRatio * orderData.couponDiscount;
+            discountAmount = discountAmount + prodCouponDisc;
+        })
+        const totalAmount = subTotal + gst - discountAmount;
+        const discount = discountAmount / subTotal;
+
+        const selectedAddress = orderData.shippingAddress;
+
+        const currentDate = new Date();
+        const deliveryDate = add(currentDate, { days: 5 });
+        const expectedDeliveryDate = format(deliveryDate,'EEEE yyyy MMMM dd');
+        
+        return res.status(200).render('retry_checkout',{
+            sampleImage : itemsToBeDelivered[0].product.images[0],
+            subTotal,
+            totalAmount : totalAmount.toFixed(2),
+            gst : gst.toFixed(2),
+            totalSelectedItems : itemsToBeDelivered.length,
+            expectedDeliveryDate,
+            selectedAddress,
+            address,
+            discount : (discount * 100).toFixed(2),//This discount will say the percentage.
+            discountAmount : discountAmount.toFixed(2),
+            orderId
+        })
+
+    }catch(error){
+        console.log("Internal erro occured while trying to retry checkout page.",error);
+        return res.status(500).send("Internal erro occured while trying to retry checkout page.",error);
+    }
+
+}
+
+const retryPaymentForFailed = async(req,res) => {
+
+    try{
+
+        let userID = "";
+        if(req?.user?._id){
+            userID = new mongoose.Types.ObjectId(req.user._id);
+        }else if(req.session.user_id){
+            userID = new mongoose.Types.ObjectId(req.session.user_id)
+        }
+        const orderId = new mongoose.Types.ObjectId(req.query.order_id);
+    
+        const paymentMethod = req.query.paymentMethod;
+        const razorpay = req.razorpay;
+        const razorpay_key = req.razorpay_key;//this is set from app.js
+
+        const orderData = await Order.findOne({_id :orderId});
+
+
+        //Finding amount to pay 
+        const itemsToBeDelivered = orderData.items.filter(item => (item.status !== 'Cancelled'));
+
+        let subTotal = 0;
+        let gst = 0;
+        let discountAmount = 0;
+
+        itemsToBeDelivered.forEach(product => {
+
+            const amountRatio = product.subtotal / orderData.subTotal;
+            
+            subTotal = subTotal + product.subtotal;
+
+            const prodGST = amountRatio * orderData.gstAmount;
+            gst = gst + prodGST;
+
+            const prodCouponDisc = amountRatio * orderData.couponDiscount;
+            discountAmount = discountAmount + prodCouponDisc;
+        })
+        const amountToPay = subTotal + gst - discountAmount;
+    console.log(amountToPay, "amountToPay Trhis is the amount to pay")
+        if(orderData){
+
+            const orderResult = await makeRazorpayment(razorpay, amountToPay,orderData._id);
+            orderData.paymentGatewayOrderId = orderResult.id;
+
+            orderData.paymentMethod = paymentMethod;//In case implementing wallet payment.
+        
+            const orderDetails = await orderData.save();
+            if(orderDetails){
+            return res.status(201).json({status : true,razorpay_key : razorpay_key, orderResult})
+            
+            }else{
+                return res.status(404).json({status : false, message: "Order Coudn't save with new payment gateway order id"});    
+            }
+
+        }else{
+
+            return res.status(404).json({status : false, message: "Order Not found"});
+        }
+
+
+    }catch(error){
+
+        console.log("Internal server error while trying to retry the payment.",error);
+        return res.status(500).send("Internal server error while trying to retry the payment.",error);
+    }
+
 
 }
 
@@ -1397,7 +1545,7 @@ const makeRazorpayment = async(razorpay, amountToPay,orderId) => {
 
     const options = {
 
-        amount : amountToPay * 100,
+        amount : Math.round(amountToPay * 100),
         currency : 'INR',
         receipt : orderId
     };
@@ -1405,7 +1553,6 @@ const makeRazorpayment = async(razorpay, amountToPay,orderId) => {
     try{
 
         const order = await razorpay.orders.create(options);
-console.log(order,"order from makeRazorPayment")
         return order;
     }catch(error){
 
@@ -1428,7 +1575,7 @@ const placeOrder = async(req,res) => {
     const selectedCoupon = req.session.coupon;
     const paymentMethod = req.query.paymentMethod;
     const razorpay = req.razorpay;
-    const razorpay_key = req.razorpay_key;
+    const razorpay_key = req.razorpay_key;//this is set from app.js
     
     if(req?.params?.address_is_selected){
         //In this block im checking if any address is selected.   
@@ -1479,11 +1626,11 @@ const placeOrder = async(req,res) => {
 
                 var orderResult = await makeRazorpayment(razorpay, amountToPay,newOrder._id);
                 newOrder.paymentGatewayOrderId = orderResult.id;
- console.log(orderResult,"orderResult from !cod")   
+ 
             }                
-            
+         
             const orderDetails = await newOrder.save();
-console.log(orderDetails._id,"From place order")            
+          
 
             if(orderDetails){
                 
@@ -1591,7 +1738,7 @@ console.log(orderDetails._id,"From place order")
 // }
 
 
-const failedPayment = async(req,res) => {
+const failedPaymentStatus = async(req,res) => {
 
     const { orderId, paymentId, reason } = req.body;
 
@@ -1662,7 +1809,7 @@ const paymentVerification = async(req,res) => {
             });
             const transactionSaveResult = await Transaction.save();
 
-            await Order.findOneAndUpdate(
+            const updatedOrder = await Order.findOneAndUpdate(
                 { paymentGatewayOrderId: orderId },
                   [
                       {$set:{ 
@@ -1673,15 +1820,28 @@ const paymentVerification = async(req,res) => {
                                   input:"$items",
                                   as: "item",
                                   in: {
-                                      $mergeObjects:
-                                      ["$$item",{paymentStatus : 'PAID'}]
+                                      $cond:{
+                                        if:{$ne:["$$item.status","Cancelled"]},
+                                        then:{$mergeObjects:["$$item",{paymentStatus: 'PAID'}]},
+                                        else: "$$item"
+                                      }
                                   }
                               }
                           } 
                       }}
-                ]
+                ],
+                {new : true}
             );
             
+            console.log(updatedOrder,"Tis is updatedOrder from payment verification");
+            if(updatedOrder){
+                const paidProductsCount = updatedOrder.items.filter(item => (item.paymentStatus === 'PAID')).length;
+                console.log(paidProductsCount,"paidProductsCount");
+                if(updatedOrder.items.length > paidProductsCount){
+                    updatedOrder.overallPaymentStatus = 'PARTIALLY_PAID';
+                    await updatedOrder.save();
+                }
+            }
             if(transactionSaveResult){
 
                 return res.status(201).json({status : true, redirect : `/order_placed?order_id=${orderId}`});
@@ -1689,7 +1849,7 @@ const paymentVerification = async(req,res) => {
                 return res.json({status : false , message : 'Could not save transaction details.'});
             }
         }else{
-console.log("Invalid signature from payment varification")            
+         
             return res.json({status : false, message : 'Invalid Signature'});
         }
     }catch(error){
@@ -1743,7 +1903,8 @@ const cancelOrder = async(req,res) => {
         const refundAmount = gstAddedAmount - cancelledProductDiscount;
 
 
-        if(orderData && (cancelledProdWithOrder[0].items.status === 'Pending') && (cancelledProdWithOrder[0].items.paymentStatus === 'PAID') ){
+        if(orderData && (cancelledProdWithOrder[0].items.status === 'Pending') && 
+        (cancelledProdWithOrder[0].items.paymentStatus === 'PAID') ){
 
             var Transaction = new transaction({
                         
@@ -1771,7 +1932,7 @@ const cancelOrder = async(req,res) => {
                 });
 
                 const createWalletForUser = await userWallet.save();
-                // console.log(createWalletForUser,"This is createWalletForUser");
+             
                 if(createWalletForUser){
 
                     flag = true;
@@ -1795,11 +1956,11 @@ const cancelOrder = async(req,res) => {
                     return res.json({status : false, message : 'Transaction saved but fund not transffered.'});
                 }
             }
-            console.log("Dont from UPI")
-        }else if( orderData && (cancelledProdWithOrder[0].items.status === 'Pending') && (orderData.paymentMethod == 'Cash on Delivery') ){
+
+        }else if( orderData && (cancelledProdWithOrder[0].items.status === 'Pending') && 
+        ((orderData.paymentMethod == 'Cash on Delivery') || (cancelledProdWithOrder[0].items.paymentStatus === 'FAILED')) ){
 
             flag = true;
-            console.log("DOne from cod")
 
         }else{
             console.log('Already cancelled maaannnnn')
@@ -1814,7 +1975,8 @@ const cancelOrder = async(req,res) => {
                         _id : orderId,
                         'items.product.id': cancelledItemId
                     },{$set : {
-                    'items.$[elem].status' : 'Cancelled' 
+                    'items.$[elem].status' : 'Cancelled',
+                    'items.$[elem].paymentStatus' : 'CANCELLED' 
                     }},
                     {
                         arrayFilters : [{'elem.product.id' : cancelledItemId}],
@@ -1839,6 +2001,7 @@ const cancelOrder = async(req,res) => {
             if(isAllCancelled.length < 1){
                  
                 updatedOrder.status = 'Cancelled';
+                updatedOrder.overallPaymentStatus = 'CANCELLED';
                 await updatedOrder.save();
             }
 
@@ -2057,12 +2220,14 @@ module.exports = {
     changeQuantity,
     addCoupon,
 
+    loadRetryCheckout,
+    retryPaymentForFailed,
     validateCart,
     loadCheckout,
     changeDeliveryAddress,
     placeOrder,
     // webhook,
-    failedPayment,
+    failedPaymentStatus,
     paymentVerification,
     loadOrderPlaced,
     getOrderDetails,
