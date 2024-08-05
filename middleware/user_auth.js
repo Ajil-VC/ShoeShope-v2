@@ -12,17 +12,17 @@ const isLoggedIn = async(req,res,next) => {
 
     try{
         
-        
-        if( !req.session.user_id && !req.user ){
+        console.log(req.session.isBlocked,"req.session.isBlocked")
+        if( (!req.session.user_id  )  && !req.user ){
 
             const acceptHeader = req.headers.accept || "";
             if (req.xhr || acceptHeader.indexOf('json') > -1) {
                 // If the client expects a JSON response
                 return res.json({ redirect: '/login' });
-              } else {
+            } else {
                 // For regular HTTP requests
                 return res.redirect('/login');
-              }
+            }
             
         }
         next();

@@ -185,7 +185,7 @@ const loginUser = async (req,res) => {
         if(userData.google_id){
             return res.status(200).redirect('/auth/google')
         }else if(userData.isBlocked){
-            return res.status(401).send("Unauthorized");
+            return res.status(401).render('error',{message : 'Unauthorized. You cannot enter into this page!', code : '401'});
         }
         else if(userData){
             const passwordMatch = await bcrypt.compare(password,userData.password)

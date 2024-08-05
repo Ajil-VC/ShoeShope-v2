@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #e74c3c;
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #34495e;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .frustrated-icon {
+            font-size: 5rem;
+            animation: frustrated 0.5s ease-in-out infinite alternate;
+        }
+        @keyframes frustrated {
+            from {
+                transform: rotate(-5deg);
+            }
+            to {
+                transform: rotate(5deg);
+            }
+        }
+        .error-code {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1rem;
+            color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-code" id="errorCode"></div>
+        <div class="frustrated-icon">😖</div>
+        <h1 id="errorTitle"><%=code%></h1>
+        <p id="errorMessage"><%=message%></p>
+        <a href="/home" class="btn">Go Home</a>
+    </div>
+
+    <script>
+        // You can customize the error message based on the error type
+        function setErrorMessage(type) {
+            const errorTitle = document.getElementById('errorTitle');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorCode = document.getElementById('errorCode');
+
+            switch(type) {
+                case '404':
+                    errorTitle.textContent = 'Page Not Found';
+                    errorMessage.textContent = "We couldn't find the page you were looking for.";
+                    errorCode.textContent = '404';
+                    break;
+                case '403':
+                    errorTitle.textContent = 'Unauthorized';
+                    errorMessage.textContent = "You don't have permission to access this page.";
+                    errorCode.textContent = '403';
+                    break;
+                default:
+                    errorTitle.textContent = 'Oops!';
+                    errorMessage.textContent = 'Something went wrong. Please try again later.';
+                    errorCode.textContent = '500';
+            }
+        }
+
+        // You can call this function with the appropriate error type
+        // For example: setErrorMessage('404');
+    </script>
+</body>
+</html>
