@@ -65,8 +65,8 @@ const userSchema = mongoose.Schema({
         default:0
     },
     isBlocked:{
-        type:Number,
-        default:0
+        type:Boolean,
+        default:true //It means user is not blocked.
     },
     image:{
         type:String,

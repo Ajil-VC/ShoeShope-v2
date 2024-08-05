@@ -54,16 +54,18 @@ function blockUser(userID){
 .then(data => {
     console.log('data recieved : ',data.userID);
     const btnId = document.getElementById(`blockBtn-${userID}`);
-    console.log(btnId)
-    console.log(data.isBlocked)
+    console.log(btnId,'btnId')
+    console.log(data.isBlocked,'data.isBlocked')
     if(data.isBlocked){
         btnId.textContent = 'Block';
+        btnId.style.color = 'black';
         btnId.classList.add('blockBtn');
         btnId.classList.remove('unblockBtn');
         btnId.classList.remove('btn-success');
         btnId.classList.add('btn-warning')
     }else{
         btnId.textContent = 'unblock';
+        btnId.style.color = 'white';
         btnId.classList.add('unblockBtn');
         btnId.classList.remove('blockBtn');
         btnId.classList.remove('btn-warning');

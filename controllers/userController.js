@@ -184,7 +184,7 @@ const loginUser = async (req,res) => {
         console.log(userData,"This is user data\n\n\n\n")
         if(userData.google_id){
             return res.status(200).redirect('/auth/google')
-        }else if(userData.isBlocked){
+        }else if(!userData.isBlocked){//False means user is blocked.
             return res.status(401).render('error',{message : 'Unauthorized. You cannot enter into this page!', code : '401'});
         }
         else if(userData){
@@ -354,8 +354,8 @@ const loadProductDetails = async (req,res) => {
 
     const product_id = req.query.product_id ; 
     let userID = "";
-    if(req?.user?._id){
-        userID = req.user._id;
+    if(req?.user?.user_id){
+        userID = req.user.user_id;
     }else if(req.session.user_id){
         userID = req.session.user_id
     }
@@ -394,7 +394,7 @@ const loadUserProfile = async(req,res) => {
     let userID = '';
     try{
         if(req?.user?.google_id){
-            userID = req.user._id;
+            userID = req.user.user_id;
 
         }else if(req.session.user_id){
             userID = req.session.user_id;
@@ -410,7 +410,7 @@ const loadUserProfile = async(req,res) => {
             wallet.findOne({userId : userID}).populate('transactions').exec()
         ]);
 
-        const latestTransactions = userWallet.transactions.reverse();
+        const latestTransactions = userWallet?.transactions.reverse();
 
         return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders,userWallet,latestTransactions});
     }catch(error){
@@ -459,8 +459,8 @@ const updateUserProfile = async(req,res) => {
     const newHashedPassword = await securePassword(newPassword);
     
     let userID = "";
-    if(req?.user?._id){
-        userID = req.user._id;
+    if(req?.user?.user_id){
+        userID = req.user.user_id;
     }else if(req.session.user_id){
         userID = req.session.user_id
     }
@@ -479,8 +479,8 @@ const updateUserProfile = async(req,res) => {
 const addItemToWishlist = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -527,8 +527,8 @@ const loadWishlist = async(req,res) => {
     try{
 
         let userID = "";
-        if(req?.user?._id){
-            userID = new mongoose.Types.ObjectId(req.user._id);
+        if(req?.user?.user_id){
+            userID = new mongoose.Types.ObjectId(req.user.user_id);
         }else if(req.session.user_id){
             userID = new mongoose.Types.ObjectId(req.session.user_id)
         }
@@ -592,8 +592,8 @@ const logoutUser = async(req,res) => {
 const addNewAddress = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -664,8 +664,8 @@ const makeDefaultAddress = async(req,res) =>{
         const address_id = new mongoose.Types.ObjectId(AddressId);
         
         let userID = "";
-        if(req?.user?._id){
-            userID = req.user._id;
+        if(req?.user?.user_id){
+            userID = req.user.user_id;
         }else if(req.session.user_id){
             userID = req.session.user_id
         }
@@ -694,8 +694,8 @@ const deleteAddress = async(req,res) => {
     let isDefault = 0;
 
     let userID = "";
-        if(req?.user?._id){
-            userID = req.user._id;
+        if(req?.user?.user_id){
+            userID = req.user.user_id;
         }else if(req.session.user_id){
             userID = req.session.user_id
         }
@@ -886,8 +886,8 @@ const cartItemsFindFn = async(userID, couponCode) =>{
 const loadCart = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = req.user._id;
+    if(req?.user?.user_id){
+        userID = req.user.user_id;
     }else if(req.session.user_id){
         userID = req.session.user_id
     }
@@ -908,8 +908,8 @@ const addProductToCart = async(req,res) => {
 
     const productID = req.query.product_id;
     let userID = "";
-        if(req?.user?._id){
-            userID = req.user._id;
+        if(req?.user?.user_id){
+            userID = req.user.user_id;
         }else if(req.session.user_id){
             userID = req.session.user_id
         }
@@ -966,8 +966,8 @@ const addProductToCart = async(req,res) => {
 const removeProductFromCart = async (req,res) => {
     
     let userID = "";
-    if(req?.user?._id){
-        userID = req.user._id;
+    if(req?.user?.user_id){
+        userID = req.user.user_id;
     }else if(req.session.user_id){
         userID = req.session.user_id
     }
@@ -1015,8 +1015,8 @@ const removeProductFromCart = async (req,res) => {
 const selectItemToOrder = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1072,8 +1072,8 @@ const selectItemToOrder = async(req,res) => {
 const changeQuantity = async (req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1153,8 +1153,8 @@ const changeQuantity = async (req,res) => {
 const addCoupon = async(req,res) => {
     
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1194,8 +1194,8 @@ const addCoupon = async(req,res) => {
 const loadCheckout = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1259,8 +1259,8 @@ const loadRetryCheckout = async(req,res) => {
     try{
         
         let userID = "";
-        if(req?.user?._id){
-            userID = new mongoose.Types.ObjectId(req.user._id);
+        if(req?.user?.user_id){
+            userID = new mongoose.Types.ObjectId(req.user.user_id);
         }else if(req.session.user_id){
             userID = new mongoose.Types.ObjectId(req.session.user_id)
         }
@@ -1327,8 +1327,8 @@ const retryPaymentForFailed = async(req,res) => {
     try{
 
         let userID = "";
-        if(req?.user?._id){
-            userID = new mongoose.Types.ObjectId(req.user._id);
+        if(req?.user?.user_id){
+            userID = new mongoose.Types.ObjectId(req.user.user_id);
         }else if(req.session.user_id){
             userID = new mongoose.Types.ObjectId(req.session.user_id)
         }
@@ -1395,8 +1395,8 @@ const retryPaymentForFailed = async(req,res) => {
 const validateCart = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1435,8 +1435,8 @@ const validateCart = async(req,res) => {
 const changeDeliveryAddress = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1566,8 +1566,8 @@ const makeRazorpayment = async(razorpay, amountToPay,orderId) => {
 const placeOrder = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1780,8 +1780,8 @@ const failedPaymentStatus = async(req,res) => {
 const paymentVerification = async(req,res) => {
 
     let userID = "";
-    if(req?.user?._id){
-        userID = new mongoose.Types.ObjectId(req.user._id);
+    if(req?.user?.user_id){
+        userID = new mongoose.Types.ObjectId(req.user.user_id);
     }else if(req.session.user_id){
         userID = new mongoose.Types.ObjectId(req.session.user_id)
     }
@@ -1875,8 +1875,8 @@ const cancelOrder = async(req,res) => {
     try{
 
         let userID = "";
-        if(req?.user?._id){
-            userID = new mongoose.Types.ObjectId(req.user._id);
+        if(req?.user?.user_id){
+            userID = new mongoose.Types.ObjectId(req.user.user_id);
         }else if(req.session.user_id){
             userID = new mongoose.Types.ObjectId(req.session.user_id)
         }
@@ -2024,8 +2024,8 @@ const initiateReturn = async(req,res) => {
     try{
 
         let userID = "";
-        if(req?.user?._id){
-            userID = new mongoose.Types.ObjectId(req.user._id);
+        if(req?.user?.user_id){
+            userID = new mongoose.Types.ObjectId(req.user.user_id);
         }else if(req.session.user_id){
             userID = new mongoose.Types.ObjectId(req.session.user_id)
         }

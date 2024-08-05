@@ -596,8 +596,13 @@
 
                                                             <li>
                                                               <span class="wal-transaction-date">
-                                                                    <%= new Date(latestTransactions[i]?.createdAt).toLocaleDateString('en-US', { 
-                                                                    year: 'numeric', month: 'long', day: 'numeric' }) %>
+                                                                
+                                                                    <%= new Date(latestTransactions[i].createdAt).toLocaleDateString('en-US', { 
+                                                                        year: 'numeric', month: 'long', day: 'numeric' 
+                                                                    }) %>
+                                                               
+                                                                
+                                                                
                                                               </span>
                                                               <span class="wal-transaction-desc"><%=latestTransactions[i]?.type%></span>
                                                               <% if((latestTransactions[i]?.type == 'refund') || (latestTransactions[i]?.type == 'deposit')  ){ %>

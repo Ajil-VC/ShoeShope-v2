@@ -12,19 +12,37 @@ const isLoggedIn = async(req,res,next) => {
 
     try{
         
-        console.log(req.session.isBlocked,"req.session.isBlocked")
-        if( (!req.session.user_id  )  && !req.user ){
+        const isAuthenticated = req.session.user_id || (req.user && req.user.user_id);
+    
+        // Check if user is blocked
+        const isBlocked = req.session.isBlocked || (req.user && req.user.isBlocked);
 
+        if (!isAuthenticated || !isBlocked) {
+            // User is not authenticated or is blocked
             const acceptHeader = req.headers.accept || "";
             if (req.xhr || acceptHeader.indexOf('json') > -1) {
                 // If the client expects a JSON response
-                return res.json({ redirect: '/login' });
+                return res.status(401).json({ redirect: '/login', message: isBlocked ? 'Account blocked' : 'Authentication required' });
             } else {
                 // For regular HTTP requests
                 return res.redirect('/login');
             }
-            
         }
+
+        //////////////////////////////////////////////////
+
+        // if( (!req.session.user_id && !req.session.isBlocked )  && (!req?.user?.user_id && !req?.user?.isBlocked ) ){
+
+        //     const acceptHeader = req.headers.accept || "";
+        //     if (req.xhr || acceptHeader.indexOf('json') > -1) {
+        //         // If the client expects a JSON response
+        //         return res.json({ redirect: '/login' });
+        //     } else {
+        //         // For regular HTTP requests
+        //         return res.redirect('/login');
+        //     }
+            
+        // }
         next();
     }catch(error){
 

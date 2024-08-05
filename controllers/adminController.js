@@ -905,13 +905,51 @@ const blockOrUnblockUser = async (req,res) => {
     try{
 
         const userData = await User.findOne({_id:idToBlockorUnblock})
-        if(!userData.isBlocked){
-            const user = await User.findByIdAndUpdate({_id:idToBlockorUnblock},{$set:{isBlocked:1}});
-            req.session.idToBlockorUnblock = false;
+        if(userData.isBlocked){
+            const user = await User.findByIdAndUpdate(
+                {_id:idToBlockorUnblock},
+                {$set:{isBlocked:false}},
+                { new: true }
+            );
+
+            //You might need to change the sessions data into database in production enviornment.    
+            const sessionStore = req.sessionStore;
+        
+            // Get all session keys
+            const sessionKeys = Object.keys(sessionStore.sessions);
+            
+            for (const sessionId of sessionKeys) {
+            const sessionData = JSON.parse(sessionStore.sessions[sessionId]);
+            console.log('Session data:', sessionData);
+            
+            let sessionUserId = sessionData.user_id || (sessionData.passport?.user?.user_id);
+            
+            if (sessionUserId === idToBlockorUnblock) {
+                await new Promise((resolve, reject) => {
+                sessionStore.destroy(sessionId, (err) => {
+                    if (err) {
+                    console.error('Error destroying session:', err);
+                    reject(err);
+                    } else {
+                    console.log(`Session destroyed for user: ${idToBlockorUnblock}`);
+                    resolve();
+                    }
+                });
+                });
+                
+                // Verify session destruction
+                const remainingSession = sessionStore.sessions[sessionId];
+                console.log('Remaining session:', remainingSession);
+            }
+            }
             return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
             
         }else{
-            const user = await User.findByIdAndUpdate({_id:idToBlockorUnblock},{$set:{isBlocked:0}})
+            const user = await User.findByIdAndUpdate(
+                {_id:idToBlockorUnblock},
+                {$set:{isBlocked:true}},
+                { new: true }
+            );
             //should send the json data to frontend and update it there.    
             return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
         }

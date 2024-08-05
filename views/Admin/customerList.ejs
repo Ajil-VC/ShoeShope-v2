@@ -82,7 +82,7 @@
                                         </td>
                                         
                                         <td class="text-end">
-                                            <% if(!user[i].isBlocked){ %>
+                                            <% if(user[i].isBlocked){ %>
                                                 <!-- <a href="#" onclick="blockUser('<%= user[i]._id %>')" id="blockBtn-<%=user[i]._id%>" class="btn btn-sm blockBtn rounded font-sm mt-15 BlockBtn">Block</a> -->
                                                 <button onclick="blockUser('<%= user[i]._id %>')" id="blockBtn-<%=user[i]._id%>" class="btn btn-sm blockBtn rounded font-sm mt-15 BlockBtn btn-warning " >Block</button>
                                                 <% }else{ %>

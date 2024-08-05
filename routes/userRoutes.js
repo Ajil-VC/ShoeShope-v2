@@ -38,7 +38,7 @@ userRouter.get('/google/callback',passport.authenticate('google',{
     failureRedirect : '/auth/failure'
 }))
 userRouter.get('/auth/failure',(req,res) => {
-    res.send("Something went wrong....")
+    return res.status(401).render('error',{message : 'Unauthorized. You cannot enter into this page!', code : '401'});
 })
 
 userRouter.get('/home',userController.loadHomePage) ;

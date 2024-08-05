@@ -19,11 +19,17 @@ passport.use(new GoogleStrategy({
           // User exists, authenticate
           console.log("User found");
 
-          if(user.isBlocked){
-            console.log("User is blocked.");
+          if(!user.isBlocked){
             return cb(null,false);
           }
-          return cb(null, user);
+
+          const sessionUser = {
+            google_id : user.google_id,
+            user_id : user._id,
+            isAuthorised : user.isAuthorised,
+            isBlocked : user.isBlocked
+          };
+          return cb(null, sessionUser);
         } else {
           // User does not exist, create a new user
           console.log("Creating new user");
