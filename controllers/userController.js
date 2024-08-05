@@ -2134,14 +2134,14 @@ const downloadInvoice = async(req,res)=> {
                 gst     : itemGST, 
                 deductions : itemDecs,
                 amount  : prodTotalPrice,
-                status  : item.status.slice(0,3)
+                status  : item.paymentStatus.slice(0,4)
             }
         });
 
         let subTotal = 0;
         let discount = 0;
         let gst = 0;
-        items.filter(item => item.status === 'Del')
+        items.filter(item => item.status === 'PAID')
         .forEach(obj => {
             subTotal += +(obj.rate * obj.quantity).toFixed(2);
             discount =  +(discount + +obj.deductions).toFixed(2);
