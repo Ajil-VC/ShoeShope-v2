@@ -1920,6 +1920,7 @@ const cancelOrder = async(req,res) => {
             });
 
             const trasactionData = await Transaction.save();
+            //Need to place it in the proper place. after added amount to the user wallet.
             
             if(!isWallet){
                 
