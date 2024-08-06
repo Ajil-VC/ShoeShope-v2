@@ -75,6 +75,8 @@ adminRouter.get('/api/sales-data',adminController.getSaleData);
 adminRouter.get('/dashboard/sales-report',adminController.salesReport);
 adminRouter.get('/dashboard/export',adminController.exportAndDownload);
 
+adminRouter.get('/best_sellers',adminController.loadBestSellers);
+
 adminRouter.get('/coupons',adminController.loadCoupons);
 adminRouter.post('/coupons',adminController.addNewCoupon);
 adminRouter.patch('/coupons',adminController.changeCouponStatus);

@@ -581,10 +581,6 @@ const exportAndDownload = async(req, res)=> {
 
         } = await saleReportByRange(range, start_date, end_date);
 
-console.log(givenRangeSaleOverAllData, 
-    givenRangeGroupedData, 
-    aggregatedRangeTotal)
-
         if(format == 'excel'){
 
             let workbook = new exceljs.Workbook();
@@ -789,6 +785,33 @@ console.log(givenRangeSaleOverAllData,
 
         console.log("Internal Error  occured while trying to download file",error);
         return res.status(500).send("Internal Error  occured while trying to download file",error);
+    }
+}
+
+
+const loadBestSellers = async(req,res) => {
+
+    try{
+
+        const topProducts = await Order.aggregate([
+            { $unwind: "$items" }, 
+            { $group: { _id: "$items.product.id", 
+                productName : { $first: "$items.product.name" },
+                productImage:{$first:"$items.product.images"}, 
+                totalUnitsSold: { $sum: "$items.quantity" }, 
+                totalOrders : { $sum: 1 },
+                productPrice: {$first:"$items.product.price"}, 
+                baseAmount  :{$sum:"$items.subtotal"} 
+            }}, 
+            { $sort: { totalUnitsSold: -1 } }, 
+            { $limit: 10 }
+        ]);
+
+        return res.status(200).render('best-sellers',{topProducts});
+
+    }catch(error){
+        console.log("Internal error occured while trying to load best Sellers page.",error);
+        return res.status(500).send("Internal error occured while trying to load best Sellers page.",error);
     }
 }
 
@@ -1566,6 +1589,8 @@ module.exports = {
     getSaleData,
 
     exportAndDownload,
+
+    loadBestSellers,
 
     loadCoupons,
     addNewCoupon,

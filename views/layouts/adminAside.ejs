@@ -14,6 +14,13 @@
                     <span class="text">Dashboard</span>
                 </a>
             </li>
+
+            <li class="menu-item <%= req.path === '/best_sellers' ? 'active' : '' %>">
+                <a class="menu-link" href="/admin/best_sellers" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
+                    <span class="text">Statistics</span>
+                </a>
+            </li>
+
             <li class="menu-item <%= ((req.path === '/productslist') || (req.path === '/category')) ? 'active' : '' %> has-submenu">
                 <a class="menu-link" href="page-products-list.html"> <i class="icon material-icons md-shopping_bag"></i>
                     <span class="text">Products</span>
@@ -68,13 +75,7 @@
                     <a href="page-error-404.html">Error 404</a>
                 </div>
             </li>
-       
-            
-            <li class="menu-item">
-                <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
-                    <span class="text">Statistics</span>
-                </a>
-            </li>
+
         </ul>
         <hr>
         <ul class="menu-aside">
