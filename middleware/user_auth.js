@@ -1,12 +1,13 @@
-// const noCacheMid = (req , res, next) => {
-//     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-//     next();
-// }
 
-// res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-// res.setHeader('Pragma', 'no-cache');
-// res.setHeader('Expires', '0');
-// res.redirect('/login');
+const noCacheMiddleware = (req, res, next) => {
+    res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
+    next();
+};
+  
 
 const isLoggedIn = async(req,res,next) => {
 
@@ -29,20 +30,6 @@ const isLoggedIn = async(req,res,next) => {
             }
         }
 
-        //////////////////////////////////////////////////
-
-        // if( (!req.session.user_id && !req.session.isBlocked )  && (!req?.user?.user_id && !req?.user?.isBlocked ) ){
-
-        //     const acceptHeader = req.headers.accept || "";
-        //     if (req.xhr || acceptHeader.indexOf('json') > -1) {
-        //         // If the client expects a JSON response
-        //         return res.json({ redirect: '/login' });
-        //     } else {
-        //         // For regular HTTP requests
-        //         return res.redirect('/login');
-        //     }
-            
-        // }
         next();
     }catch(error){
 
@@ -84,5 +71,5 @@ module.exports = {
     isLoggedOut,
     isLoggedIn,
     isBlocked,
-    // noCacheMid
+    noCacheMiddleware
 }

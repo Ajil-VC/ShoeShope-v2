@@ -42,8 +42,6 @@ $('#addNewAddressModalCenter').on('hidden.bs.modal', function () {
 });
 
 
-
-
 const otp_submit_btn = document.getElementById('otp-submit-bn');
 const otp_success_msg = document.getElementById('otp-success-msg');
 const otp_timer = document.getElementById('otp-timer');
@@ -1039,7 +1037,6 @@ const returnProduct = async(productOrderId, orderId) =>{
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    
 
     //Add to wishlist starts here.
     const heart_icon = document.querySelectorAll('.heart-icon');

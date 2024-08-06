@@ -4,7 +4,7 @@ const authenticate = require('../middleware/user_auth');
 const {passport} = require('../middleware/googleauth');
 
 userRouter.use(express.urlencoded({extended:true}));
-
+userRouter.use(authenticate.noCacheMiddleware);
 
 userRouter.use((req,res,next) => {
     

@@ -1,5 +1,5 @@
 <%- include("../layouts/header.ejs")  %>
-<body>
+<body class="logout-page" >
 <%- include("../layouts/navigation.ejs")  %>
 
 
@@ -679,6 +679,6 @@
             </div>
         </section>
     </main>
+    
 
-
-    <%- include("../layouts/footer.ejs")  %> 
+    <%- include("../layouts/footer.ejs", { isLogoutPage: true })  %> 
