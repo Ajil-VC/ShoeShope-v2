@@ -292,110 +292,75 @@ p{
 
 
 /*Here is the wallet designs*/
-.wal-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  font-family: Arial, sans-serif;
-}
-
-.wal-container h2 {
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.wal-balance {
-  background-color: #fff;
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
-
-.wal-balance span {
-  font-size: 14px;
-  color: #666;
-}
-
-.wal-balance h3 {
-  font-size: 24px;
-  color: #2c3e50;
-  margin: 10px 0 0;
-}
-
-.wal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.wal-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
-}
-
-.wal-add-funds {
-  background-color: #27ae60;
-  color: white;
-}
-
-.wal-withdraw {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.wal-btn:hover {
-  opacity: 0.9;
-}
-
-.wal-transaction-history h4 {
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.wal-transaction-history ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.wal-transaction-history li {
-  background-color: #fff;
-  padding: 10px;
-  margin-bottom: 5px;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.wal-transaction-date {
-  font-size: 12px;
-  color: #888;
-}
-
-.wal-transaction-desc {
-  flex-grow: 1;
-  margin: 0 10px;
-}
-
-.wal-transaction-amount {
-  font-weight: bold;
-}
-
-.wal-debit {
-  color: #e74c3c;
-}
-
-.wal-credit {
-  color: #27ae60;
-}
-
+.walletc-container {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .walletc-balance {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .walletc-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .walletc-th, .walletc-td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .walletc-th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .walletc-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .walletc-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .walletc-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        @media screen and (max-width: 600px) {
+            .walletc-table, .walletc-thead, .walletc-tbody, .walletc-th, .walletc-td, .walletc-tr {
+                display: block;
+            }
+            .walletc-thead .walletc-tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            .walletc-tr {
+                margin-bottom: 15px;
+            }
+            .walletc-td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+            }
+            .walletc-td:before {
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label);
+                font-weight: bold;
+            }
+        }
 
     </style>
 

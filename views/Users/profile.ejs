@@ -585,60 +585,50 @@
                                     </div>
 
                                     <!--Wallet....-->
-                                    <div class="tab-pane fade" id="wallet" role="tabpanel" aria-labelledby="account-wallet">
-                                        <div class="card" >
-                                       
-                                            <div class="card-body">
-                                                
-                                                <div class="wal-container">
-                                                    <h2>My Wallet</h2>
-                                                    <div class="wal-balance">
-                                                      <span>Available Balance</span>
-                                                      <h3>₹ <%=userWallet?.balance.toFixed(2)%></h3>
-                                                    </div>
-                                                    <div class="wal-actions">
-                                                      <button class="wal-btn wal-add-funds">Add Funds</button>
-                                                      <button class="wal-btn wal-withdraw">Withdraw</button>
-                                                    </div>
-                                                    <div class="wal-transaction-history">
-                                                      <h4>Recent Transactions</h4>
-                                                      <ul>
+                                    
 
-                                                        <% for(let i = 0 ; i < 3 ; i++){ %>
-
-                                                            <li>
-                                                              <span class="wal-transaction-date">
-                                                                
-                                                                    <%= new Date(latestTransactions[i].createdAt).toLocaleDateString('en-US', { 
-                                                                        year: 'numeric', month: 'long', day: 'numeric' 
-                                                                    }) %>
-                                                               
-                                                                
-                                                                
-                                                              </span>
-                                                              <span class="wal-transaction-desc"><%=latestTransactions[i]?.type%></span>
-                                                              <% if((latestTransactions[i]?.type == 'refund') || (latestTransactions[i]?.type == 'deposit')  ){ %>
-                                                                
-                                                                <span class="wal-transaction-amount wal-credit">+₹ <%=latestTransactions[i]?.amount.toFixed(2)%></span>
-    
-                                                              <% }else if( (latestTransactions[i]?.type == 'payment') || (latestTransactions[i]?.type == 'withdrawal') ){ %>
-    
-                                                                <span class="wal-transaction-amount wal-debit">-₹ <%=latestTransactions[i]?.amount.toFixed(2)%></span>
-    
-                                                              <% } %>
-                                                            </li>
-                                                        <% } %>
-
-                                                       
-
-                                                        
-                                                      </ul>
-                                                    </div>
-                                                  </div>
-                                           
-                                            </div>
-                                        </div>
+                                    <div class="walletc-container tab-pane fade " id="wallet" role="tabpanel" aria-labelledby="account-wallet" >
+                                        <div class="walletc-balance">Wallet Balance: $1,234.56</div>
+                                        <table class="walletc-table">
+                                            <thead>
+                                                <tr class="walletc-tr">
+                                                    <th class="walletc-th">Date</th>
+                                                    <th class="walletc-th">Type</th>
+                                                    <th class="walletc-th">Amount</th>
+                                                    <th class="walletc-th">Status</th>
+                                                    <th class="walletc-th">Description</th>
+                                                    <th class="walletc-th">Payment Method</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="walletc-tr">
+                                                    <td class="walletc-td" data-label="Date">2024-08-06</td>
+                                                    <td class="walletc-td" data-label="Type">Deposit</td>
+                                                    <td class="walletc-td" data-label="Amount">$500.00</td>
+                                                    <td class="walletc-td" data-label="Status"><span class="walletc-status walletc-completed">Completed</span></td>
+                                                    <td class="walletc-td" data-label="Description">Salary deposit</td>
+                                                    <td class="walletc-td" data-label="Payment Method">Bank Transfer</td>
+                                                </tr>
+                                                <tr class="walletc-tr">
+                                                    <td class="walletc-td" data-label="Date">2024-08-05</td>
+                                                    <td class="walletc-td" data-label="Type">Withdrawal</td>
+                                                    <td class="walletc-td" data-label="Amount">-$50.00</td>
+                                                    <td class="walletc-td" data-label="Status"><span class="walletc-status walletc-completed">Completed</span></td>
+                                                    <td class="walletc-td" data-label="Description">ATM withdrawal</td>
+                                                    <td class="walletc-td" data-label="Payment Method">Debit Card</td>
+                                                </tr>
+                                                <tr class="walletc-tr">
+                                                    <td class="walletc-td" data-label="Date">2024-08-04</td>
+                                                    <td class="walletc-td" data-label="Type">Payment</td>
+                                                    <td class="walletc-td" data-label="Amount">-$75.50</td>
+                                                    <td class="walletc-td" data-label="Status"><span class="walletc-status walletc-pending">Pending</span></td>
+                                                    <td class="walletc-td" data-label="Description">Online purchase</td>
+                                                    <td class="walletc-td" data-label="Payment Method">Credit Card</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
+                                    
 
                                     <!--Account Details....-->
                                     <div class="tab-pane fade" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
