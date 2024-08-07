@@ -426,13 +426,45 @@ const getOrderDetails = async(req,res) => {
     
     try{
         const order = await Order.findById({_id : orderId}).populate('shippingAddress');
-        const products = order.items;
+        const allProducts = order.items;
         const address = order.shippingAddress;
         const orderDate = order.orderDate;
         const orderStatus = order.status;
         const deliveryDate = order.updatedAt;
         const orderPaymentStatus = order.overallPaymentStatus;
-        
+        console.log(order)
+        console.log(allProducts)
+        const products = allProducts.map(item => {
+
+            const itemPriceRatio = item.subtotal / order.subTotal;
+            const itemGst = itemPriceRatio * order.gstAmount.toFixed(2);
+
+            const totalDed = order.couponDiscount + order.otherDiscount;
+            const itemDecs = (itemPriceRatio * totalDed).toFixed(2);
+
+            const prodTotalPrice = item.subtotal + +itemGst - +itemDecs;
+
+            return {
+                product: {
+                  id: item.product.id,
+                  name: item.product.name,
+                  size: item.product.size,
+                  Brand: item.product.Brand,
+                  Category: item.product.Category,
+                  price: item.product.price,
+                  images: item.product.images
+                },
+                quantity: item.quantity,
+                subtotal: item.subtotal,
+                itemTotalGst : itemGst,
+                itemDecs,
+                itemNetTotal : prodTotalPrice,
+                status: item.status,
+                paymentStatus: item.paymentStatus,
+                _id: item._id
+            }
+        })
+        console.log(products)
         return res.status(200).json({
             status : true,
             products,

@@ -1569,15 +1569,15 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Address and Order ID -->
     <div class="col-md-6 bot-address-info mt-3 mt-md-0">
       <p><span class="bot-bold">product Order ID:</span> ${products?._id}</p>
-   
+        <div class="bot-status ods-status bot-status-${products?.status.toLowerCase()}">${products?.status}</div>
     </div>
 
     <!-- Price, Quantity, and Status -->
     <div class="col-md-6 bot-price-info mt-3 mt-md-0">
       <p><span class="bot-bold">Price:</span> ₹${products?.product.price} <span class="bot-bold">| Qty:</span> ${products?.quantity}</p>
-      <p><span class="bot-bold">Total:</span> ₹${products?.subtotal}</p>
+      <p><span class="bot-bold">Net Total:</span> ₹${products?.itemNetTotal} (gst & decs included)</p>
       <div class="bot-return-status" >
-        <div class="bot-status ods-status bot-status-${products?.status.toLowerCase()}">${products?.status}</div>
+        
          ${returnBtn}
             
       </div>
@@ -1692,16 +1692,20 @@ document.addEventListener('DOMContentLoaded', function() {
         
     const invoiceBtn = document.getElementById('invoiceBtn');
     const retryPaymentBtn = document.getElementById('retryPaymentBtn');
+
     if(invoiceBtn){
         invoiceBtn.addEventListener('click',()=> {
                 
+            const orderId = invoiceBtn.dataset.orderId;
             invoiceBtn.disabled = true;
             createInvoice(orderId,invoiceBtn);
+    
         })
     }
     if(retryPaymentBtn){
         retryPaymentBtn.addEventListener('click',()=> {
-                 
+            
+            const orderId = invoiceBtn.dataset.orderId;
             window.location.href = `http://localhost:2000/checkout_page/retry/${orderId}`
         
         })
@@ -1711,58 +1715,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.getElementById('order-detail-table');
         tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderId,deliveryDate)).join('');
 
-        // const orderFooter = document.createElement('div');
+   
+        const order_address_type = document.getElementById('order-address-type');
+        const order_address_place_city = document.getElementById('order-address-place_city');
+        const order_address_landmark_pincode = document.getElementById('order-address-landmark_pincode');
+        
+        order_address_type.innerText = addres.addressType;
+        order_address_place_city.innerText = `${addres.place}, ${addres.city} city`;
+        order_address_landmark_pincode.innerText = `${addres.landmark}, Pin: ${addres.pinCode}`;
 
-        // orderFooter.style.background = 'white';
-        // orderFooter.style.width = '100%';
-        // orderFooter.style.display = 'flex';
-        // orderFooter.style.justifyContent = 'space-between'
-        // orderFooter.classList.add('bot-order-address-container');
-
-        // const retryPaymentBtn = document.createElement('button');
-        // retryPaymentBtn.classList.add('btn');
-        // retryPaymentBtn.style.background = '#1e8449';
-        // retryPaymentBtn.innerText = 'Retry Payment';
-        // retryPaymentBtn.style.maxHeight = '60px';
-
-        // const invoiceBtn = document.createElement('button');
-        // invoiceBtn.classList.add('btn');
-        // invoiceBtn.style.background = '#1e8449';
-        // invoiceBtn.innerText = "Download Invoice";
-        // invoiceBtn.style.maxHeight = '60px';
-
-        // const address = document.createElement('div');
-        // address.innerHTML = `<p><span class="bot-bold">Address:</span> ${addres?.addressType}</p>
-        //                     <p><span class="bot-bold">Place:</span> ${addres?.place}, ${addres?.city} city</p>
-        //                     <p><span class="bot-bold">Landmark:</span> ${addres?.landmark}, Pin: ${addres?.pinCode}</p>`;
-        // orderFooter.appendChild(address);
-
+        invoiceBtn.dataset.orderId = orderId;
         if(orderPaymentStatus == 'FAILED'){
-             retryPaymentBtn.classList.remove('display-order-details')
+            retryPaymentBtn.classList.remove('display-order-details')
         }else{
             invoiceBtn.classList.remove('display-order-details');
-            invoiceBtn.addEventListener('click',invoiceBtnHandle)
         }
-
-        // if(orderPaymentStatus == 'FAILED'){
-        //     orderFooter.appendChild(retryPaymentBtn);
-        //     retryPaymentBtn.addEventListener('click',()=> {
-                
-        //         window.location.href = `http://localhost:2000/checkout_page/retry/${orderId}`
-        //         // retryPaymentBtn.disabled = true;
-        //         console.log("retryPaymentBtn")
-        //     })
-        // }else{
-            
-        //     orderFooter.appendChild(invoiceBtn);
-        //     invoiceBtn.addEventListener('click',()=> {
-                
-        //         invoiceBtn.disabled = true;
-        //         createInvoice(orderId,invoiceBtn);
-        //     })
-        // }
-
-        // order_details.appendChild(orderFooter);
         
     }
 
@@ -1770,8 +1737,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const order_history_table = document.getElementById('order-history-table');
     const toggle_order_history = document.getElementById('toggle-order-history');
     const show_all_btn = document.getElementById('show-all-btn');
+    
     const payment_status = document.getElementById('payment-status');
+    const order_total_items = document.getElementById('order-total-items');
+    const order_header = document.getElementById('order-header');
     const order_details = document.getElementById('order-details');
+    
     let orderPaymentStatus ;
     if(order_history_table){
 
@@ -1794,6 +1765,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         orderPaymentStatus = data.orderPaymentStatus;
                         payment_status.classList.remove('display-order-details');
                         payment_status.innerText = `Overall Payment Status : ${orderPaymentStatus}`
+                        order_total_items.classList.remove('display-order-details');
+                        order_header.innerText = `Order Id: ${data.orderId}`;
+                        order_header.classList.add('setfont');
+                        order_total_items.innerText = `Total ${data.products.length} items`;
                         
                         updateOrderDataTable(data.products,data.address,data.orderDate,data.orderId,data.deliveryDate,orderPaymentStatus);
                       
@@ -1820,8 +1795,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             order_details.classList.add('display-order-details');
             show_all_btn.classList.add('display-order-details');
-            payment_status.classList.add('display-order-details')
+            payment_status.classList.add('display-order-details');
             payment_status.innerText = '';
+            order_total_items.classList.add('display-order-details');
+            order_total_items.innerText = '';
+            order_header.innerText = 'Your Order History';
+            order_header.classList.remove('setfont');
             toggle_order_history.style.display = 'block';
             
             if(!retryPaymentBtn.classList.contains('display-order-details')){
