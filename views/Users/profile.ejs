@@ -405,7 +405,7 @@
                                                 </div>
                                             </div>
                                             
-                                            <div class="card-body">
+                                            <div class="card-body" id="order-card" >
 
                                                 <div class="table-responsive" id="toggle-order-history" >
                                                     <table class="table ods-order-table">
@@ -476,6 +476,17 @@
                                                     <div class="table-responsive" id="order-detail-table"  >
                                                         
                                                         
+                                                    </div>
+                                                    <div class="bot-order-address-container" >
+
+                                                        <p>
+                                                            <span class="bot-bold">Address:</span> <span> ${addres?.addressType}</span><br>
+                                                            <span class="bot-bold">Place:</span> <span>${addres?.place}, ${addres?.city} city</span><br>
+                                                            <span class="bot-bold">Landmark:</span> <span>${addres?.landmark}, Pin: ${addres?.pinCode}</span>
+                                                        </p>
+                                                        <button id="invoiceBtn" class="btn display-order-details " style="background-color: #1e8449;max-height: 60px;" >Download Invoice</button>
+                                                        <button id="retryPaymentBtn" class="btn display-order-details " style="background-color: #1e8449;max-height: 60px;" >Retry Payment</button>
+
                                                     </div>
 
                                                 </div>

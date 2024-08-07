@@ -1569,9 +1569,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Address and Order ID -->
     <div class="col-md-6 bot-address-info mt-3 mt-md-0">
       <p><span class="bot-bold">product Order ID:</span> ${products?._id}</p>
-      <p><span class="bot-bold">Address:</span> ${addres?.addressType}</p>
-      <p><span class="bot-bold">Place:</span> ${addres?.place}, ${addres?.city} city</p>
-      <p><span class="bot-bold">Landmark:</span> ${addres?.landmark}, Pin: ${addres?.pinCode}</p>
+   
     </div>
 
     <!-- Price, Quantity, and Status -->
@@ -1689,50 +1687,82 @@ document.addEventListener('DOMContentLoaded', function() {
 
         })
     }
-        
 
+
+        
+    const invoiceBtn = document.getElementById('invoiceBtn');
+    const retryPaymentBtn = document.getElementById('retryPaymentBtn');
+    if(invoiceBtn){
+        invoiceBtn.addEventListener('click',()=> {
+                
+            invoiceBtn.disabled = true;
+            createInvoice(orderId,invoiceBtn);
+        })
+    }
+    if(retryPaymentBtn){
+        retryPaymentBtn.addEventListener('click',()=> {
+                 
+            window.location.href = `http://localhost:2000/checkout_page/retry/${orderId}`
+        
+        })
+    }
     function updateOrderDataTable(produts,addres,orderDate,orderId,deliveryDate,orderPaymentStatus){
 
         const tableBody = document.getElementById('order-detail-table');
         tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderId,deliveryDate)).join('');
 
-        const orderFooter = document.createElement('div');
-        orderFooter.style.background = 'white';
-        orderFooter.style.width = '100%';
-        orderFooter.style.display = 'flex';
-        orderFooter.style.justifyContent = 'end'
+        // const orderFooter = document.createElement('div');
 
-        const retryPaymentBtn = document.createElement('button');
-        retryPaymentBtn.classList.add('btn');
-        retryPaymentBtn.style.background = '#1e8449';
-        retryPaymentBtn.innerText = 'Retry Payment';
+        // orderFooter.style.background = 'white';
+        // orderFooter.style.width = '100%';
+        // orderFooter.style.display = 'flex';
+        // orderFooter.style.justifyContent = 'space-between'
+        // orderFooter.classList.add('bot-order-address-container');
 
-        const invoiceBtn = document.createElement('button');
-        invoiceBtn.classList.add('btn');
-        invoiceBtn.style.background = '#1e8449';
-        invoiceBtn.innerText = "Download Invoice";
+        // const retryPaymentBtn = document.createElement('button');
+        // retryPaymentBtn.classList.add('btn');
+        // retryPaymentBtn.style.background = '#1e8449';
+        // retryPaymentBtn.innerText = 'Retry Payment';
+        // retryPaymentBtn.style.maxHeight = '60px';
+
+        // const invoiceBtn = document.createElement('button');
+        // invoiceBtn.classList.add('btn');
+        // invoiceBtn.style.background = '#1e8449';
+        // invoiceBtn.innerText = "Download Invoice";
+        // invoiceBtn.style.maxHeight = '60px';
+
+        // const address = document.createElement('div');
+        // address.innerHTML = `<p><span class="bot-bold">Address:</span> ${addres?.addressType}</p>
+        //                     <p><span class="bot-bold">Place:</span> ${addres?.place}, ${addres?.city} city</p>
+        //                     <p><span class="bot-bold">Landmark:</span> ${addres?.landmark}, Pin: ${addres?.pinCode}</p>`;
+        // orderFooter.appendChild(address);
 
         if(orderPaymentStatus == 'FAILED'){
-            orderFooter.appendChild(retryPaymentBtn);
-            retryPaymentBtn.addEventListener('click',()=> {
-                
-                window.location.href = `http://localhost:2000/checkout_page/retry/${orderId}`
-                // retryPaymentBtn.disabled = true;
-                console.log("retryPaymentBtn")
-            })
+             retryPaymentBtn.classList.remove('display-order-details')
         }else{
-            
-            orderFooter.appendChild(invoiceBtn);
-            invoiceBtn.addEventListener('click',()=> {
-                
-                invoiceBtn.disabled = true;
-                createInvoice(orderId,invoiceBtn);
-            })
+            invoiceBtn.classList.remove('display-order-details');
+            invoiceBtn.addEventListener('click',invoiceBtnHandle)
         }
 
+        // if(orderPaymentStatus == 'FAILED'){
+        //     orderFooter.appendChild(retryPaymentBtn);
+        //     retryPaymentBtn.addEventListener('click',()=> {
+                
+        //         window.location.href = `http://localhost:2000/checkout_page/retry/${orderId}`
+        //         // retryPaymentBtn.disabled = true;
+        //         console.log("retryPaymentBtn")
+        //     })
+        // }else{
+            
+        //     orderFooter.appendChild(invoiceBtn);
+        //     invoiceBtn.addEventListener('click',()=> {
+                
+        //         invoiceBtn.disabled = true;
+        //         createInvoice(orderId,invoiceBtn);
+        //     })
+        // }
 
-
-        tableBody.appendChild(orderFooter);
+        // order_details.appendChild(orderFooter);
         
     }
 
@@ -1793,6 +1823,16 @@ document.addEventListener('DOMContentLoaded', function() {
             payment_status.classList.add('display-order-details')
             payment_status.innerText = '';
             toggle_order_history.style.display = 'block';
+            
+            if(!retryPaymentBtn.classList.contains('display-order-details')){
+
+                retryPaymentBtn.classList.add('display-order-details')
+            }
+            if(!invoiceBtn.classList.contains('display-order-details')){
+
+                invoiceBtn.classList.add('display-order-details');
+            }
+            
         })
        
     }
