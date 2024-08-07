@@ -408,7 +408,7 @@
                                             
                                             <div class="card-body" id="order-card" >
 
-                                                <div class="table-responsive" id="toggle-order-history" >
+                                                <div class="table-responsive table-container " id="toggle-order-history" >
                                                     <table class="table ods-order-table">
 
                                                         <% if(orders.length < 1 ){ %>
@@ -420,7 +420,7 @@
 
                                                         <% }else{ %>
                                                             <thead>
-                                                                <tr>
+                                                                <tr class="table-head" >
                                                                     <th>Preview</th>
                                                                 
                                                                     <th>Address</th>
@@ -430,7 +430,7 @@
                                                                 </tr>
                                                             </thead>
                                                         <% } %>
-                                                        <tbody id="order-history-table" > 
+                                                        <tbody id="order-history-table" style="max-height: 500px;" > 
 
                                                             <% for(let i = 0 ; i < orders.length ; i++){ %>
 

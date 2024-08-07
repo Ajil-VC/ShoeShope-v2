@@ -1525,7 +1525,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let derliveredOn = 'Not Delivered';
         if(products?.status == 'Delivered'){
     
-
             derlivery = new Date(deliveryDate);
     
                 derliveredOn = derlivery.toLocaleString('en-US', {
