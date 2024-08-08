@@ -964,6 +964,26 @@ const cancelProduct = async(productOrderId, orderId) => {
             return;
         }else{
 
+            const wallet_balance = document.getElementById('wallet-balance');
+            wallet_balance.innerText = `Wallet Balance: ₹${data.walletData.balance.toFixed(2)}`;
+
+            const walletTable = document.querySelector('.walletc-table');
+            const newRow = walletTable.insertRow(1);//Inserting a new row at the top.
+            //Adding cells to the new row.
+            const dateCell = newRow.insertCell(0);
+            const typeCell = newRow.insertCell(1);
+            const amntCell = newRow.insertCell(2);
+            const statusCell    = newRow.insertCell(3);
+            const descripCell   = newRow.insertCell(4);
+            const payMethodCell = newRow.insertCell(5);
+
+            dateCell.innerText = new Date(data.trasactionData.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            typeCell.innerText = data.trasactionData.type;
+            amntCell.innerText = data.trasactionData.amount.toFixed(2);
+            statusCell.innerHTML    = statusCell.innerHTML = `<span class="walletc-status walletc-${data.trasactionData.status.toLowerCase()}">${data.trasactionData.status}</span>`;
+            descripCell.innerText   = data.trasactionData.description;
+            payMethodCell.innerText = data.trasactionData.paymentMethod;
+
             Swal.fire(
                 'Success',
                 `${data.message}`,
@@ -1709,7 +1729,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         })
     }
-    function updateOrderDataTable(produts,addres,orderDate,orderId,deliveryDate,orderPaymentStatus){
+    function updateOrderDataTable(produts,addres,orderDate,orderId,deliveryDate,orderPaymentStatus,paymentMethod){
 
         const tableBody = document.getElementById('order-detail-table');
         tableBody.innerHTML = produts.map(item => createOrderDetailsRow(item,addres,orderDate,orderId,deliveryDate)).join('');
@@ -1724,7 +1744,9 @@ document.addEventListener('DOMContentLoaded', function() {
         order_address_landmark_pincode.innerText = `${addres.landmark}, Pin: ${addres.pinCode}`;
 
         invoiceBtn.dataset.orderId = orderId;
-        if(orderPaymentStatus == 'FAILED'){
+        console.log(orderPaymentStatus ,"orderPaymentStatus ")
+        console.log(paymentMethod,"paymentMethod");
+        if((orderPaymentStatus == 'FAILED') || ((orderPaymentStatus == 'PENDING') && (paymentMethod == 'UPI Method')) ){
             retryPaymentBtn.classList.remove('display-order-details')
         }else{
             invoiceBtn.classList.remove('display-order-details');
@@ -1769,7 +1791,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         order_header.classList.add('setfont');
                         order_total_items.innerText = `Total ${data.products.length} items`;
                         
-                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderId,data.deliveryDate,orderPaymentStatus);
+                        updateOrderDataTable(data.products,data.address,data.orderDate,data.orderId,data.deliveryDate,orderPaymentStatus,data.paymentMethod);
                       
                         toggle_order_history.style.display = 'none';
                         order_details.classList.remove('display-order-details');

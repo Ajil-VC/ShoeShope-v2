@@ -443,6 +443,11 @@ const transactionSchema = new mongoose.Schema({
         enum: ['deposit', 'payment', 'refund', 'withdrawal'],
         required: true
     },
+    paymentMethod:{
+        type: String,
+        enum: ['wallet', 'razorpay'],
+        required: true
+    },
     status: {
         type: String,
         enum: ['pending', 'completed', 'failed'],

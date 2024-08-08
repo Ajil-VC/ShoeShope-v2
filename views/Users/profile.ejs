@@ -588,45 +588,41 @@
                                     
 
                                     <div class="walletc-container tab-pane fade " id="wallet" role="tabpanel" aria-labelledby="account-wallet" >
-                                        <div class="walletc-balance">Wallet Balance: $1,234.56</div>
-                                        <table class="walletc-table">
-                                            <thead>
-                                                <tr class="walletc-tr">
-                                                    <th class="walletc-th">Date</th>
-                                                    <th class="walletc-th">Type</th>
-                                                    <th class="walletc-th">Amount</th>
-                                                    <th class="walletc-th">Status</th>
-                                                    <th class="walletc-th">Description</th>
-                                                    <th class="walletc-th">Payment Method</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr class="walletc-tr">
-                                                    <td class="walletc-td" data-label="Date">2024-08-06</td>
-                                                    <td class="walletc-td" data-label="Type">Deposit</td>
-                                                    <td class="walletc-td" data-label="Amount">$500.00</td>
-                                                    <td class="walletc-td" data-label="Status"><span class="walletc-status walletc-completed">Completed</span></td>
-                                                    <td class="walletc-td" data-label="Description">Salary deposit</td>
-                                                    <td class="walletc-td" data-label="Payment Method">Bank Transfer</td>
-                                                </tr>
-                                                <tr class="walletc-tr">
-                                                    <td class="walletc-td" data-label="Date">2024-08-05</td>
-                                                    <td class="walletc-td" data-label="Type">Withdrawal</td>
-                                                    <td class="walletc-td" data-label="Amount">-$50.00</td>
-                                                    <td class="walletc-td" data-label="Status"><span class="walletc-status walletc-completed">Completed</span></td>
-                                                    <td class="walletc-td" data-label="Description">ATM withdrawal</td>
-                                                    <td class="walletc-td" data-label="Payment Method">Debit Card</td>
-                                                </tr>
-                                                <tr class="walletc-tr">
-                                                    <td class="walletc-td" data-label="Date">2024-08-04</td>
-                                                    <td class="walletc-td" data-label="Type">Payment</td>
-                                                    <td class="walletc-td" data-label="Amount">-$75.50</td>
-                                                    <td class="walletc-td" data-label="Status"><span class="walletc-status walletc-pending">Pending</span></td>
-                                                    <td class="walletc-td" data-label="Description">Online purchase</td>
-                                                    <td class="walletc-td" data-label="Payment Method">Credit Card</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                        <div class="walletc-balance " id="wallet-balance" >Wallet Balance: ₹<%=userWallet?.balance.toFixed(2) || 0%></div>
+                                        <div class="walletc-table-container" >
+                                            
+                                            <table class="walletc-table">
+                                                <thead>
+                                                    <tr class="walletc-tr table-head ">
+                                                        <th class="walletc-th">Date</th>
+                                                        <th class="walletc-th">Type</th>
+                                                        <th class="walletc-th">Amount</th>
+                                                        <th class="walletc-th">Status</th>
+                                                        <th class="walletc-th">Description</th>
+                                                        <th class="walletc-th">Payment Method</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+   
+                                                    <% for(let i = 0 ; i < latestTransactions?.length ; i++){ %>
+    
+                                                        <tr class="walletc-tr">
+                                                            <td class="walletc-td" data-label="Date">
+                                                                <%=new Date(latestTransactions[i].createdAt).toLocaleDateString('en-US', { 
+                                                                    year: 'numeric', month: 'long', day: 'numeric' })%>
+                                                            </td>
+                                                            <td class="walletc-td" data-label="Type"><%=latestTransactions[i].type%></td>
+                                                            <td class="walletc-td" data-label="Amount">₹<%=latestTransactions[i].amount.toFixed(2)%></td>
+                                                            <td class="walletc-td" data-label="Status"><span class="walletc-status walletc-<%=latestTransactions[i].status.toLowerCase()%>"><%=latestTransactions[i].status%></span></td>
+                                                            <td class="walletc-td" data-label="Description"><%=latestTransactions[i].description%></td>
+                                                            <td class="walletc-td" data-label="Payment Method"><%=latestTransactions[i].paymentMethod%></td>
+                                                        </tr>
+                                                        
+                                                    <% } %>
+                                                
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                     
 

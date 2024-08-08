@@ -1489,9 +1489,10 @@ const changeReturnStatus = async(req,res) => {
                 paymentId : null,
                 amount : returnedStatus.refundAmnt,
                 type : 'refund',
+                paymentMethod:'wallet',
                 status: 'completed',
                 currency: 'INR',
-                description: ""
+                description: "Returned product"
 
             });
 

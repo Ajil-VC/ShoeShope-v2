@@ -403,14 +403,17 @@ const loadUserProfile = async(req,res) => {
         const userDetails = await User.findOne({_id : userID}).exec() ;
    
       
-        const [defaultAddress,otherAddress,orders,userWallet] = await Promise.all([
+        const [defaultAddress,otherAddress,orders,userWallet,latestTransactions] = await Promise.all([
             Address.findOne({_id:{$in:userDetails.address},defaultAdd:1}).exec(),
             Address.find({_id:{$in:userDetails.address},defaultAdd:0}).exec(),
             Order.find({customer : userID}).populate('shippingAddress').sort({ createdAt : -1}).exec(),
-            wallet.findOne({userId : userID}).populate('transactions').exec()
+            wallet.findOne({userId : userID}).populate('transactions').exec(),
+            transaction.find({userId : userID}).sort({createdAt : -1}).exec()
         ]);
 
-        const latestTransactions = userWallet?.transactions.reverse();
+        //Taking documents directly from transaction documents instead of taking from userWallet.
+        //Because at the time of payment the transaction ids are not pushing into the wallet transactions.
+        // const latestTransactions = userWallet?.transactions.reverse();
 
         return res.status(200).render('profile',{userDetails,defaultAddress,otherAddress,orders,userWallet,latestTransactions});
     }catch(error){
@@ -432,8 +435,8 @@ const getOrderDetails = async(req,res) => {
         const orderStatus = order.status;
         const deliveryDate = order.updatedAt;
         const orderPaymentStatus = order.overallPaymentStatus;
-        console.log(order)
-        console.log(allProducts)
+        const paymentMethod = order.paymentMethod;
+
         const products = allProducts.map(item => {
 
             const itemPriceRatio = item.subtotal / order.subTotal;
@@ -464,7 +467,7 @@ const getOrderDetails = async(req,res) => {
                 _id: item._id
             }
         })
-        console.log(products)
+      
         return res.status(200).json({
             status : true,
             products,
@@ -473,7 +476,8 @@ const getOrderDetails = async(req,res) => {
             orderStatus,
             orderId: order._id,
             deliveryDate,
-            orderPaymentStatus
+            orderPaymentStatus,
+            paymentMethod
         });
 
     }catch(error){
@@ -1393,7 +1397,7 @@ const retryPaymentForFailed = async(req,res) => {
             discountAmount = discountAmount + prodCouponDisc;
         })
         const amountToPay = subTotal + gst - discountAmount;
-    console.log(amountToPay, "amountToPay Trhis is the amount to pay")
+   
         if(orderData){
 
             const orderResult = await makeRazorpayment(razorpay, amountToPay,orderData._id);
@@ -1658,6 +1662,9 @@ const placeOrder = async(req,res) => {
 
                 var orderResult = await makeRazorpayment(razorpay, amountToPay,newOrder._id);
                 newOrder.paymentGatewayOrderId = orderResult.id;
+                if(!orderResult){
+
+                }
  
             }                
          
@@ -1835,9 +1842,10 @@ const paymentVerification = async(req,res) => {
                 paymentId,
                 amount : amount,
                 type : 'payment',
+                paymentMethod : 'razorpay',
                 status: 'completed',
                 currency: 'INR',
-                description: ""
+                description: "Product purchase"
             });
             const transactionSaveResult = await Transaction.save();
 
@@ -1945,14 +1953,13 @@ const cancelOrder = async(req,res) => {
                 paymentId : null,
                 amount : refundAmount,
                 type : 'refund',
+                paymentMethod: 'wallet',
                 status: 'completed',
                 currency: 'INR',
-                description: "Transaction of Canceled product"
+                description: "Canceled product"
     
             });
 
-            const trasactionData = await Transaction.save();
-            //Need to place it in the proper place. after added amount to the user wallet.
             
             if(!isWallet){
                 
@@ -1960,33 +1967,42 @@ const cancelOrder = async(req,res) => {
     
                     userId: userID,
                     balance: refundAmount,
-                    transactions: [trasactionData._id]
+                    transactions: []
                     
                 });
 
                 const createWalletForUser = await userWallet.save();
              
                 if(createWalletForUser){
-
+                    
+                    var trasactionData = await Transaction.save();
+                    if(trasactionData){
+                        userWallet.transactions.push(trasactionData._id);
+                        var walletData = await userWallet.save();
+                    }
                     flag = true;
-                    console.log(createWalletForUser,"createWalletForUser created\n");
 
                 }else{
-                    return res.json({status : false, message : 'Transaction saved but fund not transffered..'});
+                    return res.json({status : false, message : 'Couldnt create wallet for user.'});
                 }
 
             }else{
 
-                isWallet.transactions.push(trasactionData._id);
                 isWallet.balance = isWallet.balance + refundAmount;
                 const updatedWallet = await isWallet.save();
-                
+                console.log(updatedWallet,"updatedWallet");
                 if(updatedWallet){
+                    
+                    var trasactionData = await Transaction.save();
+                    if(trasactionData){
 
+                        updatedWallet.transactions.push(trasactionData._id);
+                        var walletData = await updatedWallet.save();
+                    }
                     flag = true;
                     console.log(updatedWallet,"updatedWallet updated\n");
                 }else{
-                    return res.json({status : false, message : 'Transaction saved but fund not transffered.'});
+                    return res.json({status : false, message : 'Couldnt update wallet.'});
                 }
             }
 
@@ -2040,7 +2056,7 @@ const cancelOrder = async(req,res) => {
 
 
 
-            return res.status(201).json({status : true, message : 'Product cancelled Successfully.'});
+            return res.status(201).json({status : true, message : 'Product cancelled Successfully.', walletData,trasactionData});
         }else{
             return res.status(201).json({status : false, message : 'Something went wrong while adding amount to user wallet.'});
         }
