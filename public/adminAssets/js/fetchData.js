@@ -1,5 +1,7 @@
 
-
+const currentDate = new Date().toISOString().split('T')[0];
+document.getElementById('saleR-start-date').setAttribute('max', currentDate);
+document.getElementById('saleR-end-date').setAttribute('max', currentDate);
 
 function swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg) {
     return new Promise((resolve, reject) => {
