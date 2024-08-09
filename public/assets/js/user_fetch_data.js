@@ -706,6 +706,11 @@ async function addProductToCart(productId,flag){
       }},);
 
     if(!response.ok){
+        
+        if(response.status == 401){
+            return window.location.href = '/login';
+        }
+
         throw new Error('Network response was not ok while adding product to cart');
     }
 
@@ -1084,6 +1089,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => {
 
                     if(!response.ok){
+
+                        if(response.status == 401){
+                            return window.location.href = '/login';
+                        }
+
                         throw new Error('Network response was not ok while adding product to the wishlist.')
                     }
                     return response.json();

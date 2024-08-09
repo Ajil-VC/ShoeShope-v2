@@ -17,8 +17,8 @@ const isLoggedIn = async(req,res,next) => {
     
         // Check if user is blocked
         const isBlocked = req.session.isBlocked || (req.user && req.user.isBlocked);
-
         if (!isAuthenticated || !isBlocked) {
+        
             // User is not authenticated or is blocked
             const acceptHeader = req.headers.accept || "";
             if (req.xhr || acceptHeader.indexOf('json') > -1) {
@@ -42,8 +42,10 @@ const isLoggedOut = async(req,res,next) => {
 
     try{
 
-        console.log("This is from isLoggedOut");
-        if( req.session.user_id || req.user ){
+        const isAuthenticated = req.session.user_id || (req.user && req.user.user_id);
+        // Check if user is blocked
+        const isBlocked = req.session.isBlocked || (req.user && req.user.isBlocked);
+        if( isAuthenticated && isBlocked ){
             return res.redirect('/home');
         }
         next();

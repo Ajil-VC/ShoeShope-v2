@@ -1650,10 +1650,42 @@ const changeReturnStatus = async(req,res) => {
 }
 
 
+
+
+
+const logoutAdmin = async(req,res) => {
+
+    try{
+
+        if(req.session.admin_id){
+
+            req.session.destroy((err) => {
+                
+                if(err){
+                    console.error("Error while destroying session : ",err);
+                    return res.status(500).send("Error while destroying session : ",err);
+                }
+
+        
+                return res.status(302).redirect('/admin/login');
+            });
+        }else{
+            console.log("Unknown Error while logging out")
+        }
+
+    }catch(error){
+        console.log("Internal error while trying to logout",error);
+        return res.status(500).send("Internal error while trying to logout",error);
+    }
+
+}
+
+
 module.exports = {
     adminRegistration,
     loadLogin,
     loginAdmin,
+    logoutAdmin,
 
     loadDashboard,
     salesReport,

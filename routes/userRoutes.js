@@ -27,9 +27,8 @@ userRouter.get('/resend_otp',userController.resend_otp) ;
 userRouter.post('/signup/verify-otp',userController.verifyOTP) ;
 
 //Login
-userRouter.get('/login',userController.loadLogin) ;
-userRouter.post('/login',userController.loginUser) ;
-userRouter.get('/home',userController.loadHomePage) ;
+userRouter.get('/login',authenticate.isLoggedOut,userController.loadLogin) ;
+userRouter.post('/login',authenticate.isLoggedOut,userController.loginUser) ;
 
 //google auth
 userRouter.get('/auth/google', passport.authenticate('google',{scope:['email','profile']}))
