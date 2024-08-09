@@ -1538,8 +1538,6 @@ const changeReturnStatus = async(req,res) => {
                 description: "Returned product"
 
             });
-
-            const trasactionData = await Transaction.save();
             
             if(!isWallet){
                 
@@ -1547,30 +1545,44 @@ const changeReturnStatus = async(req,res) => {
     
                     userId: returnedStatus.customer,
                     balance: returnedStatus.refundAmnt,
-                    transactions: [trasactionData._id]
+                    transactions: []
                     
                 });
 
                 const createWalletForUser = await userWallet.save();
-                console.log(createWalletForUser,"This is createWalletForUser");
                 if(createWalletForUser){
 
-                    const updatedOrder = await Order.findOneAndUpdate(
-                        {
-                            _id : orderId,
-                            'items.product.id': productId
-                        },{$set : {
-                           'items.$[elem].status' : 'Returned' 
-                        }},
-                        {arrayFilters : [{'elem.product.id' : productId}]},
-                        {new : true}
-                    );
-console.log(updatedOrder)
+                    const trasactionData = await Transaction.save();
+                    if(trasactionData){
+                        createWalletForUser.transactions.push(trasactionData._id);
+                        await createWalletForUser.save();
+                        
+                        var updatedOrder = await Order.findOneAndUpdate(
+                            {
+                                _id : orderId,
+                                'items.product.id': productId
+                            },{$set : {
+                               'items.$[elem].status' : 'Returned',
+                               'items.$[elem].paymentStatus' : 'REFUNDED' 
+                            }},
+                            {arrayFilters : [{'elem.product.id' : productId}]},
+                            {new : true}
+                        );
+                    }
+
                     const filteredProducts = updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
                     const orderProdCount = updatedOrder.items.length;
 
                     if(filteredProducts.length == orderProdCount){
-                        await Order.updateOne({_id: orderId},{$set:{status : 'Returned'}})
+                        await Order.updateOne({_id: orderId},{$set:{
+                            status : 'Returned',
+                            overallPaymentStatus : 'REFUNDED'
+                        }})
+                    }else{
+                        await Order.updateOne({_id: orderId},{
+                            $set:{
+                            overallPaymentStatus : 'PARTIALLY_REFUNDED'
+                        }})
                     }
 
                     return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
@@ -1580,28 +1592,43 @@ console.log(updatedOrder)
 
             }else{
 
-                isWallet.transactions.push(trasactionData._id);
                 isWallet.balance = isWallet.balance + returnedStatus.refundAmnt;
                 const updatedWallet = await isWallet.save();
                 
                 if(updatedWallet){
+                    
+                    const trasactionData = await Transaction.save();
+                    if(trasactionData){
+                        updatedWallet.transactions.push(trasactionData._id);
+                        await updatedWallet.save();
 
-                    const updatedOrder = await Order.findOneAndUpdate(
-                        {
-                            _id : orderId,
-                            'items.product.id': productId
-                        },{$set : {
-                           'items.$[elem].status' : 'Returned' 
-                        }},
-                        {arrayFilters : [{'elem.product.id' : productId}]},
-                        {new : true}
-                    );
-console.log(updatedOrder)
+                        var updatedOrder = await Order.findOneAndUpdate(
+                            {
+                                _id : orderId,
+                                'items.product.id': productId
+                            },{$set : {
+                               'items.$[elem].status' : 'Returned',
+                               'items.$[elem].paymentStatus' : 'REFUNDED' 
+                            }},
+                            {arrayFilters : [{'elem.product.id' : productId}]},
+                            {new : true}
+                        );
+                    }
+
+
                     const filteredProducts = updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
                     const orderProdCount = updatedOrder.items.length;
 
                     if(filteredProducts.length == orderProdCount){
-                        await Order.updateOne({_id: orderId},{$set:{status : 'Returned'}})
+                        await Order.updateOne({_id: orderId},{
+                            $set:{status : 'Returned',
+                            overallPaymentStatus : 'REFUNDED'
+                        }})
+                    }else{
+                        await Order.updateOne({_id: orderId},{
+                            $set:{
+                            overallPaymentStatus : 'PARTIALLY_REFUNDED'
+                        }})
                     }
 
                     return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});

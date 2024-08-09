@@ -1977,8 +1977,8 @@ const cancelOrder = async(req,res) => {
                     
                     var trasactionData = await Transaction.save();
                     if(trasactionData){
-                        userWallet.transactions.push(trasactionData._id);
-                        var walletData = await userWallet.save();
+                        createWalletForUser.transactions.push(trasactionData._id);
+                        var walletData = await createWalletForUser.save();
                     }
                     flag = true;
 
@@ -1990,7 +1990,6 @@ const cancelOrder = async(req,res) => {
 
                 isWallet.balance = isWallet.balance + refundAmount;
                 const updatedWallet = await isWallet.save();
-                console.log(updatedWallet,"updatedWallet");
                 if(updatedWallet){
                     
                     var trasactionData = await Transaction.save();
@@ -2000,7 +1999,6 @@ const cancelOrder = async(req,res) => {
                         var walletData = await updatedWallet.save();
                     }
                     flag = true;
-                    console.log(updatedWallet,"updatedWallet updated\n");
                 }else{
                     return res.json({status : false, message : 'Couldnt update wallet.'});
                 }

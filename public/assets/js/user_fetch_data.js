@@ -397,7 +397,7 @@ function swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg) {
                 resolve(true);
             } else {
                 Swal.fire(
-                    'Cancelled',
+                    'Safe',
                     safeMsg,
                     'error'
                 )
