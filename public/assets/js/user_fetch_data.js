@@ -934,8 +934,7 @@ async function loadCheckout() {
 }
 
 
-const cancelProduct = async(productOrderId, orderId) => {
-    console.log("This is productOrderId:",productOrderId,"\norderId: ",orderId,"End");
+const cancelProduct = async(productOrderId, orderId,itemOrderId) => {
 
     let alertMsg = "Are you sure you want to cancel this product?";
     let confirmMsg = 'Yes, cancel it!';
@@ -964,6 +963,14 @@ const cancelProduct = async(productOrderId, orderId) => {
             return;
         }else{
 
+            const botCancelBtn = document.querySelector(`.btn-${itemOrderId}`);
+            botCancelBtn.remove();
+
+            const itemStatus = document.querySelector(`.status-${itemOrderId}`);
+            itemStatus.classList.remove('bot-status-pending');
+            itemStatus.classList.add(`bot-status-${data.itemStatus.toLowerCase()}`);
+            itemStatus.innerText = data.itemStatus;
+
             const wallet_balance = document.getElementById('wallet-balance');
             wallet_balance.innerText = `Wallet Balance: ₹${data.walletData.balance.toFixed(2)}`;
 
@@ -979,7 +986,7 @@ const cancelProduct = async(productOrderId, orderId) => {
 
             dateCell.innerText = new Date(data.trasactionData.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
             typeCell.innerText = data.trasactionData.type;
-            amntCell.innerText = data.trasactionData.amount.toFixed(2);
+            amntCell.innerText = `₹${data.trasactionData.amount.toFixed(2)}`;
             statusCell.innerHTML    = statusCell.innerHTML = `<span class="walletc-status walletc-${data.trasactionData.status.toLowerCase()}">${data.trasactionData.status}</span>`;
             descripCell.innerText   = data.trasactionData.description;
             payMethodCell.innerText = data.trasactionData.paymentMethod;
@@ -1558,9 +1565,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let returnBtn = '';
         if((products?.status == 'Delivered') && (twoDaysLater >= currentDate )){
-            returnBtn = `<button onclick="returnProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Return</button>`
+            returnBtn = `<button onclick="returnProduct('${products?.product?.id}','${orderId}')"  class=" btn-${products?._id} bot-return-btn mt-2">Return</button>`
         }else if(products?.status == 'Pending'){
-            returnBtn = `<button onclick="cancelProduct('${products?.product?.id}','${orderId}')" class="bot-return-btn mt-2">Cancel</button>`
+            returnBtn = `<button onclick="cancelProduct('${products?.product?.id}','${orderId}','${products?._id}')"  class=" btn-${products?._id} bot-return-btn mt-2">Cancel</button>`
         }
 
         return `<div class="container-fluid bot-order-container">
@@ -1588,7 +1595,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Address and Order ID -->
     <div class="col-md-6 bot-address-info mt-3 mt-md-0">
       <p><span class="bot-bold">product Order ID:</span> ${products?._id}</p>
-        <div class="bot-status ods-status bot-status-${products?.status.toLowerCase()}">${products?.status}</div>
+        <div class=" status-${products?._id} bot-status ods-status bot-status-${products?.status.toLowerCase()}">${products?.status}</div>
     </div>
 
     <!-- Price, Quantity, and Status -->

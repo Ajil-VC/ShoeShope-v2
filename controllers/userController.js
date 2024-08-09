@@ -2054,9 +2054,14 @@ const cancelOrder = async(req,res) => {
                 await updatedOrder.save();
             }
 
+            return res.status(201).json({
+                status : true, 
+                message : 'Product cancelled Successfully.', 
+                walletData,
+                trasactionData,
+                itemStatus : 'Cancelled'
+            });
 
-
-            return res.status(201).json({status : true, message : 'Product cancelled Successfully.', walletData,trasactionData});
         }else{
             return res.status(201).json({status : false, message : 'Something went wrong while adding amount to user wallet.'});
         }
@@ -2093,12 +2098,17 @@ const initiateReturn = async(req,res) => {
         for(let i = 0 ; i < order.items.length ; i++){
             
             if(order.items[i].product.id.toString() === return_item_id.toString()){
-                var amount = order.items[i].subtotal;
+
+                const amntRatio = order.items[i].subtotal / order.subTotal;
+                const itemGST = amntRatio * order.gstAmount;
+                const totalDiscount = order.couponDiscount + order.otherDiscount;
+                const itemDiscount = amntRatio * totalDiscount;
+                var amount = order.items[i].subtotal + itemGST - itemDiscount;
             
             }
         }
 
-
+        amount = Math.round(amount * 100) / 100;
         
         const returnDetails = new returnItem({
 
@@ -2114,6 +2124,8 @@ const initiateReturn = async(req,res) => {
         const returnData = await returnDetails.save();
         if(returnData){
             
+            order.return.push(returnData._id);
+            await order.save();
             return res.status(200).json({status : true, message : 'Return initialized.'});
         }else{
             console.log("Couldn't initiate the return.");

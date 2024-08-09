@@ -12,7 +12,7 @@
         <section class="content-main">
             <div class="content-header">
                 <div>
-                    <h2 class="content-title card-title">Order List </h2>
+                    <h2 class="content-title card-title">Order Details </h2>
                     <p>Detaild order view.</p>
                 </div>
               
@@ -134,55 +134,59 @@
                         <table class="table  ">
                             <thead style="background-color: white;" >
                                 <tr>
-                                    <th width="40%">Product</th>
-                                    <th width="20%">Unit Price</th>
-                                    <th width="20%">Quantity</th>
-                                    <th width="20%">Status</th>
-                                    <th width="20%" class="text-end">Total</th>
+                                    <th width="25%">Product</th>
+                                    <th width="15%">Unit Price</th>
+                                    <th width="10%">Quantity</th>
+                                    <th width="15%">Gst</th>
+                                    <th width="10%">Decs</th>
+                                    <th width="10%">Status</th>
+                                    <th width="15%" class="text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
 
-                                <% for(let i = 0 ; i < orderDetails?.items?.length ; i++){ %>
+                                <% for(let i = 0 ; i < items?.length ; i++){ %>
 
                                     <tr>
                                         <td>
                                             <a class="itemside" href="#">
                                                 <div class="left">
-                                                    <img src="/ProductImage/<%=orderDetails?.items[i]?.product?.images[0]%>" width="40" height="40" class="img-xs" alt="Item">
+                                                    <img src="/ProductImage/<%=items[i]?.prodImage[0]%>" width="40" height="40" class="img-xs" alt="Item">
                                                 </div>
-                                                <div class="info"> <%=orderDetails?.items[i]?.product?.name%> (<%=orderDetails?.items[i]?.product?.Brand%>) </div>
+                                                <div class="info"> <%=items[i]?.name%> (<%=items[i]?.brand%>) </div>
                                             </a>
                                         </td>
-                                        <td> ₹ <%=orderDetails?.items[i]?.product?.price%> </td>
-                                        <td> <%=orderDetails?.items[i]?.quantity%> </td>
-                                        <td  > <%=orderDetails?.items[i]?.status%> </td>
-                                        <td class="text-end"> ₹ <%=orderDetails?.items[i]?.subtotal%>  </td>
+                                        <td> ₹ <%=items[i]?.prodRate%> </td>
+                                        <td> <%=items[i]?.prodQuantity%> </td>
+                                        <td> <%=items[i]?.prodgst%> </td>
+                                        <td> <%=items[i]?.prodDeductions%> </td>
+                                        <td  > <%=items[i]?.status%> </td>
+                                        <td class="text-end"> ₹ <%=items[i]?.prodNetTotal%>  </td>
                                     </tr>
                                 <% } %>
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="8">
                                         <article class="float-end">
                                             <dl class="dlist">
                                                 <dt>Subtotal:</dt>
-                                                <dd style="color: green;" >+₹ <%=orderDetails?.subTotal%></dd>
+                                                <dd style="color: green;" >+₹ <%=grandSubTotal%></dd>
                                             </dl>
                                             <dl class="dlist">
                                                 <dt>GST:</dt>
-                                                <dd style="color: green;" >+₹ <%=orderDetails?.gstAmount%></dd>
+                                                <dd style="color: green;" >+₹ <%=grandGST%></dd>
                                             </dl>
                                             <dl class="dlist">
                                               <dt>Coupon Discount:</dt>
-                                              <dd style="color: red;" >-₹ <%=orderDetails?.couponDiscount%></dd>
+                                              <dd style="color: red;" >-₹ <%=grandDiscount%></dd>
                                           </dl>
                                             <dl class="dlist">
                                                 <dt>Grand total:</dt>
-                                                <dd> <b class="h5">₹ <%=orderDetails?.totalAmount%></b> </dd>
+                                                <dd> <b class="h5">₹ <%=grandTotal%></b> </dd>
                                             </dl>
                                             <dl class="dlist">
                                                 <dt class="text-muted">Status:</dt>
                                                 <dd>
-                                                    <span class="badge rounded-pill alert-success text-success"> <%=orderDetails?.status%> </span>
+                                                    <span class="badge rounded-pill alert-success text-success"> <%=orderDetails?.overallPaymentStatus%> </span>
                                                 </dd>
                                             </dl>
                                         </article>

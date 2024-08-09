@@ -1354,8 +1354,51 @@ const loadOrderDetails = async(req,res) => {
 
         const orderDetails = await Order.findOne({_id : orderId}).populate('customer').populate('shippingAddress').exec();
         console.log(orderDetails)
+
+        let grandSubTotal = 0;
+        let grandGST = 0;
+        let grandDiscount = 0;
+        let grandTotal = 0;
+
+        const items = orderDetails.items.map(item => {
+
+            const amtRatio = item.subtotal / orderDetails.subTotal;
+            const itemGST = (amtRatio * orderDetails.gstAmount).toFixed(2);
+
+            const totalDed = orderDetails.couponDiscount + orderDetails.otherDiscount;
+            const itemDecs = (amtRatio * totalDed).toFixed(2);
+
+            const prodTotalPrice = item.subtotal + +itemGST - +itemDecs;
+            
+            if((item.paymentStatus !== 'REFUNDED') && (item.paymentStatus !== 'CANCELLED') ){
+
+                grandSubTotal += item.subtotal;
+                grandGST += +itemGST;
+                grandDiscount += +itemDecs; 
+                grandTotal += prodTotalPrice;
+            }
+
+            return {
+                name    : item.product.name,
+                brand   : item.product.Brand,
+                prodImage   : item.product.images,
+                prodQuantity: item.quantity,
+                prodRate    : item.product.price,
+                prodgst     : itemGST, 
+                prodDeductions : itemDecs,
+                prodNetTotal   : prodTotalPrice,
+                status  : item.paymentStatus
+            }
+        });
    
-        return res.status(200).render('order-details',{orderDetails});
+        return res.status(200).render('order-details',{
+            orderDetails,
+            items,
+            grandSubTotal,
+            grandGST,
+            grandDiscount, 
+            grandTotal
+        });
 
     }catch(error){
         console.log("Internal Error occured while loading order Details.")
