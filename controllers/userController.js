@@ -1658,14 +1658,38 @@ const placeOrder = async(req,res) => {
             });
     
 
-            if(paymentMethod !== 'Cash on Delivery'){
+            if(paymentMethod === 'UPI Method'){
 
                 var orderResult = await makeRazorpayment(razorpay, amountToPay,newOrder._id);
                 newOrder.paymentGatewayOrderId = orderResult.id;
-                if(!orderResult){
-
-                }
  
+            }else if(paymentMethod === 'Wallet Payment'){
+
+                const userWallet = await wallet.findOne({userId : userID});
+                if(userWallet.balance < totalAmount){
+                    return res.json({status : false,message:"Not Enough Amount in Wallet. Choose another payment method"});
+                }
+
+                
+                const Transaction = new transaction({
+                    
+                    userId : userID,
+                    orderId : 'Not Available', 
+                    amount : totalAmount,
+                    type : 'payment',
+                    paymentMethod : 'wallet',
+                    status: 'completed',
+                    currency: 'INR',
+                    description: "Product purchase"
+                });
+
+                userWallet.balance -= totalAmount;
+                const updatedUserWallet = await userWallet.save();
+                if(updatedUserWallet){
+
+                    var transactionSaveResult = await Transaction.save();
+                }
+
             }                
          
             const orderDetails = await newOrder.save();
@@ -1673,6 +1697,13 @@ const placeOrder = async(req,res) => {
 
             if(orderDetails){
                 
+                if(paymentMethod === 'Wallet Payment'){
+
+                    transactionSaveResult.orderId = (orderDetails._id).toString();
+                    await transactionSaveResult.save();
+                    await updateOrderForWalletPayment(orderDetails._id, transactionSaveResult.paymentId);
+                }
+
                 const IdsToRemoveFromCart = productsToOrder.map(item => item.product.id)
                
                 await Cart.updateOne({userId : userID},{$pull: {
@@ -1685,7 +1716,7 @@ const placeOrder = async(req,res) => {
                 await coupon.updateOne({couponCode : selectedCoupon},{$push : {usedBy : userID}});
 
 
-                if(paymentMethod !== 'Cash on Delivery'){
+                if(paymentMethod === 'UPI Method'){
         
                     return res.status(201).json({status : true,razorpay_key : razorpay_key, orderResult})
                 }  
@@ -1896,6 +1927,50 @@ const paymentVerification = async(req,res) => {
 
         console.log("Internal error while trying to make transaction.",error);
     }
+}
+
+const updateOrderForWalletPayment = async(orderId, paymentId)=> {
+
+    try{
+
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId },
+              [
+                  {$set:{ 
+                      overallPaymentStatus: 'PAID',
+                      walletPaymentId : paymentId,
+                      items:{
+                          $map:{
+                              input:"$items",
+                              as: "item",
+                              in: {
+                                  $cond:{
+                                    if:{$ne:["$$item.status","Cancelled"]},
+                                    then:{$mergeObjects:["$$item",{paymentStatus: 'PAID'}]},
+                                    else: "$$item"
+                                  }
+                              }
+                          }
+                      } 
+                  }}
+            ],
+            {new : true}
+        );
+        
+        if(updatedOrder){
+            const paidProductsCount = updatedOrder.items.filter(item => (item.paymentStatus === 'PAID')).length;
+            console.log(paidProductsCount,"paidProductsCount");
+            if(updatedOrder.items.length > paidProductsCount){
+                updatedOrder.overallPaymentStatus = 'PARTIALLY_PAID';
+                await updatedOrder.save();
+            }
+        }
+
+    }catch(error){
+        console.log("Internal Error while trying to update order\n",error);
+    }
+
+
 }
 
 const loadOrderPlaced = async(req,res) => {

@@ -305,6 +305,7 @@ const orderSchema = new mongoose.Schema({
 
     paymentGatewayOrderId: String,
     razorpayPaymentId: String,
+    walletPaymentId : String,
     items: [orderItemSchema],
     customer: {
         type: mongoose.Schema.Types.ObjectId,
@@ -368,7 +369,7 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: {
         type: String,
         required: true,
-        enum: ['UPI Method', 'Cash on Delivery'],
+        enum: [ 'Wallet Payment', 'UPI Method', 'Cash on Delivery'],
         default: 'UPI Method'
     },
     return : [{
@@ -432,7 +433,12 @@ const transactionSchema = new mongoose.Schema({
     },
     paymentId : {
         type : String,
-        default : null
+        default : function(){
+            const shortid = require('shortid');
+            const paymentId = 'def-pay-'+shortid.generate();
+            return paymentId;
+        },
+        unique: true
     },
     amount : {
         type: Number,
