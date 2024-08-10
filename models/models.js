@@ -520,11 +520,15 @@ const couponSchema = new mongoose.Schema({
         type: Number,
         required: true 
     },
+    expiryDate : {
+        type: Date,
+        required : true
+    },
     usedBy: [{ 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }]
-})
+},{timestamps : true})
 
 
 const User = mongoose.model('User', userSchema);

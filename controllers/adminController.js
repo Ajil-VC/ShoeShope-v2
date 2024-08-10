@@ -825,14 +825,15 @@ const addNewCoupon = async(req,res) => {
         }else{
             var status = false;
         }
-        // coupon
+        console.log(req.body.expiry,'req.body.expiry');
         const newCoupon = new coupon({
             couponName : req.body.couponName,
             couponCode : req.body.couponCode,
             discount : req.body.discount,
             status : status,
             MaxAmount : req.body.MaxAmount,
-            MinAmount : req.body.MinAmount
+            MinAmount : req.body.MinAmount,
+            expiryDate  : req.body.expiry
         })
 
         const coupondata = await newCoupon.save();
@@ -867,6 +868,20 @@ const changeCouponStatus = async(req,res) => {
 const loadCoupons = async(req,res) => {
 
     try{
+
+        if(req.query.code){
+            
+            const couponCode = req.query.code;
+            const couponIsExist = await coupon.findOne({
+                couponCode : couponCode
+            }).exec();
+            if(couponIsExist){
+
+                return res.status(200).json({status : true});
+            }else{
+                return res.status(200).json({status : false});
+            }
+        }
 
         const coupons = await coupon.find().exec();
         return res.status(200).render('coupons',{coupons});

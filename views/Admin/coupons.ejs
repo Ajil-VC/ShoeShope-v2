@@ -26,45 +26,51 @@
 
                 <div class="form-group">
                   <label for="couponCode">Coupon Code</label>
-                  <input type="text" class="form-control" name="couponCode" id="couponCode" required>
+                  <input type="text" class="form-control" name="couponCode" id="couponCode">
+                  <span  class="text-danger" style="font-size: smaller;" id="couponcode-error"></span>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="discountPercentage">Discount Percentage (%)</label>
-                        <input type="number" class="form-control" name="discount" id="discountPercentage" min="0" max="100" required>
+                        <input type="number" class="form-control" name="discount" id="discountPercentage" min="1" max="100" >
+                        <span  class="text-danger" style="font-size: smaller;" id="coupon-dis-error"></span>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="couponstatus">Coupon Status</label>
-                        <select class="form-control" name="status" id="couponstatus" required>
+                        <select class="form-control" name="status" id="couponstatus" >
                             <option value="" disabled selected>Select status</option>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                             
                         </select>
+                        <span  class="text-danger" style="font-size: smaller;" id="coupon-status-error"></span>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="MinimumAmnt">Minimum Amount</label>
-                        <input type="number" name="MinAmount" class="form-control" id="MinimumAmnt" required>
+                        <input type="number" name="MinAmount" class="form-control" id="MinimumAmnt" >
+                        <span  class="text-danger" style="font-size: smaller;" id="coupon-min-error"></span>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="MaximumAmnt">Maximum Amount</label>
-                        <input type="number" name="MaxAmount" class="form-control" id="MaximumAmnt" required>
+                        <input type="number" name="MaxAmount" class="form-control" id="MaximumAmnt" >
+                        <span  class="text-danger" style="font-size: smaller;" id="coupon-max-error"></span>
                     </div>
                 </div>
 
-                <!-- <div class="form-group">
+                <div class="form-group">
                   <label for="expirationDate">Expiration Date</label>
-                  <input type="date" class="form-control" id="expirationDate" required>
-                </div> -->
+                  <input type="date" class="form-control" name="expiry" id="expirationDate">
+                  <span  class="text-danger" style="font-size: smaller;" id="coupon-date-error"></span>
+                </div>
               </form>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button type="submit" form="addCouponForm" class="btn btn-primary" id="saveCouponBtn">Add Coupon</button>
+              <button form="addCouponForm" class="btn btn-primary" id="saveCouponBtn">Add Coupon</button>
             </div>
           </div>
         </div>

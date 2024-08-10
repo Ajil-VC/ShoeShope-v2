@@ -246,7 +246,7 @@ const registrationForm = document.getElementById('registrationForm');
 if(registrationForm){
 
     registrationForm.addEventListener('submit',function(event) {
-        console.log("This is registration")
+      
         event.preventDefault();
     
         let Reg_firstName = document.getElementById('Reg-firstName').value.trim();

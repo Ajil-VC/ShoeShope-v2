@@ -1,4 +1,7 @@
 
+
+
+
 const listCoupons = async(couponId) =>{
 
     try{
@@ -253,9 +256,14 @@ document.addEventListener('DOMContentLoaded',() => {
         })
     }
 
+    const currentDate = new Date().toISOString().split('T')[0];
     const saleR_apply_date = document.getElementById('saleR-apply-date');
     const saleR_start_date = document.getElementById('saleR-start-date');
     const saleR_end_date = document.getElementById('saleR-end-date');
+    if(saleR_start_date){
+        saleR_start_date.setAttribute('max', currentDate);
+        saleR_end_date.setAttribute('max', currentDate);
+    }
     if(saleR_apply_date){
         saleR_apply_date.addEventListener('click',()=> {
 
@@ -297,6 +305,118 @@ document.addEventListener('DOMContentLoaded',() => {
         })
     }
 
+
+    const couponCode = document.getElementById('couponCode');
+    const couponcode_error = document.getElementById('couponcode-error');
+    let couponCodeIsExist = false;
+    if(couponCode){
+        couponCode.addEventListener('change',(e)=> {
+
+            const input = e.target.value;
+
+            fetch(`http://localhost:2000/admin/coupons?code=${input}`)
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok")
+                }
+               
+                return response.json();  
+            })
+            .then(data => {
+
+                if(data.status){
+                    couponCodeIsExist = true;
+                }else{
+
+                    couponCodeIsExist = false;
+                }
+
+            })
+            .catch(error => {
+                console.log("There was a problem with the fetch operation of getting coupon code",error)
+            });
+        })
+    }
+
+    
+    const coupon_dis_error = document.getElementById('coupon-dis-error');
+    const coupon_status_error = document.getElementById('coupon-status-error');
+    const coupon_min_error = document.getElementById('coupon-min-error');
+    const coupon_max_error = document.getElementById('coupon-max-error');
+    const coupon_date_error = document.getElementById('coupon-date-error');
+    
+    const addCouponForm = document.getElementById('addCouponForm');
+    if(addCouponForm){
+        
+        addCouponForm.addEventListener('submit',function(e) {
+            e.preventDefault();
+
+            let couponValidation = true;
+            const discountPercentage = document.getElementById('discountPercentage').value.trim();
+            const couponstatus = document.getElementById('couponstatus').value;
+            const minimumAmnt = document.getElementById('MinimumAmnt').value.trim();
+            const maximumAmnt = document.getElementById('MaximumAmnt').value.trim();
+            const expirationDate = document.getElementById('expirationDate').value;
+            console.log(expirationDate)
+
+            coupon_dis_error.innerText = '';
+            coupon_status_error.innerText = '';
+            coupon_min_error.innerText = '';
+            coupon_max_error.innerText = '';
+            couponcode_error.innerText = '';
+            coupon_date_error.innerText = '';
+
+            if(!expirationDate){
+                couponValidation = false;
+                coupon_date_error.innerText = 'Please select a date';
+            }
+
+            if(!minimumAmnt){
+                couponValidation = false;
+                coupon_min_error.innerText = 'This field cant be empty';
+            }else if(minimumAmnt < 1){
+                couponValidation = false;
+                coupon_min_error.innerText = 'Please select a positive value';
+            }
+
+            if(!maximumAmnt){
+                couponValidation = false;
+                coupon_max_error.innerText = 'This field cant be empty';
+            }else if(maximumAmnt < 1){
+                couponValidation = false;
+                coupon_max_error.innerText = 'Please select a positive value';
+            }
+
+            if(!couponCode.value){
+                couponValidation = false;
+                couponcode_error.innerText = 'This field cant be empty';
+            }else if(couponCodeIsExist){
+                couponValidation = false;
+                couponcode_error.innerText = 'This coupon code already exists';
+            }
+
+            if(!discountPercentage){
+                couponValidation = false;
+                coupon_dis_error.innerText = 'This field cant be empty';
+            }else if( discountPercentage > 100 ){
+                couponValidation = false;
+                coupon_dis_error.innerText = 'This value should be less than 100';
+            }else if(discountPercentage < 1){
+                couponValidation = false;
+                coupon_dis_error.innerText = 'This value should be greater than 0';
+            }
+
+            if(!couponstatus){
+                couponValidation = false;
+                coupon_status_error.innerText = 'Please select a value';
+            }
+
+            if(couponValidation){
+
+                this.submit();
+            }
+        })
+    }
 
 });
 
