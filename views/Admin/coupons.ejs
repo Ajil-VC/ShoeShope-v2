@@ -99,14 +99,14 @@
                         <div class="col-lg-4 col-md-6 me-auto">
                             <input type="text" placeholder="Search..." class="form-control">
                         </div>
-                        <div class="col-lg-2 col-6 col-md-3">
+                        <!-- <div class="col-lg-2 col-6 col-md-3">
                             <select class="form-select">
                                 <option>Status</option>
                                 <option>Active</option>
                                 <option>Disabled</option>
                                 <option>Show all</option>
                             </select>
-                        </div>
+                        </div> -->
                       
                     </div>
                 </header> <!-- card-header end// -->
@@ -121,6 +121,7 @@
                                     <th scope="col">Discount</th>
                                     <th scope="col">Minimum Amount</th>
                                     <th scope="col">Maximum Amount</th>
+                                    <th scope="col">Expiry</th>
                                     <th scope="col">Status</th>
                                    
                                 </tr>
@@ -135,6 +136,10 @@
                                         <td><%=coupons[i]?.discount%> %</td>
                                         <td><%=coupons[i]?.MinAmount%></td>
                                         <td><%=coupons[i]?.MaxAmount%></td>
+                                        <td>
+                                            <%=new Date(coupons[i]?.expiryDate).toLocaleDateString('en-US', { 
+                                                year: 'numeric', month: 'long', day: 'numeric' })%>
+                                        </td>
                                         
                                         <td>
 

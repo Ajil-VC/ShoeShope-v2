@@ -345,6 +345,14 @@ document.addEventListener('DOMContentLoaded',() => {
     const coupon_max_error = document.getElementById('coupon-max-error');
     const coupon_date_error = document.getElementById('coupon-date-error');
     
+    const expirationDate = document.getElementById('expirationDate');
+    if(expirationDate){
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate()+1);
+        const minDate = tomorrow.toISOString().split('T')[0];
+        expirationDate.setAttribute('min', minDate);
+    }
     const addCouponForm = document.getElementById('addCouponForm');
     if(addCouponForm){
         
@@ -356,8 +364,7 @@ document.addEventListener('DOMContentLoaded',() => {
             const couponstatus = document.getElementById('couponstatus').value;
             const minimumAmnt = document.getElementById('MinimumAmnt').value.trim();
             const maximumAmnt = document.getElementById('MaximumAmnt').value.trim();
-            const expirationDate = document.getElementById('expirationDate').value;
-            console.log(expirationDate)
+            const expiration = expirationDate.value;
 
             coupon_dis_error.innerText = '';
             coupon_status_error.innerText = '';
@@ -366,7 +373,7 @@ document.addEventListener('DOMContentLoaded',() => {
             couponcode_error.innerText = '';
             coupon_date_error.innerText = '';
 
-            if(!expirationDate){
+            if(!expiration){
                 couponValidation = false;
                 coupon_date_error.innerText = 'Please select a date';
             }
