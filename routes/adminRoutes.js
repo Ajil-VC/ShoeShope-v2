@@ -74,6 +74,7 @@ adminRouter.get('/login',authenticate.isLoggedOut,adminController.loadLogin);
 adminRouter.post('/login',authenticate.isLoggedOut,adminController.loginAdmin);
 adminRouter.get('/dashboard',authenticate.isLoggedIn,adminController.loadDashboard);
 adminRouter.get('/api/sales-data',authenticate.isLoggedIn,adminController.getSaleData);
+adminRouter.get('/api/doughnut-data',authenticate.isLoggedIn,adminController.getCategoryData)
 adminRouter.get('/dashboard/sales-report',authenticate.isLoggedIn,adminController.salesReport);
 adminRouter.get('/dashboard/export',authenticate.isLoggedIn,adminController.exportAndDownload);
 adminRouter.get('/logout',authenticate.isLoggedIn,adminController.logoutAdmin);

@@ -210,6 +210,46 @@ const getSaleData = async(req,res) => {
 
 }
 
+const getCategoryData = async(req,res) => {
+
+    try{
+
+        const categoryWiseData = await Order.aggregate([{
+            $match:{
+                overallPaymentStatus:{$in:['PAID','PARTIALLY_PAID']}}
+            },{
+                $unwind:'$items'
+            },{
+                $group:{ 
+                    _id:'$items.product.Category', 
+                    totalQtySold:{$sum:'$items.quantity'}
+                }
+            },{
+                $sort:{totalQtySold:-1}
+            }
+        ]);
+
+        const labelsData = [];
+        const valuesData = [];
+        categoryWiseData.forEach(ob => {
+
+            labelsData.push(ob._id);
+            valuesData.push(ob.totalQtySold);
+
+        });
+
+        return res.status(200).json({
+            "labels": labelsData,
+            "values": valuesData
+        });
+
+    }catch(error){
+
+        console.log("Internal error while trying to get category details for doughnut graph",error);
+        return res.status(500).send("Internal error while trying to get category details for doughnut graph",error);
+    }
+
+}
 
 const saleReportByRange = async(range, start_date, end_date) =>{
 
@@ -1705,6 +1745,7 @@ module.exports = {
     loadDashboard,
     salesReport,
     getSaleData,
+    getCategoryData,
 
     exportAndDownload,
 

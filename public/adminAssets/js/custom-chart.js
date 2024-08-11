@@ -111,43 +111,56 @@ document.addEventListener('DOMContentLoaded', function() {
     // }
 
     if (document.getElementById('myChart2')) {
-            var ctx = document.getElementById("myChart2").getContext('2d');
-            
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: [ 'Blue', 'Yellow'],
-                    datasets: [{
-                        data: [60, 100],
-                        backgroundColor: [
-                           
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 206, 86, 0.8)',
-                           
-                        ],
-                        borderColor: [
-                        
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                         
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: false,
-                            text: 'Doughnut Chart Example'
-                        }
+        var ctx = document.getElementById("myChart2").getContext('2d');
+        
+        var doughnutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [],
+                    borderColor: [],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: 'Doughnut Chart Example'
                     }
                 }
-            });
-           
+            }
+        });
+    
+        function generateColors(numColors) {
+            var colors = [];
+            for (var i = 0; i < numColors; i++) {
+                var hue = (i * 137.508) % 360; // Use golden angle approximation
+                colors.push(`hsl(${hue}, 70%, 60%)`);
+            }
+            return colors;
+        }
+    
+        // Fetch data from backend
+        fetch('/admin/api/doughnut-data')
+            .then(response => response.json())
+            .then(data => {
+                doughnutChart.data.labels = data.labels;
+                doughnutChart.data.datasets[0].data = data.values;
+                
+                var colors = generateColors(data.labels.length);
+                doughnutChart.data.datasets[0].backgroundColor = colors.map(color => color.replace('hsl', 'hsla').replace(')', ', 0.8)'));
+                doughnutChart.data.datasets[0].borderColor = colors;
+                
+                doughnutChart.update();
+            })
+            .catch(error => console.error('Error fetching doughnut data:', error));
     }
 
     
