@@ -2,6 +2,62 @@
 document.addEventListener('DOMContentLoaded',function() {
 
 
+    function addDynamicCardsToWishlist(){
+        const heart_icon = document.querySelectorAll('.heart-icon');
+        if(heart_icon){
+
+            heart_icon.forEach(heart => {
+
+                heart.addEventListener('click',function() {
+                    
+                    const wishlist_toggle = heart.querySelector('.wishlist-toggle');
+                    const productId = this.dataset.id;
+                    const isRemoveCard = this.dataset.card;
+
+                    fetch(`http://localhost:2000/wishlist?productId=${productId}`,{method : "PATCH",headers : {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }})
+                    .then(response => {
+
+                        if(!response.ok){
+
+                            if(response.status == 401){
+                                return window.location.href = '/login';
+                            }
+
+                            throw new Error('Network response was not ok while adding product to the wishlist.')
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+
+                        if(data.redirect){
+                            window.location.href = data.redirect;
+                            return
+                        }
+                        if(data.status && data.add == 1){
+                            wishlist_toggle.classList.add('active');
+                        }else if(data.status && data.add == -1){
+                            wishlist_toggle.classList.remove('active');
+                            if(isRemoveCard == 'remove'){
+                                const itemCardInWishlist = document.getElementById(productId);
+                                itemCardInWishlist.remove();
+
+                                const totalItemsInWishlist = document.getElementById('totalItemsInWishlist');
+                                totalItemsInWishlist.innerText =  `Total ${data.itemsLeftInWishlist} items in your wishlist`
+                            }
+                        }
+                        
+                    })
+                    .catch(error =>{
+                        console.log("Error while trying add product to wishlist",error)
+                    })
+                })
+            })
+        }
+    }
+
     function makeProductCard(product){
         
         return `
@@ -15,10 +71,17 @@ document.addEventListener('DOMContentLoaded',function() {
                             </a>
                         </div>
                                                 
-                        <div class="heart-icon ">
-                            <a aria-label="Add to Wishlist" href="#"><i class="fi-rs-heart"></i></a>
-                        </div>
+                        
+                        <div class="heart-icon" data-id=${product._id}>
+                         
+                            <div class="wishlist-toggle" aria-label="Add to Wishlist">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </div>
 
+
+                        </div>
 
                         <div class="product-badges product-badges-position product-badges-mrg">
 
@@ -119,6 +182,7 @@ document.addEventListener('DOMContentLoaded',function() {
         });
 
         target_products_parent.innerHTML = products.map(item => makeProductCard(item)).join('');
+        addDynamicCardsToWishlist();
 
         for(let i = 1 ; i <= totalPages; i++){
 

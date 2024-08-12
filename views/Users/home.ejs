@@ -158,13 +158,16 @@
                                                 </a>
                                             </div>
                                             
-                                            <!-- <div class="product-action-1">
-                                                
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up" ><i class="fi-rs-heart"></i></a>
-                                              
-                                            </div> -->
-                                            <div class="heart-icon ">
-                                                <a aria-label="Add to Wishlist" href="#"><i class="fi-rs-heart"></i></a>
+                                      
+                                            <div class="heart-icon" data-id="<%=products[i]?._id%>">
+                                                 
+                                                <div class="wishlist-toggle" aria-label="Add to Wishlist">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                                    </svg>
+                                                </div>
+
+
                                             </div>
     
                                             <div class="product-badges product-badges-position product-badges-mrg d-flex justify-content-between ">          
