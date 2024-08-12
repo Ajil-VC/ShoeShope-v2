@@ -24,7 +24,7 @@
                   for(let i = 0 ; i < coupons.length ; i++){ %>
     
                     <div class="form-check">
-                      <input class="form-check-input" type="radio" name="couponOption" id="<%=coupons[i]._id%>" value="<%=coupons[i].couponCode%>" required>
+                      <input class="form-check-input cart-form-check-input" type="radio" name="couponOption" id="<%=coupons[i]._id%>" value="<%=coupons[i].couponCode%>" required>
                       <label class="form-check-label" for="<%=coupons[i]._id%>">
                         <%=coupons[i].couponName%> <span style="font-weight: bold; color: black;" > (<%=coupons[i].couponCode%>) </span>, <span style="color: green;" ><%=coupons[i].discount%> % Off</span>|
                         <span  >On ₹ <%=coupons[i].MinAmount%>+</span> [Max : <%=coupons[i].MaxAmount%>]

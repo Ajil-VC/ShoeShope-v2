@@ -323,10 +323,22 @@ const loadShowcase = async(req,res) => {
 
         try{
 
-      
+            const page = parseInt(req.query.page) || 1 ;
+            const limit = 6;
+            const skip = (page - 1) * limit; 
+
             let query = {targetGroup : req.query.group};
             const queryArray = []
             const matchQuery = {$match : null};
+            const facetQuery = {'$facet':{
+                'products'  : [
+                    { '$skip': skip },
+                    { '$limit': limit }
+                ],
+                'totalCount'  : [
+                    { '$count': 'count' }
+                ]
+            }};
 
             const brands = (req.query.brands === "undefined" || req.query.brands === '') ? [] : req.query.brands.split(',') ;
             const categories = req.query.categories === "undefined" || req.query.categories=== '' ? [] : req.query.categories.split(',');
@@ -343,15 +355,27 @@ const loadShowcase = async(req,res) => {
             queryArray.push(matchQuery);
 
             if(sortvalue && (sortvalue !== 'undefined')){
-                const sortQuery = {$sort : { salePrice : sortvalue}}
-                queryArray.push(sortQuery);
+                const sortQuery = {'$sort' : { salePrice : sortvalue}}
+                facetQuery['$facet']['products'].unshift(sortQuery); 
             }
-            console.log(queryArray)
-            const products = await Product.aggregate(queryArray)
 
-            if(products.length > 0){
+            queryArray.push(facetQuery);
 
-                return res.status(200).json({status:true, products});
+console.log(queryArray)
+       
+            const productsData = await Product.aggregate(queryArray)
+            const products = productsData[0].products;
+            const totalDocuments = productsData[0].totalCount[0]?.count || 0;
+            const totalPages = Math.ceil(totalDocuments / limit);
+console.log(totalDocuments,"This is total count\n",'curentpage:',page);
+            if(totalDocuments > 0){
+
+                return res.status(200).json({
+                    status:true, 
+                    products,
+                    totalPages : totalPages, 
+                    currentPage : page
+                });
             }else{
                 return res.status(200).json({status:false, message : 'No products in this combination'});
             }

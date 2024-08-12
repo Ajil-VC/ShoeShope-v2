@@ -836,17 +836,17 @@
 
                         <div class="pagination-area mt-30 mb-50">
                             <nav aria-label="Page navigation example">
-                                <ul class="pagination justify-content-start">
+                                <ul class="pagination justify-content-start" id="showcase-ul" >
                                     <!-- products,totalPages : totalPages, currentPage : page -->
                                     <% for(let i = 1 ; i <= totalPages ; i++ ) { 
                          
                                         if(i == currentPage){ %>
             
-                                            <li class="page-item active"><a class="page-link" ><%=i%></a></li>
+                                            <li class="page-item showcase-page-number active"><a class="page-link" ><%=i%></a></li>
                                         <% }else{ %>
             
-                                            <li class="page-item"><a class="page-link" href="/showcase?group=<%=targetGroup%>&page=<%=i%>"><%=i%></a></li>
-                                            <%console.log(i)%>
+                                            <li class="page-item showcase-page-number " data-group="<%=targetGroup%>" data-page_num="<%=i%>" ><a class="page-link"><%=i%></a></li>
+                                            
                                     <% }} %>
                                     
                                     <!-- <li class="page-item"><a class="page-link dot" href="#">...</a></li> -->

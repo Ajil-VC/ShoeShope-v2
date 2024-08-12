@@ -41,7 +41,38 @@ document.addEventListener('DOMContentLoaded',function() {
     }
 
 
+    function createPagination(i, curPage, ulElement,targetGroup){
 
+        const li = document.createElement('li');
+        li.classList.add('page-item', 'showcase-page-number');
+        if(i == curPage){
+            li.classList.add('active');
+        }else{
+            li.setAttribute('data-group',targetGroup);
+            li.setAttribute('data-page_num',`${i}`);
+        }
+
+        const a = document.createElement('a');
+        a.classList.add('page-link');
+        a.innerText = `${i}`;
+
+        li.appendChild(a);
+        li.addEventListener('click',function() {
+
+            const pageNum = this.getAttribute('data-page_num');
+            const targetGroup = this.getAttribute('data-group');
+            console.log(pageNum,targetGroup);
+
+            if(pageNum){
+
+                selections.pageNumber = pageNum;
+                updateSearch(targetGroup,selections);
+            }
+            
+        });
+        ulElement.appendChild(li);
+
+    }
     
     // const searchProducts = async(home_product_grid, searchKey) =>{
 
@@ -80,11 +111,20 @@ document.addEventListener('DOMContentLoaded',function() {
     //     } )
     // }
 
+    function updateShowcase(target_products_parent,products,totalPages,currentPage,targetGroup){
 
-
-    function updateShowcase(target_products_parent,products){
+        const showcase_ul = document.getElementById('showcase-ul');
+        const showcase_page_number = document.querySelectorAll('.showcase-page-number');
+        showcase_page_number.forEach(list => {
+            list.remove()
+        });
 
         target_products_parent.innerHTML = products.map(item => makeProductCard(item)).join('');
+
+        for(let i = 1 ; i <= totalPages; i++){
+
+            createPagination(i,currentPage,showcase_ul,targetGroup);
+        }
     }
 
     function updateSearch(targetGroup,selections){
@@ -92,6 +132,7 @@ document.addEventListener('DOMContentLoaded',function() {
         const selectedBrands = selections.brands;
         const selectedCategories = selections.category;
         const sortValue = selections.sortvalue;
+        const pageNumber = selections.pageNumber;
     
         let brands = [];
         let categories = [];
@@ -111,7 +152,7 @@ document.addEventListener('DOMContentLoaded',function() {
 
         const target_products_parent = document.getElementById('target-products');
 
-        fetch(`http://localhost:2000/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}`,{
+        fetch(`http://localhost:2000/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}`,{
             headers:{  'Accept': 'application/json' }
         })
         .then(response => {
@@ -124,13 +165,18 @@ document.addEventListener('DOMContentLoaded',function() {
         .then(data => {
     
             if(data.status){
-                
+
                 target_products_parent.innerHTML = ""; 
-                updateShowcase(target_products_parent,data.products);
+                updateShowcase(target_products_parent,data.products,data.totalPages,data.currentPage, targetGroup);
             }else{
 
                 target_products_parent.innerHTML = "";
                 target_products_parent.textContent = data.message;
+
+                const showcase_page_number = document.querySelectorAll('.showcase-page-number');
+                    showcase_page_number.forEach(list => {
+                    list.remove()
+                });
             }
                              
         })
@@ -162,6 +208,7 @@ document.addEventListener('DOMContentLoaded',function() {
             }
 
             selections.brands = checkedBrands;
+
             updateSearch(targetGroup,selections);
         })
    })
@@ -218,6 +265,27 @@ document.addEventListener('DOMContentLoaded',function() {
             updateSearch(targetGroup,selections);
     
        })
+   }
+
+   const showcase_page_number = document.querySelectorAll('.showcase-page-number');
+   if(showcase_page_number){
+
+        showcase_page_number.forEach(element => {
+            
+            element.addEventListener('click',function() {
+
+                const pageNum = this.getAttribute('data-page_num');
+                const targetGroup = this.getAttribute('data-group');
+                console.log(pageNum,targetGroup);
+
+                if(pageNum){
+
+                    selections.pageNumber = pageNum;
+                    updateSearch(targetGroup,selections);
+                }
+                
+            })
+        });
    }
 
 })//DOMContentLoaded ends here

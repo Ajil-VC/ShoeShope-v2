@@ -842,10 +842,10 @@ async function removeProductFromCart(productId){
 
 // Add Coupon
 var selectedCoupon = null;
-const form_check_input = document.querySelectorAll('.form-check-input');
-if(form_check_input){
+const car_form_check_input = document.querySelectorAll('.cart-form-check-input');
+if(car_form_check_input){
 
-    form_check_input.forEach(radio => {
+    car_form_check_input.forEach(radio => {
 
         radio.addEventListener('change', (e) => {
 
