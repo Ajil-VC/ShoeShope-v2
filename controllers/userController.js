@@ -278,17 +278,25 @@ const loadHomePage = async(req,res) => {
 }
 
 const loadShowcase = async(req,res) => {
+    
 
     if(req.accepts('html')){
+
+        const page = parseInt(req.query.page) || 1 ;
+        const limit = 6;
+        const skip = (page - 1) * limit; 
 
         try{
          
             const targetGroup = req.query.group ;
-            const [category, brand, groupProducts] = await Promise.all([
+            const [category, brand, groupProducts,totalDocuments] = await Promise.all([
                 Category.find({isActive : 1}).exec(),
                 Brand.find().exec(),
-                Product.find({targetGroup : targetGroup}).exec()
-            ])
+                Product.find({targetGroup : targetGroup}).skip(skip).limit(limit).exec(),
+                Product.countDocuments({targetGroup : targetGroup}).exec()
+            ]);
+
+            const totalPages = Math.ceil(totalDocuments / limit);
     
             if(category.length == 0){
                 console.log("\n\n\n Category is empty\n\n\n");
@@ -297,7 +305,14 @@ const loadShowcase = async(req,res) => {
                 console.log("\n\n\n Brand is empty\n\n\n");
             }
             
-            return res.status(200).render('showcase',{category,brand,groupProducts,targetGroup}) ;
+            return res.status(200).render('showcase',{
+                category,
+                brand,
+                groupProducts,
+                targetGroup,
+                totalPages : totalPages, 
+                currentPage : page
+            });
     
             
         }catch(error){

@@ -111,8 +111,6 @@ document.addEventListener('DOMContentLoaded',function() {
 
         const target_products_parent = document.getElementById('target-products');
 
-
-        console.log(categoryQuerypara,brandQuerypara)
         fetch(`http://localhost:2000/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}`,{
             headers:{  'Accept': 'application/json' }
         })

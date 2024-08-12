@@ -1196,7 +1196,7 @@ const updateCategory = async(req,res) => {
 const loadAllProducts = async (req,res) => {
 
     const page = parseInt(req.query.page) || 1 ;
-    const limit = 6;
+    const limit = 9;
    
 
     try{
