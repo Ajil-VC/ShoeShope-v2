@@ -215,10 +215,10 @@ const getCategoryData = async(req,res) => {
     try{
 
         const categoryWiseData = await Order.aggregate([{
-            $match:{
-                overallPaymentStatus:{$in:['PAID','PARTIALLY_PAID']}}
-            },{
                 $unwind:'$items'
+            },{
+            $match:{
+                'items.paymentStatus':'PAID'}
             },{
                 $group:{ 
                     _id:'$items.product.Category', 
