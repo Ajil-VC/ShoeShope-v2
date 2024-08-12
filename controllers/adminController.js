@@ -833,21 +833,59 @@ const loadBestSellers = async(req,res) => {
 
     try{
 
-        const topProducts = await Order.aggregate([
-            { $unwind: "$items" }, 
-            { $group: { _id: "$items.product.id", 
-                productName : { $first: "$items.product.name" },
-                productImage:{$first:"$items.product.images"}, 
-                totalUnitsSold: { $sum: "$items.quantity" }, 
-                totalOrders : { $sum: 1 },
-                productPrice: {$first:"$items.product.price"}, 
-                baseAmount  :{$sum:"$items.subtotal"} 
-            }}, 
-            { $sort: { totalUnitsSold: -1 } }, 
-            { $limit: 10 }
-        ]);
+        if(req.accepts('html')){
 
-        return res.status(200).render('best-sellers',{topProducts});
+            const topProducts = await Order.aggregate([
+                { $unwind: "$items" }, 
+                { $match: {
+                    "items.paymentStatus" : 'PAID'
+                }},
+                { $group: { _id: "$items.product.id", 
+                    productName : { $first: "$items.product.name" },
+                    productImage:{$first:"$items.product.images"}, 
+                    totalUnitsSold: { $sum: "$items.quantity" }, 
+                    totalOrders : { $sum: 1 },
+                    productPrice: {$first:"$items.product.price"}, 
+                    baseAmount  :{$sum:"$items.subtotal"} 
+                }}, 
+                { $sort: { totalUnitsSold: -1 } }, 
+                { $limit: 10 }
+            ]);
+    
+            return res.status(200).render('best-sellers',{topProducts});
+        }else{
+
+            const topProductsOnCategory = await Order.aggregate([
+                { $unwind: "$items" }, 
+                { $match: {
+                    "items.paymentStatus" : 'PAID'
+                }},
+                {$group: {
+                    _id:{category:"$items.product.Category", productId:"$items.product.id"},
+                    productName: {$first : "$items.product.name"},
+                    productImage: {$first : "$items.product.images"},
+                    totalUnitsSold: {$sum : "$items.quantity"},
+                    totalRevenue : {$sum : "$items.subtotal"}
+                }},
+                { $sort: { "_id.category": 1, totalUnitsSold : -1 } }, 
+                { $group: { _id: "$_id.category",  
+                    totalUnitsSold: { $sum: "$totalUnitsSold" }, 
+                    totalOrders : { $sum: 1 },
+                    baseAmount  :{$sum:"$totalRevenue"},
+                    bestSellingProduct : {
+                        $first:{
+                            productName : "$productName",
+                            productImage: "$productImage",
+                            totalUnitsSold : "$totalUnitsSold"
+                        }
+                    }
+                }}, 
+                {$sort: {totalUnitsSold : -1}},
+                {$limit : 10}
+            ]);
+    console.log(topProductsOnCategory,"topProductsOnCategory")
+
+        }
 
     }catch(error){
         console.log("Internal error occured while trying to load best Sellers page.",error);

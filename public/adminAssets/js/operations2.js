@@ -425,6 +425,17 @@ document.addEventListener('DOMContentLoaded',() => {
         })
     }
 
+    const best_seller_products = document.getElementById('best-seller-products');
+    if(best_seller_products){
+
+        best_seller_products.addEventListener('click',(e)=> {
+
+            const sortOn = e.target.value;
+            console.log(sortOn)
+
+        })
+    }
+
 });
 
 
