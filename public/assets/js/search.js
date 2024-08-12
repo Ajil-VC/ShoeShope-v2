@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded',function() {
 
             const pageNum = this.getAttribute('data-page_num');
             const targetGroup = this.getAttribute('data-group');
-            console.log(pageNum,targetGroup);
 
             if(pageNum){
 
@@ -145,11 +144,6 @@ document.addEventListener('DOMContentLoaded',function() {
             var categoryQuerypara = categories.join(',');
         }
       
-        if((brands.length === 0) && (categories.length === 0) && sortValue === 0 ){
-            window.location.href = `http://localhost:2000/showcase?group=${targetGroup}`;
-            return;
-        }
-
         const target_products_parent = document.getElementById('target-products');
 
         fetch(`http://localhost:2000/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}`,{
@@ -208,7 +202,7 @@ document.addEventListener('DOMContentLoaded',function() {
             }
 
             selections.brands = checkedBrands;
-
+            selections.pageNumber = 1;
             updateSearch(targetGroup,selections);
         })
    })
@@ -228,6 +222,7 @@ document.addEventListener('DOMContentLoaded',function() {
             }
 
             selections.category = checkedCategory;
+            selections.pageNumber = 1;
             updateSearch(targetGroup,selections);
         })
    })
@@ -247,6 +242,7 @@ document.addEventListener('DOMContentLoaded',function() {
     
             }
             targetGroup = this.getAttribute('data-group');
+            selections.pageNumber = 1;
             updateSearch(targetGroup,selections);
             
        })
@@ -262,6 +258,7 @@ document.addEventListener('DOMContentLoaded',function() {
                 selections.sortvalue = 0;
             }
             targetGroup = this.getAttribute('data-group');
+            selections.pageNumber = 1;
             updateSearch(targetGroup,selections);
     
        })
@@ -276,7 +273,6 @@ document.addEventListener('DOMContentLoaded',function() {
 
                 const pageNum = this.getAttribute('data-page_num');
                 const targetGroup = this.getAttribute('data-group');
-                console.log(pageNum,targetGroup);
 
                 if(pageNum){
 
