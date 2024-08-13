@@ -1,232 +1,234 @@
-const {Admin,User,Category,Brand,Product,Order,returnItem,transaction,coupon,wallet} = require('../models/models')
+const { Admin, User, Category, Brand, Product, Order, returnItem, transaction, coupon, wallet } = require('../models/models')
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const {format, setDate, endOfWeek} = require('date-fns'); 
+const { format, setDate, endOfWeek } = require('date-fns');
 const exceljs = require('exceljs');
 const pdfDocument = require('pdfkit');
 
 const securePassword = async (password) => {
-    
-    try{
 
-        const hashedP = await bcrypt.hash(password,10);
+    try {
+
+        const hashedP = await bcrypt.hash(password, 10);
         return hashedP;
 
-    }catch(error){
+    } catch (error) {
         console.log(error)
     }
 
 }
 
-const adminRegistration = async(req,res) => {
+const adminRegistration = async (req, res) => {
 
 
-        try{
+    try {
 
-            const {firstName,lastName,email,password} = req.body
-           
-            const sPassword = await securePassword(password)
+        const { firstName, lastName, email, password } = req.body
+
+        const sPassword = await securePassword(password)
 
 
-            const newAdmin = new Admin({
-                firstName   : firstName,
-                lastName    : lastName,
-                email       : email,
-                password    : sPassword,
-                isAuthorised  : 1  
-            })
+        const newAdmin = new Admin({
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: sPassword,
+            isAuthorised: 1
+        })
 
-    
-            const adminData = await newAdmin.save();
 
-            if(adminData){
-                return console.log('Admin Created Successfully')
-            }else{
-                return console.log('Something went wrong while registering Admin')
-            }
-        }catch(error){
-            console.log('Error while registering Admin\n',error);
+        const adminData = await newAdmin.save();
+
+        if (adminData) {
+            return console.log('Admin Created Successfully')
+        } else {
+            return console.log('Something went wrong while registering Admin')
         }
+    } catch (error) {
+        console.log('Error while registering Admin\n', error);
+    }
 }
 
-const  loadLogin = async(req,res) => {
+const loadLogin = async (req, res) => {
 
-    try{
+    try {
         return res.status(200).render('adminLogin')
-    }catch(error){
+    } catch (error) {
         console.log("Error when tried to login Admin", error)
         res.status(500).send('Internal Server Error')
     }
 }
 
-const loginAdmin = async(req,res) => {
+const loginAdmin = async (req, res) => {
 
-    try{
+    try {
 
-        const {email,password} = req.body;
+        const { email, password } = req.body;
 
-        const adminData = await Admin.findOne({email}).exec();
-        if(!adminData){
+        const adminData = await Admin.findOne({ email }).exec();
+        if (!adminData) {
             return res.status(404).send('Admin not found')
         }
-        const passwordMatch = await bcrypt.compare(password,adminData.password)
-        
-        if(passwordMatch){
-            req.session.admin_id = adminData._id; 
-            req.session.isAuthorised = adminData.isAuthorised; 
+        const passwordMatch = await bcrypt.compare(password, adminData.password)
+
+        if (passwordMatch) {
+            req.session.admin_id = adminData._id;
+            req.session.isAuthorised = adminData.isAuthorised;
             return res.status(200).redirect('dashboard')
-        }else{
+        } else {
             return res.status(404).send('Email or Password Incorrect')
         }
 
-    }catch(error){
-        
-        console.log('Error while Admin loggin in',error);
+    } catch (error) {
+
+        console.log('Error while Admin loggin in', error);
         return res.status(500).send("Internal server error while Admin login")
     }
 
 }
 
 
-const getSaleData = async(req,res) => {
+const getSaleData = async (req, res) => {
 
 
-    try{
+    try {
 
         const currentYear = new Date().getFullYear();
 
-        const [monthlyNetDeliveredProducts,monthlyOrderCount] = await Promise.all([
+        const [monthlyNetDeliveredProducts, monthlyOrderCount] = await Promise.all([
 
             Order.aggregate([
                 {
-                  $match: { 
-                    status: 'Delivered',// Filter orders with status 'Delivered'
-                    $expr: { $eq: [{ $year: "$createdAt" }, currentYear] }
-                } 
-                },
-                {
-                  $lookup: {
-                    from: 'returnitems', // The name of the returns collection
-                    localField: 'return', // Field in the orders collection
-                    foreignField: '_id', // Field in the returns collection
-                    as: 'returnsDetails' // Alias for the joined documents
-                  }
-                },
-                {
-                  $addFields: {
-                    returnedProductIds: { $map: { input: '$returnsDetails', as: 'returnid', in: '$$returnid.productId' } }
-                  }
-                },
-                {
-                  $addFields: {
-                    nonReturnedProducts: {
-                      $filter: {
-                        input: '$items',
-                        as: 'item',
-                        cond: { $not: [{ $in: ['$$item.product.id', '$returnedProductIds'] }] }
-                      }
+                    $match: {
+                        status: 'Delivered',// Filter orders with status 'Delivered'
+                        $expr: { $eq: [{ $year: "$createdAt" }, currentYear] }
                     }
-                  }
                 },
                 {
-                  $project: {
-                    nonReturnedProducts: 1,
-                    createdAt: 1,
-                    orderCount: { $literal: 1 } // Add a literal value of 1 for each order
-                  }
+                    $lookup: {
+                        from: 'returnitems', // The name of the returns collection
+                        localField: 'return', // Field in the orders collection
+                        foreignField: '_id', // Field in the returns collection
+                        as: 'returnsDetails' // Alias for the joined documents
+                    }
                 },
                 {
-                  $unwind: '$nonReturnedProducts'
+                    $addFields: {
+                        returnedProductIds: { $map: { input: '$returnsDetails', as: 'returnid', in: '$$returnid.productId' } }
+                    }
                 },
                 {
-                  $group: {
-                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }, // Group by month
-                    products: { $push: '$nonReturnedProducts' },
-                    orderCount: { $sum: '$orderCount' } // Sum up the count of orders
-                  }
+                    $addFields: {
+                        nonReturnedProducts: {
+                            $filter: {
+                                input: '$items',
+                                as: 'item',
+                                cond: { $not: [{ $in: ['$$item.product.id', '$returnedProductIds'] }] }
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        nonReturnedProducts: 1,
+                        createdAt: 1,
+                        orderCount: { $literal: 1 } // Add a literal value of 1 for each order
+                    }
+                },
+                {
+                    $unwind: '$nonReturnedProducts'
+                },
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }, // Group by month
+                        products: { $push: '$nonReturnedProducts' },
+                        orderCount: { $sum: '$orderCount' } // Sum up the count of orders
+                    }
                 },
                 {
                     $sort: { "_id": 1 } // Ensure sorting by month
                 }
-    
+
             ]),
 
 
             Order.aggregate([
                 {
-                  $match: { 
-                    // status: 'Delivered',// Filter orders with status 'Delivered'
-                    $expr: { $eq: [{ $year: "$createdAt" }, currentYear] }
-                } 
+                    $match: {
+                        // status: 'Delivered',// Filter orders with status 'Delivered'
+                        $expr: { $eq: [{ $year: "$createdAt" }, currentYear] }
+                    }
                 },
                 {
-                  $group: {
-                    _id: { 
-                      year: { $year: "$createdAt" },
-                      month: { $month: "$createdAt" }
-                    },
-                    totalOrders: { $sum: 1 } // Sum the totalItems field for each month
-                  }
+                    $group: {
+                        _id: {
+                            year: { $year: "$createdAt" },
+                            month: { $month: "$createdAt" }
+                        },
+                        totalOrders: { $sum: 1 } // Sum the totalItems field for each month
+                    }
                 },
                 {
-                  $sort: { 
-                    // "_id.year": 1,  
-                    "_id.month": 1 } // Sort the result by year and month
+                    $sort: {
+                        // "_id.year": 1,  
+                        "_id.month": 1
+                    } // Sort the result by year and month
                 },
                 {
-                  $project: {
-                    _id: 0,
-                    year: "$_id.year",
-                    month: "$_id.month",
-                    totalOrders: 1
-                  }
+                    $project: {
+                        _id: 0,
+                        year: "$_id.year",
+                        month: "$_id.month",
+                        totalOrders: 1
+                    }
                 }
             ])
         ])
 
-        const products = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ;
-        for(let i = 0 ; i < monthlyNetDeliveredProducts.length ; i++){
-            
+        const products = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (let i = 0; i < monthlyNetDeliveredProducts.length; i++) {
+
             const month = monthlyNetDeliveredProducts[i]._id.split('-')[1];
             const monthInt = parseInt(month);
-            products[monthInt -1 ] = monthlyNetDeliveredProducts[i].orderCount;
+            products[monthInt - 1] = monthlyNetDeliveredProducts[i].orderCount;
         }
-        const sales = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ;
-        for(let i = 0 ; i < monthlyOrderCount.length ; i++){
+        const sales = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (let i = 0; i < monthlyOrderCount.length; i++) {
 
             const month = monthlyOrderCount[i].month;
-            sales[month -1] = monthlyOrderCount[i].totalOrders;
+            sales[month - 1] = monthlyOrderCount[i].totalOrders;
         }
 
         return res.status(200).json({
             "sales": sales,
             "products": products
-          }); 
+        });
 
-    }catch(error){
-        console.log("Internal error while getting sale data",error);
-        return res.status(500).send("Internal error while getting sale data",error);
+    } catch (error) {
+        console.log("Internal error while getting sale data", error);
+        return res.status(500).send("Internal error while getting sale data", error);
     }
 
 }
 
-const getCategoryData = async(req,res) => {
+const getCategoryData = async (req, res) => {
 
-    try{
+    try {
 
         const categoryWiseData = await Order.aggregate([{
-                $unwind:'$items'
-            },{
-            $match:{
-                'items.paymentStatus':'PAID'}
-            },{
-                $group:{ 
-                    _id:'$items.product.Category', 
-                    totalQtySold:{$sum:'$items.quantity'}
-                }
-            },{
-                $sort:{totalQtySold:-1}
+            $unwind: '$items'
+        }, {
+            $match: {
+                'items.paymentStatus': 'PAID'
             }
+        }, {
+            $group: {
+                _id: '$items.product.Category',
+                totalQtySold: { $sum: '$items.quantity' }
+            }
+        }, {
+            $sort: { totalQtySold: -1 }
+        }
         ]);
 
         const labelsData = [];
@@ -243,44 +245,44 @@ const getCategoryData = async(req,res) => {
             "values": valuesData
         });
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Internal error while trying to get category details for doughnut graph",error);
-        return res.status(500).send("Internal error while trying to get category details for doughnut graph",error);
+        console.log("Internal error while trying to get category details for doughnut graph", error);
+        return res.status(500).send("Internal error while trying to get category details for doughnut graph", error);
     }
 
 }
 
-const saleReportByRange = async(range, start_date, end_date) =>{
+const saleReportByRange = async (range, start_date, end_date) => {
 
-    if(range == 'currWeek'){
+    if (range == 'currWeek') {
 
         var startTime = new Date();
-        startTime.setUTCHours(0,0,0,0);
+        startTime.setUTCHours(0, 0, 0, 0);
         startTime.setUTCDate(startTime.getUTCDate() - startTime.getUTCDay());
-        
+
         var endTime = new Date(startTime);
         endTime.setUTCDate(endTime.getUTCDate() + 7);
 
-    }else if(range == 'currMonth'){
+    } else if (range == 'currMonth') {
 
         var startTime = new Date();
-        startTime.setUTCHours(0,0,0,0)
+        startTime.setUTCHours(0, 0, 0, 0)
         startTime.setUTCDate(1);
 
         var endTime = new Date(startTime);
         endTime.setUTCMonth(endTime.getUTCMonth() + 1);
 
-    }else if(start_date && end_date){
-        
+    } else if (start_date && end_date) {
+
         const date1 = new Date(start_date);
         const date2 = new Date(end_date);
 
-        if(date1 < date2){
+        if (date1 < date2) {
 
             var startTime = new Date(date1);
             var endTime = new Date(date2);
-        }else{
+        } else {
 
             var startTime = new Date(date2);
             var endTime = new Date(date1);
@@ -290,48 +292,50 @@ const saleReportByRange = async(range, start_date, end_date) =>{
         startTime.setUTCHours(0, 0, 0, 0);
         //Setting time of the end day into maximum
         endTime.setUTCHours(23, 59, 59, 999);
-        
+
     }
 
-    const givenRangeSaleOverAllData  = await Order.aggregate([ 
+    const givenRangeSaleOverAllData = await Order.aggregate([
 
-        { 
+        {
 
-            $match: { 
+            $match: {
 
-            createdAt: { 
+                createdAt: {
 
-                $gte: startTime, 
+                    $gte: startTime,
 
-                $lt: endTime 
-               
-            } 
+                    $lt: endTime
 
-            }}, 
+                }
 
-            { $group: { 
+            }
+        },
 
-                _id:null,
+        {
+            $group: {
 
-                overAllSalesCount :{$count:{}},
+                _id: null,
 
-                overAllOrderAmount :{$sum:"$totalAmount"},
+                overAllSalesCount: { $count: {} },
 
-                couponDiscount:{
+                overAllOrderAmount: { $sum: "$totalAmount" },
 
-                    $sum:{
+                couponDiscount: {
 
-                        $ifNull:["$couponDiscount",0]
+                    $sum: {
+
+                        $ifNull: ["$couponDiscount", 0]
 
                     }
 
                 },
 
-                otherDiscount:{
+                otherDiscount: {
 
-                    $sum:{
+                    $sum: {
 
-                        $ifNull:["$otherDiscount",0]
+                        $ifNull: ["$otherDiscount", 0]
 
                     }
 
@@ -345,75 +349,77 @@ const saleReportByRange = async(range, start_date, end_date) =>{
 
 
 
-        const thisWeekOrders = await Order.aggregate([
-            { $match: {
-                 createdAt: { 
-                    $gte: startTime, 
-                    $lt: endTime 
-                } 
-            }}
-        ]); 
+    const thisWeekOrders = await Order.aggregate([
+        {
+            $match: {
+                createdAt: {
+                    $gte: startTime,
+                    $lt: endTime
+                }
+            }
+        }
+    ]);
 
-      
-        // Grouping data according to current week
-        const groupedData = thisWeekOrders.reduce((acc,curr) => {
 
-            const date = new Date(curr.createdAt).toISOString().split('T')[0];
+    // Grouping data according to current week
+    const groupedData = thisWeekOrders.reduce((acc, curr) => {
 
-            if(acc[date]){
-                acc[date].orderCount++;          
+        const date = new Date(curr.createdAt).toISOString().split('T')[0];
 
-                const updatingFocusObject = curr.items.filter(item => item.status === 'Delivered')
+        if (acc[date]) {
+            acc[date].orderCount++;
+
+            const updatingFocusObject = curr.items.filter(item => item.status === 'Delivered')
                 .map(product => {
 
                     acc[date].prodFocusedDetails.grossSales = acc[date].prodFocusedDetails.grossSales + product.subtotal;
 
                     //Below Im calculating the coupon discount for the particular product.
                     const prodPriceProportion = product.subtotal / curr.subTotal;
-                    acc[date].prodFocusedDetails.couponDeductions = 
-                    Number((acc[date].prodFocusedDetails.couponDeductions + (prodPriceProportion * curr.couponDiscount)).toFixed(2));
+                    acc[date].prodFocusedDetails.couponDeductions =
+                        Number((acc[date].prodFocusedDetails.couponDeductions + (prodPriceProportion * curr.couponDiscount)).toFixed(2));
 
                     //Below Im calculating netsales.
-                    acc[date].prodFocusedDetails.netSales = 
-                    Number((acc[date].prodFocusedDetails.netSales + product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2)) ;
+                    acc[date].prodFocusedDetails.netSales =
+                        Number((acc[date].prodFocusedDetails.netSales + product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2));
 
-                }) 
+                })
 
 
-            }else{
-                
+        } else {
 
-                //Below im calculating the Gross sales amount,discount,
-                // Coupon deductions, net sales using filter & map methods
-                //And setting it into the desired date.
 
-                const prodFocusedDetails = curr.items.filter(item => item.status === 'Delivered')
+            //Below im calculating the Gross sales amount,discount,
+            // Coupon deductions, net sales using filter & map methods
+            //And setting it into the desired date.
+
+            const prodFocusedDetails = curr.items.filter(item => item.status === 'Delivered')
                 .map(product => {
 
 
-                    if(acc[date]?.orderCount){
+                    if (acc[date]?.orderCount) {
 
                         acc[date].prodFocusedDetails.grossSales = acc[date].prodFocusedDetails.grossSales + product.subtotal;
 
                         //Below Im calculating the coupon discount for the particular product.
                         const prodPriceProportion = product.subtotal / curr.subTotal;
-                        acc[date].prodFocusedDetails.couponDeductions =  
-                        Number((acc[date].prodFocusedDetails.couponDeductions + (prodPriceProportion * curr.couponDiscount)).toFixed(2));
+                        acc[date].prodFocusedDetails.couponDeductions =
+                            Number((acc[date].prodFocusedDetails.couponDeductions + (prodPriceProportion * curr.couponDiscount)).toFixed(2));
 
                         //Below Im calculating netsales.
-                        acc[date].prodFocusedDetails.netSales = 
-                        Number((acc[date].prodFocusedDetails.netSales + product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2)) ;
+                        acc[date].prodFocusedDetails.netSales =
+                            Number((acc[date].prodFocusedDetails.netSales + product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2));
 
-                    }else{
+                    } else {
 
                         acc[date] = {
                             //Here Im initializing the Object to group and get detailed data.
-                            orderCount : 1, 
-                            prodFocusedDetails : {
-                                grossSales  : 0,
-                                discounts   : 0,
-                                couponDeductions : 0,
-                                netSales    : 0
+                            orderCount: 1,
+                            prodFocusedDetails: {
+                                grossSales: 0,
+                                discounts: 0,
+                                couponDeductions: 0,
+                                netSales: 0
                             }
                         };
 
@@ -424,35 +430,35 @@ const saleReportByRange = async(range, start_date, end_date) =>{
                         acc[date].prodFocusedDetails.couponDeductions = Number((prodPriceProportion * curr.couponDiscount).toFixed(2));
 
                         //Below Im calculating netsales.
-                        acc[date].prodFocusedDetails.netSales = Number(( product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2)) ;
+                        acc[date].prodFocusedDetails.netSales = Number((product.subtotal - (prodPriceProportion * curr.couponDiscount)).toFixed(2));
 
 
                     }
 
-                    
+
 
                 })
 
-            }
-            return acc;
-        },{});
+        }
+        return acc;
+    }, {});
 
-        const givenRangeGroupedData = Object.entries(groupedData).map(([date,values]) =>{
-            return {date : date, ...values};
-        });
-        
-        //below im trying to sum up all the data in givenRangeGroupedData.
-        //The last week is already over. So Please confirm everything 
-        const aggregatedRangeTotal = givenRangeGroupedData.reduce((acc,cur) => {
+    const givenRangeGroupedData = Object.entries(groupedData).map(([date, values]) => {
+        return { date: date, ...values };
+    });
 
-            acc.orderTotal     = acc.orderTotal + cur.orderCount;
-            acc.grossSaleTotal = acc.grossSaleTotal + cur.prodFocusedDetails.grossSales;
-            acc.discountTotal  = acc.discountTotal + cur.prodFocusedDetails.discounts;
-            acc.couponDisTotal = acc.couponDisTotal + cur.prodFocusedDetails.couponDeductions;
-            acc.netSaleTotal   = acc.netSaleTotal + cur.prodFocusedDetails.netSales;
-            return acc;
+    //below im trying to sum up all the data in givenRangeGroupedData.
+    //The last week is already over. So Please confirm everything 
+    const aggregatedRangeTotal = givenRangeGroupedData.reduce((acc, cur) => {
 
-        },{orderTotal : 0, grossSaleTotal : 0, discountTotal : 0, couponDisTotal : 0, netSaleTotal : 0})
+        acc.orderTotal = acc.orderTotal + cur.orderCount;
+        acc.grossSaleTotal = acc.grossSaleTotal + cur.prodFocusedDetails.grossSales;
+        acc.discountTotal = acc.discountTotal + cur.prodFocusedDetails.discounts;
+        acc.couponDisTotal = acc.couponDisTotal + cur.prodFocusedDetails.couponDeductions;
+        acc.netSaleTotal = acc.netSaleTotal + cur.prodFocusedDetails.netSales;
+        return acc;
+
+    }, { orderTotal: 0, grossSaleTotal: 0, discountTotal: 0, couponDisTotal: 0, netSaleTotal: 0 })
 
 
     return {
@@ -462,69 +468,69 @@ const saleReportByRange = async(range, start_date, end_date) =>{
     };
 }
 
-const salesReport = async(req,res) => {
+const salesReport = async (req, res) => {
     //for fetching sales report from frontend
-    
-    var start_date = req.query.start_date ?? null; 
+
+    var start_date = req.query.start_date ?? null;
     var end_date = req.query.end_date ?? null;
-    
-    try{
+
+    try {
 
         const range = req.query.range ?? null;
 
         const {
-            givenRangeSaleOverAllData, 
-            givenRangeGroupedData, 
+            givenRangeSaleOverAllData,
+            givenRangeGroupedData,
             aggregatedRangeTotal
         } = await saleReportByRange(range, start_date, end_date);
-    
-        if(range === 'thisDay'){
+
+        if (range === 'thisDay') {
             var message = "Today's Sales Report";
-        }else if(range === 'currWeek' ){
+        } else if (range === 'currWeek') {
             var message = 'This Week Sales Report';
-        }else if( range ===  'currMonth' ){
+        } else if (range === 'currMonth') {
             var message = "This Month Sales Report";
-        }else{
+        } else {
             var message = "Custom range Sales Report";
         }
 
-        if(givenRangeGroupedData.length < 1 ){
+        if (givenRangeGroupedData.length < 1) {
 
             return res.status(200).json({
-                status : false, 
+                status: false,
                 message,
-                noDataMessage : "No Data available in this range."
+                noDataMessage: "No Data available in this range."
             });
 
-        }else{
+        } else {
 
             return res.status(200).json({
-                status : true, 
-                givenRangeSaleOverAllData, 
-                givenRangeGroupedData, 
+                status: true,
+                givenRangeSaleOverAllData,
+                givenRangeGroupedData,
                 aggregatedRangeTotal,
                 message
             });
         }
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Internal error while trying to get sales report.",error);
-        return res.status(500).send("Internal error while trying to get sales report.",error);
+        console.log("Internal error while trying to get sales report.", error);
+        return res.status(500).send("Internal error while trying to get sales report.", error);
     }
 
 }
 
 
-const loadDashboard = async (req,res) => {
+const loadDashboard = async (req, res) => {
 
-    try{
+    try {
 
         // const currentYear = new Date().getFullYear();
         // const startDate = new Date(`${currentYear}-01-01T00:00:00Z`);
         const currentDate = new Date();
 
-        const monthsElapsed = currentDate.getMonth() + 1 ;
+        const monthsElapsed = currentDate.getMonth() + 1;
 
 
         const [
@@ -532,46 +538,51 @@ const loadDashboard = async (req,res) => {
             categories,
             orderStatics,
             returnOrders,
-            {givenRangeSaleOverAllData, givenRangeGroupedData, aggregatedRangeTotal} ] = await Promise.all([
-            
-            Product.aggregate([ {$group:{_id:null,total:{$sum:"$stockQuantity"}}} ]),
-            Product.aggregate([ {$group:{_id:"$Category"}} ]),
+            { givenRangeSaleOverAllData, givenRangeGroupedData, aggregatedRangeTotal }] = await Promise.all([
 
-            Order.aggregate([
-                {$group:{
-                    _id:"$status",
-                    count:{$sum:1},
-                    totalAmnt: {$sum : "$totalAmount"}
-                }},
-            ]),
+                Product.aggregate([{ $group: { _id: null, total: { $sum: "$stockQuantity" } } }]),
+                Product.aggregate([{ $group: { _id: "$Category" } }]),
 
-            returnItem.aggregate([
-                {$group:{
-                    _id:'$status',
-                    count:{$sum : 1},
-                    totalAmnt: {$sum : "$refundAmnt"}
-                }},
-                {$match:{_id : 'approved'}}
-            ]),
+                Order.aggregate([
+                    {
+                        $group: {
+                            _id: "$status",
+                            count: { $sum: 1 },
+                            totalAmnt: { $sum: "$totalAmount" }
+                        }
+                    },
+                ]),
 
-            saleReportByRange('currWeek')//Getting datas from this current week
+                returnItem.aggregate([
+                    {
+                        $group: {
+                            _id: '$status',
+                            count: { $sum: 1 },
+                            totalAmnt: { $sum: "$refundAmnt" }
+                        }
+                    },
+                    { $match: { _id: {$in:['approved','initiated']} } }
+                ]),
 
-        ]);
+                saleReportByRange('currWeek')//Getting datas from this current week
 
-        
+            ]);
+
+
 
         const categoryCount = categories.length;
         const deliveredOrderCount = orderStatics.filter(ob => ob._id == 'Delivered')[0].count;
         const totalDeliveredAmount = orderStatics.filter(ob => ob._id == 'Delivered')[0].totalAmnt;
-        const totalReturnCount = returnOrders[0].count;
-        const totalReturnedAmnt = returnOrders[0].totalAmnt;
+        const totalReturnCount = returnOrders.filter(elem => (elem._id == 'approved'))[0].count;
+        const totalReturnedAmnt = returnOrders.filter(elem => (elem._id == 'approved'))[0].totalAmnt;
 
         const purchasedCount = deliveredOrderCount - totalReturnCount;
         const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2);
-        const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2) ;
+        const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2);
 
+        const initiatedReturnCount = returnOrders.filter(elem => (elem._id == 'initiated'))[0].count;
 
-        return res.status(200).render('dashboard',{
+        return res.status(200).render('dashboard', {
             productsCount,
             categoryCount,
             purchasedCount,
@@ -579,12 +590,13 @@ const loadDashboard = async (req,res) => {
             avgMonthlyEarning,
             givenRangeSaleOverAllData,
             givenRangeGroupedData,
-            aggregatedRangeTotal
+            aggregatedRangeTotal,
+            initiatedReturnCount
         });
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Error while rendering dashboard\n",error);
+        console.log("Error while rendering dashboard\n", error);
         return res.status(500).send("Error while rendering dashboard")
 
     }
@@ -592,92 +604,92 @@ const loadDashboard = async (req,res) => {
 
 
 
-const exportAndDownload = async(req, res)=> {
+const exportAndDownload = async (req, res) => {
 
-    try{
+    try {
 
         const format = req.query.format;
 
-        const start_date = req.query.start_date ?? null; 
+        const start_date = req.query.start_date ?? null;
         const end_date = req.query.end_date ?? null;
-    
+
         const range = req.query.range ?? null;
 
-        if(range === 'thisDay'){
+        if (range === 'thisDay') {
             var head = "Today's Sales Report";
-        }else if(range === 'currWeek' ){
+        } else if (range === 'currWeek') {
             var head = 'This Week Sales Report';
-        }else if( range ===  'currMonth' ){
+        } else if (range === 'currMonth') {
             var head = "This Month Sales Report";
-        }else{
+        } else {
             var head = "Custom range Sales Report";
         }
 
         const {
 
-            givenRangeSaleOverAllData, 
-            givenRangeGroupedData, 
+            givenRangeSaleOverAllData,
+            givenRangeGroupedData,
             aggregatedRangeTotal
 
         } = await saleReportByRange(range, start_date, end_date);
 
-        if(format == 'excel'){
+        if (format == 'excel') {
 
             let workbook = new exceljs.Workbook();
 
             const sheet = workbook.addWorksheet('sale_report');
             sheet.columns = [
-                {header : "Date", key : 'date', width : 18},
-                {header : "Orders", key : 'orders', width : 10},
-                {header : "Gross Sales", key : 'grossSales', width : 18},
-                {header : "Discounts", key : 'discounts', width : 18},
-                {header : "Coupon Deductions", key : 'couponDeductions', width : 18},
-                {header : "Net Sales", key : 'netSales', width : 18},
+                { header: "Date", key: 'date', width: 18 },
+                { header: "Orders", key: 'orders', width: 10 },
+                { header: "Gross Sales", key: 'grossSales', width: 18 },
+                { header: "Discounts", key: 'discounts', width: 18 },
+                { header: "Coupon Deductions", key: 'couponDeductions', width: 18 },
+                { header: "Net Sales", key: 'netSales', width: 18 },
             ];
 
             const headerRow = sheet.getRow(1);
             headerRow.eachCell(head => {
-                
+
                 head.font = {
-                    bold    : true,
-                    color   : {argb : 'FFFFFFFF'} 
+                    bold: true,
+                    color: { argb: 'FFFFFFFF' }
                 };
                 head.fill = {
-                    type : 'pattern',
+                    type: 'pattern',
                     pattern: 'solid',
-                    fgColor :   {argb: 'FFFF0000'}
+                    fgColor: { argb: 'FFFF0000' }
                 }
             });
-            
-            await givenRangeGroupedData.forEach((value,idx) => {
-                
+
+            await givenRangeGroupedData.forEach((value, idx) => {
+
                 sheet.addRow({
-                    date    : value.date,
-                    orders  : value.orderCount,
-                    grossSales  : value.prodFocusedDetails.grossSales,
-                    discounts   : value.prodFocusedDetails.discounts,
-                    couponDeductions : value.prodFocusedDetails.couponDeductions,
-                    netSales    : value.prodFocusedDetails.netSales
+                    date: value.date,
+                    orders: value.orderCount,
+                    grossSales: value.prodFocusedDetails.grossSales,
+                    discounts: value.prodFocusedDetails.discounts,
+                    couponDeductions: value.prodFocusedDetails.couponDeductions,
+                    netSales: value.prodFocusedDetails.netSales
                 })
             });
-            
+
             sheet.addRow({
-                date    : "Total",
-                orders  : aggregatedRangeTotal.orderTotal,
-                grossSales  : aggregatedRangeTotal.grossSaleTotal,
-                discounts   : aggregatedRangeTotal.discountTotal,
-                couponDeductions    : aggregatedRangeTotal.couponDisTotal,
-                netSales    : aggregatedRangeTotal.netSaleTotal
+                date: "Total",
+                orders: aggregatedRangeTotal.orderTotal,
+                grossSales: aggregatedRangeTotal.grossSaleTotal,
+                discounts: aggregatedRangeTotal.discountTotal,
+                couponDeductions: aggregatedRangeTotal.couponDisTotal,
+                netSales: aggregatedRangeTotal.netSaleTotal
             });
 
             const footerRow = sheet.lastRow;
             footerRow.eachCell(footer => {
 
-                footer.font = {bold    : true};
+                footer.font = { bold: true };
                 footer.fill = {
-                    type : 'pattern',
+                    type: 'pattern',
                     pattern: 'solid',
-                    fgColor :   {argb: 'FFF0F0F0'}
+                    fgColor: { argb: 'FFF0F0F0' }
                 }
 
             })
@@ -691,39 +703,39 @@ const exportAndDownload = async(req, res)=> {
                 'Content-Disposition',
                 'attachment; filename="sales_report.xlsx"'
             );
-            res.setHeader('X-File-Type','excel');
+            res.setHeader('X-File-Type', 'excel');
 
             await workbook.xlsx.write(res);
 
             res.end();
 
-        }else if(format == 'pdf'){
+        } else if (format == 'pdf') {
 
             //creating a document.
-            const doc = new pdfDocument({size : 'A4', layout : 'portrait'});
+            const doc = new pdfDocument({ size: 'A4', layout: 'portrait' });
 
-            res.setHeader('Content-Type','application/pdf');
-            res.setHeader('Content-Disposition','attachment;filename=sales_report.pdf');
-            res.setHeader('X-File-Type','pdf');
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment;filename=sales_report.pdf');
+            res.setHeader('X-File-Type', 'pdf');
 
             //pipe the pdf document to the response.
             doc.pipe(res);
 
             //add content to the pdf.
-            doc.fontSize(16).text(head,{align : 'center'});
+            doc.fontSize(16).text(head, { align: 'center' });
             doc.moveDown();
 
             //Setting A4 page size.
-            const pageWidth  = 595.28;
+            const pageWidth = 595.28;
             // const pageHeight = 841.89;
-            const margin     = 40;
+            const margin = 40;
 
             //Table configuration
             const table = {
-                x : margin,
-                y : 100,
-                width : pageWidth-2 * margin,
-                rowHeight : 20
+                x: margin,
+                y: 100,
+                width: pageWidth - 2 * margin,
+                rowHeight: 20
             };
 
             //calculate column width.
@@ -732,12 +744,12 @@ const exportAndDownload = async(req, res)=> {
 
             //Draw table headers.
             doc.font('Helvetica-Bold').fontSize(8);
-            const headers = ['Date','Orders','Gross Sales','Discounts','Coupon Deductions','Net Sales'];
-            headers.forEach((header,index)=> {
-                
-                doc.text(header, table.x + index * columnWidth + 5 , table.y + 5, {
-                    width : columnWidth - 4 ,
-                    align : 'left'
+            const headers = ['Date', 'Orders', 'Gross Sales', 'Discounts', 'Coupon Deductions', 'Net Sales'];
+            headers.forEach((header, index) => {
+
+                doc.text(header, table.x + index * columnWidth + 5, table.y + 5, {
+                    width: columnWidth - 4,
+                    align: 'left'
                 });
             })
 
@@ -749,21 +761,21 @@ const exportAndDownload = async(req, res)=> {
                 const data = [
 
                     obj.date,
-                    obj.orderCount.toString(), 
+                    obj.orderCount.toString(),
                     obj.prodFocusedDetails.grossSales.toString(),
                     obj.prodFocusedDetails.discounts.toString(),
                     obj.prodFocusedDetails.couponDeductions.toString(),
                     obj.prodFocusedDetails.netSales.toString(),
-                ]   
+                ]
 
-                data.forEach((text,columnnInd) => {
-                    
-                    doc.text(text,table.x + columnnInd * columnWidth + 5 , y + 5, {
-                        width : columnWidth - 4,
-                        align : 'left'
+                data.forEach((text, columnnInd) => {
+
+                    doc.text(text, table.x + columnnInd * columnWidth + 5, y + 5, {
+                        width: columnWidth - 4,
+                        align: 'left'
                     });
                 })
-            
+
             });
 
             //add footer row
@@ -771,8 +783,8 @@ const exportAndDownload = async(req, res)=> {
 
             //draw light grey background for footer.
             doc.fill('#f0f0f0')
-            .rect(table.x, footerRowY, table.width, table.rowHeight)
-            .fill();
+                .rect(table.x, footerRowY, table.width, table.rowHeight)
+                .fill();
 
             //reseting color of text back to black.
             doc.fill('black');
@@ -788,32 +800,32 @@ const exportAndDownload = async(req, res)=> {
                 aggregatedRangeTotal.couponDisTotal,
                 aggregatedRangeTotal.netSaleTotal
             ];
-            footerData.forEach((text,columnIndex)=> {
-                
-                doc.text(text, 
-                    table.x + columnIndex * columnWidth + 5, 
-                    footerRowY + 5,  
+            footerData.forEach((text, columnIndex) => {
+
+                doc.text(text,
+                    table.x + columnIndex * columnWidth + 5,
+                    footerRowY + 5,
                     {
-                        width: columnWidth - 4,     
+                        width: columnWidth - 4,
                         align: 'left'
                     }
                 );
 
-            }) 
+            })
 
             //Draw lines.
             doc.lineWidth(0.5);
 
             //horizontal lines.
             for (let i = 0; i <= givenRangeGroupedData.length + 2; i++) {
-                const y = table.y + i * table.rowHeight;  
+                const y = table.y + i * table.rowHeight;
                 doc.moveTo(table.x, y).lineTo(table.x + table.width, y).stroke();
             }
 
             //vertical lines.
-            for(let i = 0 ; i <= columnCount ; i++){
+            for (let i = 0; i <= columnCount; i++) {
                 const x = table.x + i * columnWidth;
-                doc.moveTo(x,table.y).lineTo(x, table.y + table.rowHeight * (givenRangeGroupedData.length + 2)).stroke();
+                doc.moveTo(x, table.y).lineTo(x, table.y + table.rowHeight * (givenRangeGroupedData.length + 2)).stroke();
             }
 
             //finalize the pdf and end the stream here.
@@ -821,221 +833,255 @@ const exportAndDownload = async(req, res)=> {
 
         }
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Internal Error  occured while trying to download file",error);
-        return res.status(500).send("Internal Error  occured while trying to download file",error);
+        console.log("Internal Error  occured while trying to download file", error);
+        return res.status(500).send("Internal Error  occured while trying to download file", error);
     }
 }
 
 
 
-const getTopProducts = async(sortOn)=> {
+const getTopProducts = async (sortOn) => {
 
     //Taking the top selling products based products, Categories, Brands.
     //Tied products will not show in this query. Means, If 2 products have 
     //Same number of quantity sold then it will take the first one only 
     //after sorting.
 
-    if(sortOn == 'Products'){
+    if (sortOn == 'Products') {
 
         const bestSellers = await Order.aggregate([
-            { $unwind: "$items" }, 
-            { $match: {
-                "items.paymentStatus" : 'PAID'
-            }},
-            { $group: { _id: "$items.product.id", 
-                productName : { $first: "$items.product.name" },
-                productImage:{$first:"$items.product.images"}, 
-                totalUnitsSold: { $sum: "$items.quantity" }, 
-                totalOrders : { $sum: 1 },
-                productPrice: {$first:"$items.product.price"}, 
-                baseAmount  :{$sum:"$items.subtotal"} 
-            }}, 
-            { $sort: { totalUnitsSold: -1 } }, 
+            { $unwind: "$items" },
+            {
+                $match: {
+                    "items.paymentStatus": 'PAID'
+                }
+            },
+            {
+                $group: {
+                    _id: "$items.product.id",
+                    productName: { $first: "$items.product.name" },
+                    productImage: { $first: "$items.product.images" },
+                    totalUnitsSold: { $sum: "$items.quantity" },
+                    totalOrders: { $sum: 1 },
+                    productPrice: { $first: "$items.product.price" },
+                    baseAmount: { $sum: "$items.subtotal" }
+                }
+            },
+            { $sort: { totalUnitsSold: -1 } },
             { $limit: 10 }
         ]);
 
-        return {bestSellers};
+        return { bestSellers };
 
-    }else if(sortOn == 'Brands'){
-
-        const bestSellers = await Order.aggregate([
-
-            { $unwind: "$items" }, 
-            { $match: {
-                "items.paymentStatus" : 'PAID'
-            }},
-            {$group: {
-                _id:{brands:"$items.product.Brand", productId:"$items.product.id"},
-                productName: {$first : "$items.product.name"},
-                productImage: {$first : "$items.product.images"},
-                totalUnitsSold: {$sum : "$items.quantity"},
-                totalRevenue : {$sum : "$items.subtotal"}
-            }},
-            { $sort: { "_id.brands": 1, totalUnitsSold : -1 } }, 
-            { $group: { _id: "$_id.brands",  
-                totalUnitsSold: { $sum: "$totalUnitsSold" }, 
-                totalOrders : { $sum: 1 },
-                baseAmount  :{$sum:"$totalRevenue"},
-                bestSellingProduct : {
-                    $first:{
-                        productName : "$productName",
-                        productImage: "$productImage",
-                        totalUnitsSold : "$totalUnitsSold"
-                    }
-                }
-            }}, 
-            {$sort: {totalUnitsSold : -1}},
-            {$limit : 10}
-        ]);
-        return {bestSellers};
-
-    }else if(sortOn == 'Categories'){
+    } else if (sortOn == 'Brands') {
 
         const bestSellers = await Order.aggregate([
 
-            { $unwind: "$items" }, 
-            { $match: {
-                "items.paymentStatus" : 'PAID'
-            }},
-            {$group: {
-                _id:{category:"$items.product.Category", productId:"$items.product.id"},
-                productName: {$first : "$items.product.name"},
-                productImage: {$first : "$items.product.images"},
-                totalUnitsSold: {$sum : "$items.quantity"},
-                totalRevenue : {$sum : "$items.subtotal"}
-            }},
-            { $sort: { "_id.category": 1, totalUnitsSold : -1 } }, 
-            { $group: { _id: "$_id.category",  
-                totalUnitsSold: { $sum: "$totalUnitsSold" }, 
-                totalOrders : { $sum: 1 },
-                baseAmount  :{$sum:"$totalRevenue"},
-                bestSellingProduct : {
-                    $first:{
-                        productName : "$productName",
-                        productImage: "$productImage",
-                        totalUnitsSold : "$totalUnitsSold"
+            { $unwind: "$items" },
+            {
+                $match: {
+                    "items.paymentStatus": 'PAID'
+                }
+            },
+            {
+                $group: {
+                    _id: { brands: "$items.product.Brand", productId: "$items.product.id" },
+                    productName: { $first: "$items.product.name" },
+                    productImage: { $first: "$items.product.images" },
+                    totalUnitsSold: { $sum: "$items.quantity" },
+                    totalRevenue: { $sum: "$items.subtotal" }
+                }
+            },
+            { $sort: { "_id.brands": 1, totalUnitsSold: -1 } },
+            {
+                $group: {
+                    _id: "$_id.brands",
+                    totalUnitsSold: { $sum: "$totalUnitsSold" },
+                    totalOrders: { $sum: 1 },
+                    baseAmount: { $sum: "$totalRevenue" },
+                    bestSellingProduct: {
+                        $first: {
+                            productName: "$productName",
+                            productImage: "$productImage",
+                            totalUnitsSold: "$totalUnitsSold"
+                        }
                     }
                 }
-            }}, 
-            {$sort: {totalUnitsSold : -1}},
-            {$limit : 10}
+            },
+            { $sort: { totalUnitsSold: -1 } },
+            { $limit: 10 }
         ]);
-        return {bestSellers};
+        return { bestSellers };
+
+    } else if (sortOn == 'Categories') {
+
+        const bestSellers = await Order.aggregate([
+
+            { $unwind: "$items" },
+            {
+                $match: {
+                    "items.paymentStatus": 'PAID'
+                }
+            },
+            {
+                $group: {
+                    _id: { category: "$items.product.Category", productId: "$items.product.id" },
+                    productName: { $first: "$items.product.name" },
+                    productImage: { $first: "$items.product.images" },
+                    totalUnitsSold: { $sum: "$items.quantity" },
+                    totalRevenue: { $sum: "$items.subtotal" }
+                }
+            },
+            { $sort: { "_id.category": 1, totalUnitsSold: -1 } },
+            {
+                $group: {
+                    _id: "$_id.category",
+                    totalUnitsSold: { $sum: "$totalUnitsSold" },
+                    totalOrders: { $sum: 1 },
+                    baseAmount: { $sum: "$totalRevenue" },
+                    bestSellingProduct: {
+                        $first: {
+                            productName: "$productName",
+                            productImage: "$productImage",
+                            totalUnitsSold: "$totalUnitsSold"
+                        }
+                    }
+                }
+            },
+            { $sort: { totalUnitsSold: -1 } },
+            { $limit: 10 }
+        ]);
+        return { bestSellers };
 
     }
 
 }
 
-const loadBestSellers = async(req,res) => {
+const loadBestSellers = async (req, res) => {
 
-    try{
+    try {
 
-        if(req.accepts('html')){
+        if (req.accepts('html')) {
 
-            const {bestSellers} = await getTopProducts('Products');
-            return res.status(200).render('best-sellers',{bestSellers});
+            const initiatedReturns = await returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ]);
+            const initiatedReturnCount = initiatedReturns[0].total;
 
-        }else{
+            const { bestSellers } = await getTopProducts('Products');
+            return res.status(200).render('best-sellers', { bestSellers,initiatedReturnCount });
+
+        } else {
 
             const sortOn = req.query.sort_on;
-            const {bestSellers} = await getTopProducts(sortOn);          
-            return res.status(200).json({status : true, bestSellers,sortOn});
+            const { bestSellers } = await getTopProducts(sortOn);
+            return res.status(200).json({ status: true, bestSellers, sortOn });
 
         }
 
-    }catch(error){
-        console.log("Internal error occured while trying to load best Sellers page.",error);
-        return res.status(500).send("Internal error occured while trying to load best Sellers page.",error);
+    } catch (error) {
+        console.log("Internal error occured while trying to load best Sellers page.", error);
+        return res.status(500).send("Internal error occured while trying to load best Sellers page.", error);
     }
 }
 
 
-const addNewCoupon = async(req,res) => {
+const addNewCoupon = async (req, res) => {
 
-    try{
+    try {
 
-        if(req.body.status == 'active'){
+        if (req.body.status == 'active') {
             var status = true;
-        }else{
+        } else {
             var status = false;
         }
-        console.log(req.body.expiry,'req.body.expiry');
+        console.log(req.body.expiry, 'req.body.expiry');
         const newCoupon = new coupon({
-            couponName : req.body.couponName,
-            couponCode : req.body.couponCode,
-            discount : req.body.discount,
-            status : status,
-            MaxAmount : req.body.MaxAmount,
-            MinAmount : req.body.MinAmount,
-            expiryDate  : req.body.expiry
+            couponName: req.body.couponName,
+            couponCode: req.body.couponCode,
+            discount: req.body.discount,
+            status: status,
+            MaxAmount: req.body.MaxAmount,
+            MinAmount: req.body.MinAmount,
+            expiryDate: req.body.expiry
         })
 
         const coupondata = await newCoupon.save();
-        if(coupondata){
+        if (coupondata) {
             return res.status(201).redirect('/admin/coupons');
         }
-        
-        
-    }catch(error){
 
-        console.log("Internal error while trying to add new coupon.",error);
-        return res.status(500).send("Internal error while trying to add new coupon.",error);
+
+    } catch (error) {
+
+        console.log("Internal error while trying to add new coupon.", error);
+        return res.status(500).send("Internal error while trying to add new coupon.", error);
     }
 }
 
 
-const changeCouponStatus = async(req,res) => {
+const changeCouponStatus = async (req, res) => {
 
-    try{
+    try {
 
         const couponId = new mongoose.Types.ObjectId(req.query.coupon);
-        const currentCoupon = await coupon.findOne({_id : couponId});
-        const updatedCoupon = await coupon.findByIdAndUpdate( {_id : couponId},{$set: { status : !currentCoupon.status }},{new :true} )
+        const currentCoupon = await coupon.findOne({ _id: couponId });
+        const updatedCoupon = await coupon.findByIdAndUpdate({ _id: couponId }, { $set: { status: !currentCoupon.status } }, { new: true })
 
-    }catch(error){
-        console.log('Internal error occured while changing coupon status',error);
-        return res.status(500).send('Internal error occured while changing coupon status',error);
+    } catch (error) {
+        console.log('Internal error occured while changing coupon status', error);
+        return res.status(500).send('Internal error occured while changing coupon status', error);
     }
 }
 
 
-const loadCoupons = async(req,res) => {
+const loadCoupons = async (req, res) => {
 
-    try{
+    try {
 
-        if(req.query.code){
-            
+        if (req.query.code) {
+
             const couponCode = req.query.code;
             const couponIsExist = await coupon.findOne({
-                couponCode : couponCode
+                couponCode: couponCode
             }).exec();
-            if(couponIsExist){
+            if (couponIsExist) {
 
-                return res.status(200).json({status : true});
-            }else{
-                return res.status(200).json({status : false});
+                return res.status(200).json({ status: true });
+            } else {
+                return res.status(200).json({ status: false });
             }
         }
 
-        const coupons = await coupon.find().exec();
-        return res.status(200).render('coupons',{coupons});
+        const [coupons,initiatedReturns] = await Promise.all([
+            coupon.find().exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
+        ]);
+        const initiatedReturnCount = initiatedReturns[0].total;
+        return res.status(200).render('coupons', { coupons,initiatedReturnCount });
 
-    }catch(error){
-        console.log("Internal error while trying to load coupons",error);
-        return res.status(500).send("Internal error while trying to load coupons",error);
+    } catch (error) {
+        console.log("Internal error while trying to load coupons", error);
+        return res.status(500).send("Internal error while trying to load coupons", error);
     }
 
 }
 
 
-const loadCustomerList = async(req,res) => {
+const loadCustomerList = async (req, res) => {
 
 
-    const page = parseInt(req.query.page) || 1 ;
+    const page = parseInt(req.query.page) || 1;
     const limit = 5;
-    try{
+    try {
 
         //Getting fetched data here
         // const searchQuery = req.query.query;
@@ -1056,309 +1102,337 @@ const loadCustomerList = async(req,res) => {
 
         // }
 
-        const skip = (page - 1) * limit; 
+        const skip = (page - 1) * limit;
 
-        const userData = await User.find().skip(skip).limit(limit).exec();
-        const totalDocuments = await User.countDocuments().exec();
+        const [userData,totalDocuments,initiatedReturns] = await Promise.all([
+            User.find().skip(skip).limit(limit).exec(),
+            User.countDocuments().exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
+        ]);
+        const initiatedReturnCount = initiatedReturns[0].total;
         const totalPages = Math.ceil(totalDocuments / limit);
-        return res.status(200).render('customerList',{user : userData, totalPages : totalPages, currentPage : page});
+        return res.status(200).render('customerList', { user: userData, totalPages: totalPages, currentPage: page,initiatedReturnCount });
         // return res.status(200).json({user : userData, totalPages : totalPages, currentPage : page})
 
-        
-    }catch(error){
-        console.log("Error While rendering customerList\n",error)
-        return res.status(500).send('Server Error whil taking customer list',error)
+
+    } catch (error) {
+        console.log("Error While rendering customerList\n", error)
+        return res.status(500).send('Server Error whil taking customer list', error)
     }
 }
 
-const blockOrUnblockUser = async (req,res) => {
+const blockOrUnblockUser = async (req, res) => {
 
 
 
     const idToBlockorUnblock = req.query.id;
-    try{
+    try {
 
-        const userData = await User.findOne({_id:idToBlockorUnblock})
-        if(userData.isBlocked){
+        const userData = await User.findOne({ _id: idToBlockorUnblock })
+        if (userData.isBlocked) {
             const user = await User.findByIdAndUpdate(
-                {_id:idToBlockorUnblock},
-                {$set:{isBlocked:false}},
+                { _id: idToBlockorUnblock },
+                { $set: { isBlocked: false } },
                 { new: true }
             );
 
             //You might need to change the sessions data into database in production enviornment.    
             const sessionStore = req.sessionStore;
-        
+
             // Get all session keys
             const sessionKeys = Object.keys(sessionStore.sessions);
-            
+
             for (const sessionId of sessionKeys) {
-            const sessionData = JSON.parse(sessionStore.sessions[sessionId]);
-            console.log('Session data:', sessionData);
-            
-            let sessionUserId = sessionData.user_id || (sessionData.passport?.user?.user_id);
-            
-            if (sessionUserId === idToBlockorUnblock) {
-                await new Promise((resolve, reject) => {
-                sessionStore.destroy(sessionId, (err) => {
-                    if (err) {
-                    console.error('Error destroying session:', err);
-                    reject(err);
-                    } else {
-                    console.log(`Session destroyed for user: ${idToBlockorUnblock}`);
-                    resolve();
-                    }
-                });
-                });
-                
-                // Verify session destruction
-                const remainingSession = sessionStore.sessions[sessionId];
-                console.log('Remaining session:', remainingSession);
+                const sessionData = JSON.parse(sessionStore.sessions[sessionId]);
+                console.log('Session data:', sessionData);
+
+                let sessionUserId = sessionData.user_id || (sessionData.passport?.user?.user_id);
+
+                if (sessionUserId === idToBlockorUnblock) {
+                    await new Promise((resolve, reject) => {
+                        sessionStore.destroy(sessionId, (err) => {
+                            if (err) {
+                                console.error('Error destroying session:', err);
+                                reject(err);
+                            } else {
+                                console.log(`Session destroyed for user: ${idToBlockorUnblock}`);
+                                resolve();
+                            }
+                        });
+                    });
+
+                    // Verify session destruction
+                    const remainingSession = sessionStore.sessions[sessionId];
+                    console.log('Remaining session:', remainingSession);
+                }
             }
-            }
-            return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
-            
-        }else{
+            return res.status(200).json({ userID: user._id, isBlocked: user.isBlocked });
+
+        } else {
             const user = await User.findByIdAndUpdate(
-                {_id:idToBlockorUnblock},
-                {$set:{isBlocked:true}},
+                { _id: idToBlockorUnblock },
+                { $set: { isBlocked: true } },
                 { new: true }
             );
             //should send the json data to frontend and update it there.    
-            return res.status(200).json({userID : user._id,isBlocked: user.isBlocked});
+            return res.status(200).json({ userID: user._id, isBlocked: user.isBlocked });
         }
 
-    }catch(error){
-        console.log('Internal Error while blocking or unblocking ',error)
+    } catch (error) {
+        console.log('Internal Error while blocking or unblocking ', error)
         return res.status(500).send("Internal Error while blocking or unblocking")
     }
 
 }
 
-const deleteUser = async (req,res) => {
-    
+const deleteUser = async (req, res) => {
+
     const idToDelete = req.query.id;
 
-    try{
+    try {
 
-        
-        await User.deleteOne({_id : idToDelete})
+
+        await User.deleteOne({ _id: idToDelete })
         console.log("User Deleted successfully ")
 
         //should send the json data to frontend and update it there.
-     
 
-    }catch(error){
-        console.log('Internal Error while deleting user',error)
+
+    } catch (error) {
+        console.log('Internal Error while deleting user', error)
         return res.status(500).send("Internal Error while deleting user")
     }
 
 }
 
 
-const loadCategory = async(req,res) => {
+const loadCategory = async (req, res) => {
 
-    try{
-        const brands = await Brand.find({}).exec();
-        const categoryDetails = await Category.find({}).exec();
-     
-        return res.status(200).render('categories',{brands,categoryDetails});
+    try {
+        
+        const [brands, categoryDetails, initiatedReturns] = await Promise.all([
+            Brand.find({}).exec(),
+            Category.find({}).exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
+        ])
+        const initiatedReturnCount = initiatedReturns[0].total;
+        return res.status(200).render('categories', { brands, categoryDetails,initiatedReturnCount });
 
-    }catch(error){
+    } catch (error) {
 
         console.log("Couldn't load category page");
         return res.status(500).send("Couldn't load category page")
     }
 }
 
-const addBrandOrCategory = async (req,res) => {
+const addBrandOrCategory = async (req, res) => {
 
- 
-    if(req.query.brand){
+
+    if (req.query.brand) {
 
         const newBrand = req.query.brand;
 
-        try{
+        try {
 
             await new Brand({
-                name : newBrand
+                name: newBrand
             }).save()
-            
-    
+
+
             console.log("Added Successfully Give a sweet alert here");
             return;
-    
-        }catch(error){
-    
+
+        } catch (error) {
+
             console.log('Error while adding new Brand\n');
             return res.status(500).send("Error while adding new Brand");
-    
+
         }
 
     }
 
 
-    if(req.body.category.trim() && req.body.description.trim()){
+    if (req.body.category.trim() && req.body.description.trim()) {
 
-        const category = req.body.category.trim() ;
-        const description =  req.body.description.trim() ;
+        const category = req.body.category.trim();
+        const description = req.body.description.trim();
 
-        try{
+        try {
 
             const newCategory = await new Category({
 
-                name : category,
-                description : description
+                name: category,
+                description: description
             })
             await newCategory.save();
             // const categoryDetails = await Category.find({});
             // return res.status(201).render('categories',{categoryDetails});
-            return res.status(201).json({status : true});
+            return res.status(201).json({ status: true });
 
-        }catch(error){
+        } catch (error) {
 
-            console.log("Error occured while creating Category\n",error)
+            console.log("Error occured while creating Category\n", error)
             // return res.status(500).send("Category already saved in database.")
-            return res.status(201).json({status : false,message : "Category already saved in database."});
+            return res.status(201).json({ status: false, message: "Category already saved in database." });
         }
-        
-    }else{
-      
+
+    } else {
+
     }
-    
+
 }
 
-const softDeleteCategory = async(req,res) => {
+const softDeleteCategory = async (req, res) => {
 
     const itemID = new mongoose.Types.ObjectId(req.query.categoryID);
-   
-    try{
 
-        const category = await Category.findOne({_id:itemID}).exec();
-      
-        if(category.isActive){
-            
-            const categoryDetails = await Category.findOneAndUpdate({_id:itemID},{$set:{isActive : 0}},{new : true}).exec();
-            console.log(categoryDetails)
-            return res.status(200).json({status : false,message : `${categoryDetails.name} Successfully deactivated.`});
-        }else{
+    try {
 
-            const categoryDetails = await Category.findOneAndUpdate({_id:itemID},{$set:{isActive : 1}},{new : true}).exec();
+        const category = await Category.findOne({ _id: itemID }).exec();
+
+        if (category.isActive) {
+
+            const categoryDetails = await Category.findOneAndUpdate({ _id: itemID }, { $set: { isActive: 0 } }, { new: true }).exec();
             console.log(categoryDetails)
-            return res.status(200).json({status : true,message : `${categoryDetails.name} Successfully Activated.`});
+            return res.status(200).json({ status: false, message: `${categoryDetails.name} Successfully deactivated.` });
+        } else {
+
+            const categoryDetails = await Category.findOneAndUpdate({ _id: itemID }, { $set: { isActive: 1 } }, { new: true }).exec();
+            console.log(categoryDetails)
+            return res.status(200).json({ status: true, message: `${categoryDetails.name} Successfully Activated.` });
         }
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Error while performing softdeletion",error);
+        console.log("Error while performing softdeletion", error);
         return res.status(500).send('Error while performing softdeletion');
     }
 
 }
 
-const updateCategory = async(req,res) => {
+const updateCategory = async (req, res) => {
 
     const categoryId = new mongoose.Types.ObjectId(req.query.id);
     const name = req.query.category_name;
     const description = req.query.description;
 
-    try{
+    try {
 
-        const updpatedCategory = await Category.updateOne({_id : categoryId},{$set:{name:name,description:description}}).exec();
+        const updpatedCategory = await Category.updateOne({ _id: categoryId }, { $set: { name: name, description: description } }).exec();
 
-        if(updpatedCategory.modifiedCount){
-        
-            return res.status(200).json({status : true});
-        }else{
-        
+        if (updpatedCategory.modifiedCount) {
+
+            return res.status(200).json({ status: true });
+        } else {
+
             console.log("Could not update category.")
-            return res.status(200).json({status : false,message : "Couldnt update category."});
+            return res.status(200).json({ status: false, message: "Couldnt update category." });
         }
 
-    }catch(error){
+    } catch (error) {
 
-        if(error.code === 11000){
-           
-            return res.json({status : false,message : "Category already exist."});
+        if (error.code === 11000) {
+
+            return res.json({ status: false, message: "Category already exist." });
         }
 
-        console.log("Internal server error while performing udpation of categories.",error);
-        return res.status(500).send("Internal server error while performing udpation of categories.",error);
+        console.log("Internal server error while performing udpation of categories.", error);
+        return res.status(500).send("Internal server error while performing udpation of categories.", error);
     }
 }
 
+const loadAllProducts = async (req, res) => {
 
-
-const loadAllProducts = async (req,res) => {
-
-    const page = parseInt(req.query.page) || 1 ;
+    const page = parseInt(req.query.page) || 1;
     const limit = 9;
-   
 
-    try{
-     
-        const skip = (page - 1) * limit; 
-        const [products, totalDocuments] = await Promise.all([
-            Product.find().skip(skip).limit(limit).sort({ createdAt : -1 }).exec(),
-            Product.countDocuments().exec()
+
+    try {
+
+        const skip = (page - 1) * limit;
+        const [products, totalDocuments,initiatedReturns] = await Promise.all([
+            Product.find().skip(skip).limit(limit).sort({ createdAt: -1 }).exec(),
+            Product.countDocuments().exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
+        const initiatedReturnCount = initiatedReturns[0].total;
 
-        return res.render('productslist',{products,totalPages : totalPages, currentPage : page })
+        return res.render('productslist', { products, totalPages: totalPages, currentPage: page, initiatedReturnCount })
 
-    }catch(error){
+    } catch (error) {
 
-        console.log('Error while loading products\n',error);
+        console.log('Error while loading products\n', error);
         return res.status(500).send("Error while loading products")
     }
 }
 
-const softDeleteProducts = async(req,res) => {
+const softDeleteProducts = async (req, res) => {
     //Complete this function to list product
     const productID = req.query.productID;
-    try{
+    try {
 
-        const product = await Product.findOne({_id:productID}).exec();
-        
-        if(product.isActive){
-            
-            await Product.updateOne({_id:productID},{$set:{isActive : 0}}).exec();
+        const product = await Product.findOne({ _id: productID }).exec();
+
+        if (product.isActive) {
+
+            await Product.updateOne({ _id: productID }, { $set: { isActive: 0 } }).exec();
             const productDetails = await Product.find({});
             // return res.status(200).render('productslist',{productDetails})
-            return res.json({productID : productID,isActive:0})
-        }else{
+            return res.json({ productID: productID, isActive: 0 })
+        } else {
 
-            await Product.updateOne({_id:productID},{$set:{isActive : 1}}).exec();
+            await Product.updateOne({ _id: productID }, { $set: { isActive: 1 } }).exec();
             const productDetails = await Product.find({});
-            return res.status(200).render('productslist',{productDetails})
+            return res.status(200).render('productslist', { productDetails })
 
         }
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Error while performing softdeletion of Produts",error);
+        console.log("Error while performing softdeletion of Produts", error);
         return res.status(500).send('Error while performing softdeletion Produts');
     }
 }
 
-const loadAddNewProduct = async(req,res) => {
+const loadAddNewProduct = async (req, res) => {
 
-    try{
-        
-        const categories = await Category.find({}).exec();
-        const brand = await Brand.find({}).exec();
+    try {
 
-        return res.status(200).render('add-new-product',{categories,brand})
+        const [categories,brand, initiatedReturns] = await Promise.all([
+            Category.find({}).exec(),
+            Brand.find({}).exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
+        ]);
+        const initiatedReturnCount = initiatedReturns[0].total;
 
-    }catch(error){
+        return res.status(200).render('add-new-product', { categories, brand, initiatedReturnCount })
 
-        console.log("Internal Error while loading addNewProduct\n",error);
+    } catch (error) {
+
+        console.log("Internal Error while loading addNewProduct\n", error);
         return res.status(500).send('Error while loading addNewProduct');
     }
 
 }
 
-const addNewProduct = async(req,res) => {
+const addNewProduct = async (req, res) => {
 
     const {
         productName,
@@ -1371,140 +1445,168 @@ const addNewProduct = async(req,res) => {
         targetGroup } = req.body;
 
     const product_name = req.query.product_name;
-    
-    try{
-        
-        if(req.query.product_name){
 
-            const isProductExist = await Product.findOne({ProductName : product_name}).exec();
-            if(isProductExist){
-    
-                return res.status(200).json({status : false, message : `A product is already exist in the name ${product_name}`});
+    try {
+
+        if (req.query.product_name) {
+
+            const isProductExist = await Product.findOne({ ProductName: product_name }).exec();
+            if (isProductExist) {
+
+                return res.status(200).json({ status: false, message: `A product is already exist in the name ${product_name}` });
             }
-            return res.json({status : true})
+            return res.json({ status: true })
         }
-        
+
         const newProduct = new Product({
-            ProductName : productName,
-            Description : description,
+            ProductName: productName,
+            Description: description,
             regularPrice: regularPrice,
-            salePrice   : salePrice,
+            salePrice: salePrice,
             stockQuantity: stockQuantity,
-            Category    : category,
-            Brand   : brand,
-            image   : req.files.map(file => file.filename),
-            targetGroup : targetGroup
+            Category: category,
+            Brand: brand,
+            image: req.files.map(file => file.filename),
+            targetGroup: targetGroup
         });
 
         await newProduct.save();
-        return res.status(201).json({status : true ,message:"Product Added Successfully"});
+        return res.status(201).json({ status: true, message: "Product Added Successfully" });
 
-    }catch(error){
+    } catch (error) {
 
-        console.log('Internal Error While Adding new product\n',error);
+        console.log('Internal Error While Adding new product\n', error);
         return res.status(500).send('Internal Error While Adding new product');
     }
 }
 
-const loadEditProduct = async(req,res) => {
+const loadEditProduct = async (req, res) => {
 
-    const productId = new mongoose.Types.ObjectId(req.query.productId)
-    try{
-        
-        const [categories,brand,product] = await Promise.all([
-          
+    try {
+
+        const productId = new mongoose.Types.ObjectId(req.query.productId)
+        const [categories, brand, product, initiatedReturns] = await Promise.all([
+
             Category.find({}).exec(),
             Brand.find({}).exec(),
-            Product.findOne({_id : productId})
-        ])
-        if(!product){
-            return res.status(404).send("Product not Found")
+            Product.findOne({ _id: productId }),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
+        ]);
+        if (!product) {
+            return res.status(404).render('error', {
+                code: '404',
+                title: 'Oops!',
+                message: "Product Not Found.Recheck the product Id",
+                redirect: '/admin/productslist'
+            });
         }
-console.log(product)
-        return res.status(200).render('edit-product',{categories,brand,product})
+        const initiatedReturnCount = initiatedReturns[0].total;
+        
+        return res.status(200).render('edit-product', { categories, brand, product, initiatedReturnCount })
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Internal Error while loading addNewProduct\n",error);
-        return res.status(500).send('Error while loading addNewProduct');
+        console.error('Internal Error while loading edit produdt page', error.stack);
+        return res.status(500).render('error', {
+            code: '500',
+            title: 'Oops!',
+            message: "Something went wrong. Please try again later.",
+            redirect: '/admin/productslist'
+        });
     }
 
 }
 
-const updateProduct = async(req,res) => {
+const updateProduct = async (req, res) => {
 
-    const productId = new mongoose.Types.ObjectId(req.query.productId);
 
-    try{
+    try {
+        const productId = new mongoose.Types.ObjectId(req.query.productId);
 
-        const product = await Product.findOne({_id : productId}).exec();
-       
-        if(!product){
+        const product = await Product.findOne({ _id: productId }).exec();
+
+        if (!product) {
             throw new Error('Product not found');
         }
 
         Object.keys(req.body).forEach(key => {
-          
-            if(req.body[key] !== undefined){
+
+            if (req.body[key] !== undefined) {
                 product[key] = req.body[key];
             }
         })
 
-    
+
         let newImages = null;
-        if(req.files && req.files.length > 0){
+        if (req.files && req.files.length > 0) {
             newImages = req.files.map(file => file.filename)
-        
-        }
-        if(newImages){
 
-            product.image = [...newImages,...product.image];
         }
-     
+        if (newImages) {
+
+            product.image = [...newImages, ...product.image];
+        }
+
         const updatedProduct = await product.save();
-        if(updatedProduct){
-            return res.status(200).json({status : true, redirect : `/admin/productslist/edit_product?productId=${productId}`});
+        if (updatedProduct) {
+            return res.status(200).json({ status: true, redirect: `/admin/productslist/edit_product?productId=${productId}` });
         }
 
-    }catch(error){
-        console.log("Internal Error while updating product details.",error);
+    } catch (error) {
+        console.error('Internal Error while updating product Details', error.stack);
+        return res.status(500).json({ status: false });
     }
 }
 
 
+const loadOrderList = async (req, res) => {
 
-
-const loadOrderList = async(req,res) => {
-
-    const page = parseInt(req.query.page) || 1 ;
+    const page = parseInt(req.query.page) || 1;
     const limit = 10;
 
-    try{
+    try {
 
-        const skip = (page - 1) * limit; 
-        
-        const [orders,totalDocuments] = await Promise.all([
-            
-            Order.find().skip(skip).limit(limit).populate('customer').sort({ createdAt : -1 }).exec(),
-            Order.countDocuments().exec()
+        const skip = (page - 1) * limit;
+
+        const [orders, totalDocuments,initiatedReturns] = await Promise.all([
+
+            Order.find().skip(skip).limit(limit).populate('customer').sort({ createdAt: -1 }).exec(),
+            Order.countDocuments().exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
-    
-        return res.status(200).render('order-list',{orderlist : orders, totalPages : totalPages, currentPage : page});
+        const initiatedReturnCount = initiatedReturns[0].total;
 
-    }catch(error){
-        console.log("Internal error while trying to load order list",error);
+        return res.status(200).render('order-list', { orderlist: orders, totalPages: totalPages, currentPage: page,initiatedReturnCount });
+
+    } catch (error) {
+        console.log("Internal error while trying to load order list", error);
     }
 }
 
-const loadOrderDetails = async(req,res) => {
- 
-    const orderId = new mongoose.Types.ObjectId(req.query.orderId)
+const loadOrderDetails = async (req, res) => {
+    
+    try {
+        const orderId = new mongoose.Types.ObjectId(req.query.orderId)
 
-    try{
-
-        const orderDetails = await Order.findOne({_id : orderId}).populate('customer').populate('shippingAddress').exec();
-        console.log(orderDetails)
+        const [orderDetails,initiatedReturns] = await Promise.all([
+            Order.findOne({ _id: orderId }).populate('customer').populate('shippingAddress').exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
+        ])
+        
+        const initiatedReturnCount = initiatedReturns[0].total;
 
         let grandSubTotal = 0;
         let grandGST = 0;
@@ -1520,283 +1622,311 @@ const loadOrderDetails = async(req,res) => {
             const itemDecs = (amtRatio * totalDed).toFixed(2);
 
             const prodTotalPrice = item.subtotal + +itemGST - +itemDecs;
-            
-            if((item.paymentStatus !== 'REFUNDED') && (item.paymentStatus !== 'CANCELLED') ){
+
+            if ((item.paymentStatus !== 'REFUNDED') && (item.paymentStatus !== 'CANCELLED')) {
 
                 grandSubTotal += item.subtotal;
                 grandGST += +itemGST;
-                grandDiscount += +itemDecs; 
+                grandDiscount += +itemDecs;
                 grandTotal += prodTotalPrice;
             }
 
             return {
-                name    : item.product.name,
-                brand   : item.product.Brand,
-                prodImage   : item.product.images,
+                name: item.product.name,
+                brand: item.product.Brand,
+                prodImage: item.product.images,
                 prodQuantity: item.quantity,
-                prodRate    : item.product.price,
-                prodgst     : itemGST, 
-                prodDeductions : itemDecs,
-                prodNetTotal   : prodTotalPrice,
-                status  : item.paymentStatus
+                prodRate: item.product.price,
+                prodgst: itemGST,
+                prodDeductions: itemDecs,
+                prodNetTotal: prodTotalPrice,
+                status: item.paymentStatus
             }
         });
-   
-        return res.status(200).render('order-details',{
+
+        return res.status(200).render('order-details', {
             orderDetails,
             items,
             grandSubTotal,
             grandGST,
-            grandDiscount, 
-            grandTotal
+            grandDiscount,
+            grandTotal,
+            initiatedReturnCount
         });
 
-    }catch(error){
-        console.log("Internal Error occured while loading order Details.")
+    } catch (error) {
+
+        console.error('Internal Error occured while loading order Details.', error.stack);
+        return res.status(500).render('error', {
+            code: '500',
+            title: 'Oops!',
+            message: "Something went wrong. Please try again later.",
+            redirect: '/admin/order-list'
+        });
     }
 }
 
-const updateOrderStatus = async(req,res) => {
+const updateOrderStatus = async (req, res) => {
 
     const orderId = new mongoose.Types.ObjectId(req.query.orderId);
     const orderStatus = req.query.orderStatus;
 
-    try{
+    try {
 
-        let order = await Order.findOneAndUpdate({_id : orderId},{$set:{status : orderStatus}},{new : true});
+        let order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { status: orderStatus } }, { new: true });
 
-        let pendingItems = order.items.filter(item => ((item.status == 'Pending') || (item.status == 'Shipped')) ).map((elem) => {
-           
-            return {productId : elem.product.id}
+        let pendingItems = order.items.filter(item => ((item.status == 'Pending') || (item.status == 'Shipped'))).map((elem) => {
+
+            return { productId: elem.product.id }
         });
-    
-        if((order.confirmation ===  0) && (orderStatus === 'Delivered')){
-        
-            order = await Order.findOneAndUpdate({_id : orderId},{$set:{confirmation : 1}},{new : true});
-            
-            const prome = order.items.filter(prod => ((prod.status == 'Pending') || (prod.status == 'Shipped')) ).map(async item => {
-                return Product.updateOne({_id : item.product.id},{$inc : { reserved : -item.quantity }}).exec();
+
+        if ((order.confirmation === 0) && (orderStatus === 'Delivered')) {
+
+            order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { confirmation: 1 } }, { new: true });
+
+            const prome = order.items.filter(prod => ((prod.status == 'Pending') || (prod.status == 'Shipped'))).map(async item => {
+                return Product.updateOne({ _id: item.product.id }, { $inc: { reserved: -item.quantity } }).exec();
             });
-            
+
             await Promise.all(prome);
 
             const promeOfProductStatus = pendingItems.map(productId => {
                 return Order.updateOne(
                     {
-                        _id : orderId,
+                        _id: orderId,
                         'items.product.id': productId.productId
-                    },{$set : {
-                    'items.$[elem].status' : 'Delivered' 
-                    }},
-                    {
-                        arrayFilters : [{'elem.product.id' : productId.productId}],
-                        new : true
+                    }, {
+                    $set: {
+                        'items.$[elem].status': 'Delivered'
                     }
-                    
+                },
+                    {
+                        arrayFilters: [{ 'elem.product.id': productId.productId }],
+                        new: true
+                    }
+
                 ).exec()
             })
             await Promise.all(promeOfProductStatus);
-            console.log(promeOfProductStatus,"promeOfProductStatuspromeOfProductStatus");
-            
-              
-        }else if( (order.confirmation ===  0) && (orderStatus === 'Cancelled')) {
+            console.log(promeOfProductStatus, "promeOfProductStatuspromeOfProductStatus");
 
-            order = await Order.findOneAndUpdate({_id : orderId},{$set:{confirmation : 1}},{new : true});
-            
+
+        } else if ((order.confirmation === 0) && (orderStatus === 'Cancelled')) {
+
+            order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { confirmation: 1 } }, { new: true });
+
             const prome = order.items.map(async item => {
-                return Product.updateOne({_id : item.product.id},
-                    {$inc : { reserved : -item.quantity, stockQuantity : item.quantity }}).exec();
+                return Product.updateOne({ _id: item.product.id },
+                    { $inc: { reserved: -item.quantity, stockQuantity: item.quantity } }).exec();
             });
-            
+
             await Promise.all(prome);
 
             const promeOfProductStatus = pendingItems.map(productId => {
                 return Order.updateOne(
                     {
-                        _id : orderId,
+                        _id: orderId,
                         'items.product.id': productId.productId
-                    },{$set : {
-                    'items.$[elem].status' : 'Cancelled' 
-                    }},
-                    {
-                        arrayFilters : [{'elem.product.id' : productId.productId}],
-                        new : true
+                    }, {
+                    $set: {
+                        'items.$[elem].status': 'Cancelled'
                     }
-                    
+                },
+                    {
+                        arrayFilters: [{ 'elem.product.id': productId.productId }],
+                        new: true
+                    }
+
                 ).exec()
             })
             await Promise.all(promeOfProductStatus);
-            console.log(promeOfProductStatus,"promeOfProductStatuspromeOfProductStatus");
-            
+            console.log(promeOfProductStatus, "promeOfProductStatuspromeOfProductStatus");
+
         }
-        
-        return res.status(200).json({status : true, message : `Successfully set the status to ${orderStatus}`,orderstatus : orderStatus })
-            
-    }catch(error){
+
+        return res.status(200).json({ status: true, message: `Successfully set the status to ${orderStatus}`, orderstatus: orderStatus })
+
+    } catch (error) {
         console.log("Internal Error while trying to update the status of order.");
     }
 }
 
 
-const loadReturnedOrders = async(req,res) => {
-    
-    const page = parseInt(req.query.page) || 1 ;
+const loadReturnedOrders = async (req, res) => {
+
+    const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
 
-    try{
+    try {
 
-        const [returnedProducts, totalDocuments] = await Promise.all([
-            returnItem.find().sort({returnDate : -1}).skip(skip).limit(limit).populate('customer').exec(),
-            returnItem.countDocuments().exec()
+        const [returnedProducts, totalDocuments,initiatedReturns] = await Promise.all([
+            returnItem.find().sort({ returnDate: -1 }).skip(skip).limit(limit).populate('customer').exec(),
+            returnItem.countDocuments().exec(),
+            returnItem.aggregate([
+                
+                { $match: { status : 'initiated' } },
+                {$count : 'total'}
+            ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
+        const initiatedReturnCount = initiatedReturns[0].total;
 
-        console.log(returnedProducts,"This is the fulldetails");
-        return res.render('returned-order',{returnedProducts,totalPages : totalPages, currentPage : page});
+        console.log(returnedProducts, "This is the fulldetails");
+        return res.render('returned-order', { returnedProducts, totalPages: totalPages, currentPage: page, initiatedReturnCount });
 
-    }catch(error){
+    } catch (error) {
 
-        console.log("Internal error occured while trying to get the returned order details.",error);
-        return res.status(500).send("Internal error occured while trying to get the returned order details.",error);
+        console.log("Internal error occured while trying to get the returned order details.", error);
+        return res.status(500).send("Internal error occured while trying to get the returned order details.", error);
     }
 }
 
 
-const changeReturnStatus = async(req,res) => {
+const changeReturnStatus = async (req, res) => {
 
     const returnId = new mongoose.Types.ObjectId(req.body.returnId);
 
-    try{
-        
-        const returnedStatus = await returnItem.findOneAndUpdate(returnId,{$set:{status : req.body.returnStatus}},{new : true});
-        const  isWallet = await wallet.findOne({userId : returnedStatus.customer}).exec();
+    try {
+
+        const returnedStatus = await returnItem.findOneAndUpdate(returnId, { $set: { status: req.body.returnStatus } }, { new: true });
+        const isWallet = await wallet.findOne({ userId: returnedStatus.customer }).exec();
         const orderId = returnedStatus.order;
         const productId = returnedStatus.productId;
-   
-        if(returnedStatus.status === 'approved'){
-    
+
+        if (returnedStatus.status === 'approved') {
+
             var Transaction = new transaction({
-                    
-                userId : returnedStatus.customer,
-                orderId : orderId, 
-                paymentId : null,
-                amount : returnedStatus.refundAmnt,
-                type : 'refund',
-                paymentMethod:'wallet',
+
+                userId: returnedStatus.customer,
+                orderId: orderId,
+                paymentId: null,
+                amount: returnedStatus.refundAmnt,
+                type: 'refund',
+                paymentMethod: 'wallet',
                 status: 'completed',
                 currency: 'INR',
                 description: "Returned product"
 
             });
-            
-            if(!isWallet){
-                
+
+            if (!isWallet) {
+
                 const userWallet = new wallet({
-    
+
                     userId: returnedStatus.customer,
                     balance: returnedStatus.refundAmnt,
                     transactions: []
-                    
+
                 });
 
                 const createWalletForUser = await userWallet.save();
-                if(createWalletForUser){
+                if (createWalletForUser) {
 
                     const trasactionData = await Transaction.save();
-                    if(trasactionData){
+                    if (trasactionData) {
                         createWalletForUser.transactions.push(trasactionData._id);
                         await createWalletForUser.save();
-                        
+
                         var updatedOrder = await Order.findOneAndUpdate(
                             {
-                                _id : orderId,
+                                _id: orderId,
                                 'items.product.id': productId
-                            },{$set : {
-                               'items.$[elem].status' : 'Returned',
-                               'items.$[elem].paymentStatus' : 'REFUNDED' 
-                            }},
-                            {arrayFilters : [{'elem.product.id' : productId}]},
-                            {new : true}
+                            }, {
+                            $set: {
+                                'items.$[elem].status': 'Returned',
+                                'items.$[elem].paymentStatus': 'REFUNDED'
+                            }
+                        },
+                            { arrayFilters: [{ 'elem.product.id': productId }] },
+                            { new: true }
                         );
                     }
 
-                    const filteredProducts = updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
+                    const filteredProducts = updatedOrder.items.filter(prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')));
                     const orderProdCount = updatedOrder.items.length;
 
-                    if(filteredProducts.length == orderProdCount){
-                        await Order.updateOne({_id: orderId},{$set:{
-                            status : 'Returned',
-                            overallPaymentStatus : 'REFUNDED'
-                        }})
-                    }else{
-                        await Order.updateOne({_id: orderId},{
-                            $set:{
-                            overallPaymentStatus : 'PARTIALLY_REFUNDED'
-                        }})
+                    if (filteredProducts.length == orderProdCount) {
+                        await Order.updateOne({ _id: orderId }, {
+                            $set: {
+                                status: 'Returned',
+                                overallPaymentStatus: 'REFUNDED'
+                            }
+                        })
+                    } else {
+                        await Order.updateOne({ _id: orderId }, {
+                            $set: {
+                                overallPaymentStatus: 'PARTIALLY_REFUNDED'
+                            }
+                        })
                     }
 
-                    return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
-                }else{
-                    return res.json({status : false, message : 'Return approved but fund not transffered.'});
+                    return res.status(201).json({ status: true, message: 'Return approved and amount added to user wallet.' });
+                } else {
+                    return res.json({ status: false, message: 'Return approved but fund not transffered.' });
                 }
 
-            }else{
+            } else {
 
                 isWallet.balance = isWallet.balance + returnedStatus.refundAmnt;
                 const updatedWallet = await isWallet.save();
-                
-                if(updatedWallet){
-                    
+
+                if (updatedWallet) {
+
                     const trasactionData = await Transaction.save();
-                    if(trasactionData){
+                    if (trasactionData) {
                         updatedWallet.transactions.push(trasactionData._id);
                         await updatedWallet.save();
 
                         var updatedOrder = await Order.findOneAndUpdate(
                             {
-                                _id : orderId,
+                                _id: orderId,
                                 'items.product.id': productId
-                            },{$set : {
-                               'items.$[elem].status' : 'Returned',
-                               'items.$[elem].paymentStatus' : 'REFUNDED' 
-                            }},
-                            {arrayFilters : [{'elem.product.id' : productId}]},
-                            {new : true}
+                            }, {
+                            $set: {
+                                'items.$[elem].status': 'Returned',
+                                'items.$[elem].paymentStatus': 'REFUNDED'
+                            }
+                        },
+                            { arrayFilters: [{ 'elem.product.id': productId }] },
+                            { new: true }
                         );
                     }
 
 
-                    const filteredProducts = updatedOrder.items.filter( prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')) );
+                    const filteredProducts = updatedOrder.items.filter(prod => ((prod.status == 'Returned') || (prod.status == 'Cancelled')));
                     const orderProdCount = updatedOrder.items.length;
 
-                    if(filteredProducts.length == orderProdCount){
-                        await Order.updateOne({_id: orderId},{
-                            $set:{status : 'Returned',
-                            overallPaymentStatus : 'REFUNDED'
-                        }})
-                    }else{
-                        await Order.updateOne({_id: orderId},{
-                            $set:{
-                            overallPaymentStatus : 'PARTIALLY_REFUNDED'
-                        }})
+                    if (filteredProducts.length == orderProdCount) {
+                        await Order.updateOne({ _id: orderId }, {
+                            $set: {
+                                status: 'Returned',
+                                overallPaymentStatus: 'REFUNDED'
+                            }
+                        })
+                    } else {
+                        await Order.updateOne({ _id: orderId }, {
+                            $set: {
+                                overallPaymentStatus: 'PARTIALLY_REFUNDED'
+                            }
+                        })
                     }
 
-                    return res.status(201).json({status : true, message : 'Return approved and amount added to user wallet.'});
-                }else{
-                    return res.json({status : false, message : 'Return approved but fund not transffered.'});
+                    return res.status(201).json({ status: true, message: 'Return approved and amount added to user wallet.' });
+                } else {
+                    return res.json({ status: false, message: 'Return approved but fund not transffered.' });
                 }
             }
 
 
-            
-    
-        }
-        
-    }catch(error){
 
-        console.log("Internal error while return commit.",error);
-        return res.status(500).send("Internal error while return commit.",error);
+
+        }
+
+    } catch (error) {
+
+        console.log("Internal error while return commit.", error);
+        return res.status(500).send("Internal error while return commit.", error);
     }
 }
 
@@ -1804,29 +1934,29 @@ const changeReturnStatus = async(req,res) => {
 
 
 
-const logoutAdmin = async(req,res) => {
+const logoutAdmin = async (req, res) => {
 
-    try{
+    try {
 
-        if(req.session.admin_id){
+        if (req.session.admin_id) {
 
             req.session.destroy((err) => {
-                
-                if(err){
-                    console.error("Error while destroying session : ",err);
-                    return res.status(500).send("Error while destroying session : ",err);
+
+                if (err) {
+                    console.error("Error while destroying session : ", err);
+                    return res.status(500).send("Error while destroying session : ", err);
                 }
 
-        
+
                 return res.status(302).redirect('/admin/login');
             });
-        }else{
+        } else {
             console.log("Unknown Error while logging out")
         }
 
-    }catch(error){
-        console.log("Internal error while trying to logout",error);
-        return res.status(500).send("Internal error while trying to logout",error);
+    } catch (error) {
+        console.log("Internal error while trying to logout", error);
+        return res.status(500).send("Internal error while trying to logout", error);
     }
 
 }

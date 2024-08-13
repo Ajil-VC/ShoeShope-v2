@@ -57,6 +57,15 @@ app.use((req, res, next) => {
 app.use('/', userRouter);
 app.use('/admin', adminRouter)
 
+app.use((req, res, next) => {
+    return res.status(404).render('error', { code: '404', title: 'Page Not Found', message: "We couldn't find the page you were looking for." });
+});
+app.use((err, req, res, next) => {
+
+    console.error(error.stack);
+    return res.status(404).render('error', { code: '500', title: 'Oops!', message: "We couldn't find the page you were looking for." });
+})
+
 app.listen(PORT, () => {
     console.log(`ShoeShope is listening at http://localhost:${PORT}/admin/login`)
 })

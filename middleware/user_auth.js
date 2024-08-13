@@ -46,7 +46,7 @@ const isLoggedOut = async (req, res, next) => {
         // Check if user is blocked
         const isBlocked = req.session.isBlocked || (req.user && req.user.isBlocked);
         if (isAuthenticated && isBlocked) {
-            return res.redirect('');
+            return res.redirect('/');
         }
         next();
     } catch (error) {
@@ -75,17 +75,6 @@ const setViews = async (req, res, next) => {
     next();
 }
 
-const pageNotFound = async (req, res, next) => {
-
-    return res.status(404).render('error',{code : '404',title : 'Page Not Found', message : "We couldn't find the page you were looking for."});
-}
-
-const errorHandling = async(err,req,res,next)=> {
-
-    console.error(error.stack);
-    return res.status(404).render('error',{code : '500',title : 'Oops!', message : "We couldn't find the page you were looking for."});
-
-}
 
 module.exports = {
     isLoggedOut,
@@ -93,6 +82,4 @@ module.exports = {
     isBlocked,
     noCacheMiddleware,
     setViews,
-    pageNotFound,
-    errorHandling
 }

@@ -24,7 +24,7 @@ userRouter.post('/login', authenticate.isLoggedOut, userController.loginUser);
 //google auth
 userRouter.get('/auth/google', passport.authenticate('google', { scope: ['email', 'profile'] }))
 userRouter.get('/google/callback', passport.authenticate('google', {
-    successRedirect: '',
+    successRedirect: '/',
     failureRedirect: '/auth/failure'
 }))
 userRouter.get('/auth/failure', (req, res) => {
@@ -74,8 +74,5 @@ userRouter.post('/profile/cancelproduct', authenticate.isLoggedIn, userControlle
 userRouter.get('/profile/invoice', authenticate.isLoggedIn, userController.downloadInvoice);
 
 userRouter.get('/profile/logout', authenticate.isLoggedIn, userController.logoutUser);
-
-userRouter.use(authenticate.pageNotFound);
-userRouter.use(authenticate.errorHandling);
 
 module.exports = userRouter;
