@@ -905,7 +905,8 @@ const loadBestSellers = async(req,res) => {
 
             const sortOn = req.query.sort_on;
             const {bestSellers} = await getTopProducts(sortOn);
-            return res.status(200).json({bestSellers,sortOn});
+console.log(bestSellers)            
+            return res.status(200).json({status : true, bestSellers,sortOn});
 
         }
 

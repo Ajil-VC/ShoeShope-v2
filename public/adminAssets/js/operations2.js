@@ -426,20 +426,157 @@ document.addEventListener('DOMContentLoaded',() => {
     }
 
 
-    async function fetchBestSellingProduct(sortOn){
-        
-        const response = await fetch(`http://localhost:2000/admin/best_sellers?sort_on=${sortOn}`,{
-            method : 'GET',
-            headers : {
-                'Accept': 'application/json' 
-            }
-        });
 
-        if(!response.ok){
-            throw new Error('Network response was not ok while trying to fetch best selling products.');
+    function createTopCategoryTable(data){
+
+        const best_selling_products_heading = document.getElementById('best-selling-products-heading');
+        best_selling_products_heading.innerText = 'Best Selling Categories';
+        const best_seller_table_container = document.getElementById('best-seller-table-container');
+        
+        document.getElementById('best-seller-table').remove();
+        const table = document.createElement('table');
+        table.classList.add('table', 'table-hover');
+        table.setAttribute('id','best-seller-table');
+
+        best_seller_table_container.appendChild(table);
+
+        const thead = document.createElement('thead');
+        const tr = document.createElement('tr');
+        const tableHead = ['Category','Total Units Sold','Total Orders','Base Amount', 'Top Product'];
+        tableHead.forEach(header => {
+            const th = document.createElement('th');
+            th.setAttribute('scope','col');
+            th.innerText = header;
+            tr.appendChild(th);
+        });
+        const tbody = document.createElement('tbody');
+        thead.appendChild(tr);
+        table.appendChild(thead);
+        table.appendChild(tbody);
+
+        data.bestSellers.forEach((rowData,index) => {
+
+            const newRow = table.insertRow(index + 1);
+            //Adding cells to the row.
+            const categoryCell  = newRow.insertCell(0);
+            const unitsSoldCell = newRow.insertCell(1);
+            const totOrderCell  = newRow.insertCell(2);
+            const baseAmntCell  = newRow.insertCell(3);
+            const topProdCell   = newRow.insertCell(4);
+
+            categoryCell.innerText  = rowData._id;
+            unitsSoldCell.innerText = rowData.totalUnitsSold;
+            totOrderCell.innerText  = rowData.totalOrders;
+            baseAmntCell.innerText  = `₹${rowData.baseAmount}`;
+            topProdCell.innerHTML   = `<a class="itemside" href="#">
+                                                <div class="left">
+                                                    <img src="/ProductImage/${rowData.bestSellingProduct.productImage[0]}" class="img-sm img-thumbnail" alt="Item">
+                                                </div>
+                                                <div class="info">
+                                                    <h6 class="mb-0"> ${rowData.bestSellingProduct.productName} (${rowData.bestSellingProduct.totalUnitsSold} pcs) </h6>
+                                                </div>
+                                            </a>`;
+            newRow.style.backgroundColor = '#ffffff';                                            
+
+        })
+    }
+
+    function createTopProductTable(data){
+
+        const best_selling_products_heading = document.getElementById('best-selling-products-heading');
+        best_selling_products_heading.innerText = 'Best Selling Products';
+        const best_seller_table_container = document.getElementById('best-seller-table-container');
+        
+        document.getElementById('best-seller-table').remove();
+        const table = document.createElement('table');
+        table.classList.add('table', 'table-hover');
+        table.setAttribute('id','best-seller-table');
+
+        best_seller_table_container.appendChild(table);
+
+        const thead = document.createElement('thead');
+        const tr = document.createElement('tr');
+        const tableHead = ['Product','Total Units Sold','Total Orders','Product Price','Base Amount'];
+        tableHead.forEach(header => {
+            const th = document.createElement('th');
+            th.setAttribute('scope','col');
+            th.innerText = header;
+            tr.appendChild(th);
+        });
+        const tbody = document.createElement('tbody');
+        thead.appendChild(tr);
+        table.appendChild(thead);
+        table.appendChild(tbody);
+
+        data.bestSellers.forEach((rowData,index) => {
+
+            const newRow = table.insertRow(index + 1);
+            //Adding cells to the row.
+            const productCell   = newRow.insertCell(0);
+            const unitsSoldCell = newRow.insertCell(1);
+            const totOrderCell  = newRow.insertCell(2);
+            const prodPriceCell = newRow.insertCell(3);
+            const baseAmntCell  = newRow.insertCell(4);
+
+            productCell.innerHTML  = `<a class="itemside" href="#">
+                                                <div class="left">
+                                                    <img src="/ProductImage/${rowData.productImage[0]}" class="img-sm img-thumbnail" alt="Item">
+                                                </div>
+                                                <div class="info">
+                                                    <h6 class="mb-0"> ${rowData.productName} </h6>
+                                                </div>
+                                        </a>`;
+            unitsSoldCell.innerText = rowData.totalUnitsSold;
+            totOrderCell.innerText  = rowData.totalOrders;
+            prodPriceCell.innerText = `₹${rowData.productPrice}`;
+            baseAmntCell.innerText  = `₹${rowData.baseAmount}`;
+
+            newRow.style.backgroundColor = '#ffffff';                                            
+
+        })
+
+    }
+
+    async function fetchBestSellingProduct(sortOn){
+
+        try{
+
+            const response = await fetch(`http://localhost:2000/admin/best_sellers?sort_on=${sortOn}`,{
+                method : 'GET',
+                headers : {
+                    'Accept': 'application/json' 
+                }
+            });
+    
+            if(!response.ok){
+                throw new Error('Network response was not ok while trying to fetch best selling products.');
+            }
+            const data = await response.json();
+            console.log(data);
+            if(data.status){
+
+                if(data.sortOn == 'Categories'){
+                    
+                    createTopCategoryTable(data);
+
+                }else if(data.sortOn == 'Products'){
+
+                    createTopProductTable(data);
+
+                }
+
+            }else{
+                Swal.fire({
+                    title: 'Error Occured',
+                    text: "Error occured while trying to fetch data.",
+                    icon: 'error'
+                });
+            }
+
+        }catch(error){
+            console.log("Error occured while trying to fetch and set best seller products.",error);
         }
-        const data = await response.json();
-        console.log(data);
+        
     }
 
     const best_seller_products = document.getElementById('best-seller-products');
