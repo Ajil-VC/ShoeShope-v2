@@ -30,17 +30,18 @@
                         
                         <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
                             <div class="custom_select">
-                                <select class="form-select select-nice" id="best-seller-products" >
+                                <!-- select-nice -->
+                                <select class="form-select " id="best-seller-products" >
 
                                     <option disabled selected>best sellers on..</option>
-                                    <option>Products</option>
-                                    <option>Brands</option>
-                                    <option>Categories</option>
+                                    <option value="Products" >Products</option>
+                                    <option value="Brands" >Brands</option>
+                                    <option value="Categories" >Categories</option>
                                
                                 </select>
                             </div>
                         </div>
-                     
+             
                         <div class="col-md-2 col-6">
                             <input type="text" placeholder="Search..." class="form-control">
                         </div>
@@ -64,36 +65,36 @@
                             </thead>
                             <tbody>
 
-                                <% for(let i = 0 ; i < topProducts.length ; i++){ %>
+                                <% for(let i = 0 ; i < bestSellers.length ; i++){ %>
 
                                     <tr>
                                         <td>
                                             <a class="itemside" href="#">
                                                 <div class="left">
-                                                    <img src="/ProductImage/<%=topProducts[i].productImage[0]%>" class="img-sm img-thumbnail" alt="Item">
+                                                    <img src="/ProductImage/<%=bestSellers[i].productImage[0]%>" class="img-sm img-thumbnail" alt="Item">
                                                 </div>
                                                 <div class="info">
-                                                    <h6 class="mb-0"> <%= topProducts[i].productName%> </h6>
+                                                    <h6 class="mb-0"> <%= bestSellers[i].productName%> </h6>
                                                 </div>
                                             </a>
                                         </td>
                                       
                                         <td>
 
-                                            <span> <%= topProducts[i].totalUnitsSold %> </span> 
+                                            <span> <%= bestSellers[i].totalUnitsSold %> </span> 
                                         </td>
                                         <td>
 
-                                           <span> <%= topProducts[i].totalOrders %> </span> 
+                                           <span> <%= bestSellers[i].totalOrders %> </span> 
                                         </td>
 
                                         <td>
 
-                                            <span>₹<%=topProducts[i].productPrice%></span> 
+                                            <span>₹<%=bestSellers[i].productPrice%></span> 
                                         </td>
                                         <td>
 
-                                            <span>₹<%=topProducts[i].baseAmount%></span>
+                                            <span>₹<%=bestSellers[i].baseAmount%></span>
                                         </td>
                                        
                                       

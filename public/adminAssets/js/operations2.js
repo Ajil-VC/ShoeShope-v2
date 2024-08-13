@@ -425,13 +425,30 @@ document.addEventListener('DOMContentLoaded',() => {
         })
     }
 
+
+    async function fetchBestSellingProduct(sortOn){
+        
+        const response = await fetch(`http://localhost:2000/admin/best_sellers?sort_on=${sortOn}`,{
+            method : 'GET',
+            headers : {
+                'Accept': 'application/json' 
+            }
+        });
+
+        if(!response.ok){
+            throw new Error('Network response was not ok while trying to fetch best selling products.');
+        }
+        const data = await response.json();
+        console.log(data);
+    }
+
     const best_seller_products = document.getElementById('best-seller-products');
     if(best_seller_products){
 
-        best_seller_products.addEventListener('click',(e)=> {
+        best_seller_products.addEventListener('change',(e)=> {
 
             const sortOn = e.target.value;
-            console.log(sortOn)
+            fetchBestSellingProduct(sortOn);
 
         })
     }
