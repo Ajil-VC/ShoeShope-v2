@@ -832,6 +832,11 @@ const exportAndDownload = async(req, res)=> {
 
 const getTopProducts = async(sortOn)=> {
 
+    //Taking the top selling products based products, Categories, Brands.
+    //Tied products will not show in this query. Means, If 2 products have 
+    //Same number of quantity sold then it will take the first one only 
+    //after sorting.
+
     if(sortOn == 'Products'){
 
         const bestSellers = await Order.aggregate([
@@ -854,6 +859,37 @@ const getTopProducts = async(sortOn)=> {
         return {bestSellers};
 
     }else if(sortOn == 'Brands'){
+
+        const bestSellers = await Order.aggregate([
+
+            { $unwind: "$items" }, 
+            { $match: {
+                "items.paymentStatus" : 'PAID'
+            }},
+            {$group: {
+                _id:{brands:"$items.product.Brand", productId:"$items.product.id"},
+                productName: {$first : "$items.product.name"},
+                productImage: {$first : "$items.product.images"},
+                totalUnitsSold: {$sum : "$items.quantity"},
+                totalRevenue : {$sum : "$items.subtotal"}
+            }},
+            { $sort: { "_id.brands": 1, totalUnitsSold : -1 } }, 
+            { $group: { _id: "$_id.brands",  
+                totalUnitsSold: { $sum: "$totalUnitsSold" }, 
+                totalOrders : { $sum: 1 },
+                baseAmount  :{$sum:"$totalRevenue"},
+                bestSellingProduct : {
+                    $first:{
+                        productName : "$productName",
+                        productImage: "$productImage",
+                        totalUnitsSold : "$totalUnitsSold"
+                    }
+                }
+            }}, 
+            {$sort: {totalUnitsSold : -1}},
+            {$limit : 10}
+        ]);
+        return {bestSellers};
 
     }else if(sortOn == 'Categories'){
 
@@ -904,8 +940,7 @@ const loadBestSellers = async(req,res) => {
         }else{
 
             const sortOn = req.query.sort_on;
-            const {bestSellers} = await getTopProducts(sortOn);
-console.log(bestSellers)            
+            const {bestSellers} = await getTopProducts(sortOn);          
             return res.status(200).json({status : true, bestSellers,sortOn});
 
         }
