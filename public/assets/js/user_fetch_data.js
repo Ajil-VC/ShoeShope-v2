@@ -157,7 +157,7 @@ if(otp_submit_btn){
                     otp_success_msg.textContent = data.message;
                 }else{
         
-                    window.location.href = "http://localhost:2000/home"
+                    window.location.href = "http://localhost:2000/h"
                 }
         
             })

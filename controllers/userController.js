@@ -23,7 +23,8 @@ const securePassword = async (password) => {
         return hashedP;
 
     }catch(error){
-        console.log(error)
+        console.error(error.stack)
+        return res.status(500).render('error',{code : '500',title : 'Oops!', message : "Internal Error Occured. Please try again." });
     }
 
 }
@@ -32,10 +33,12 @@ const loadRegister = async(req,res) => {
 
     try{
 
-        res.render('registration')
+        return res.render('registration')
 
     }catch(error){
-        console.log('something happened')
+
+        console.error(error.stack)
+        return res.status(500).render('error',{code : '500',title : 'Oops!', message : "We couldn't find the page you were looking for." });
     }
 }
 
@@ -70,16 +73,14 @@ const gen_otp = async(req,res) => {
         return res.status(200).render('otpVerification');
         
     }catch(error){
-        console.log(error);
-        res.status(500).send("Error sending OTP")
+        console.error(error.stack)
+        return res.status(500).render('error',{code : '500',title : 'Oops!', message : "Error while sending otp. Please try again" });
     }
 }
 //resend otp here
 //************************************* */
 const resend_otp = async (req,res) => {
 
-    console.log("Heloo this is resend  otp")
-    console.log(req.session.formdata)
     const email = req.session.formdata.email;
    
     const otp = otpGenerator.generate(5,{digits:true,alphabets:false,upperCaseAlphabets:false,lowerCaseAlphabets:false, specialChars:false})
@@ -105,8 +106,9 @@ const resend_otp = async (req,res) => {
         return res.json({success:true,message : "OTP send to your email.."})
         
     }catch(error){
-        console.log(error);
-        res.status(500).send("Error sending OTP")
+        
+        console.error(error.stack)
+        return res.status(500).render('error',{code : '500',title : 'Oops!', message : "Error While sending otp; Please try again." });
     }
 
 }
@@ -121,7 +123,6 @@ const verifyOTP = async(req,res) => {
     const otp = req.body.otp.join('');//Getting array of otp so added this
     const email = req.session.formdata.email;
     const userDatafromSession = req.session.formdata;
-    console.log("From back:",otp)
 
         /* Using .exec() with Mongoose queries ensures a promise is returned,
         aligning with modern JavaScript practices for handling asynchronous operations. */
@@ -145,7 +146,7 @@ const verifyOTP = async(req,res) => {
                 const userData = await newUser.save();
 
                 if(userData){
-                    console.log("User created successfully")
+                
                     return res.status(201).json({status:true})
                 }else{
                     res.send('Something went wrong while registering')
@@ -159,8 +160,8 @@ const verifyOTP = async(req,res) => {
         }
 
    }catch(error){
-    console.log("Error in verifying otp\n",error)
-    return res.status(500).send('Error in verifying otp')
+        console.error("Errory while verifying otp.",error.stack)
+        return res.status(500).render('error',{code : '500',title : 'Oops!', message : "Errory while verifying otp." });
    }
 }
 
@@ -169,8 +170,9 @@ const loadLogin = (req,res) => {
     try{
         return res.status(200).render('login')
     }catch(error){
-        console.log("Error while loading login\n",error)
-        return res.status(500).send('Something Went Wrong')
+        
+        console.error("Error while loading login page",error.stack)
+        return res.status(500).render('error',{code : '500',title : 'Oops!', message : "Error while loading login page" });
     }
 }
 
@@ -181,11 +183,10 @@ const loginUser = async (req,res) => {
         const {email,password} = req.body;
 
         const userData = await User.findOne({email}).exec();
-        console.log(userData,"This is user data\n\n\n\n")
         if(userData.google_id){
             return res.status(200).redirect('/auth/google')
         }else if(!userData.isBlocked){//False means user is blocked.
-            return res.status(401).render('error',{message : 'Unauthorized. You cannot enter into this page!', code : '401'});
+            return res.status(401).render('error',{title: 'Unauthorized' ,message : 'Unauthorized. You cannot enter into this page!', code : '401'});
         }
         else if(userData){
             const passwordMatch = await bcrypt.compare(password,userData.password)
@@ -196,7 +197,7 @@ const loginUser = async (req,res) => {
                 req.session.isAuthorised = userData.isAuthorised; 
                 req.session.isBlocked = userData.isBlocked;
     
-                return res.status(200).redirect('/home')
+                return res.status(200).redirect('')
             }else{
                 return res.status(401).send('email or password incorrect');
             }
@@ -421,8 +422,8 @@ const loadProductDetails = async (req,res) => {
 
     }catch(error){
 
-        console.log('Internal Error while loading product Details',error);
-        return res.status(500).send("Internal Error while loading product Details");
+        console.error('Internal Error while loading product Details',error.stack);
+        return res.status(500).render('error',{code : '500',title : 'Oops!', message : "We couldn't find the page you were looking for." });
     }
 
 }
@@ -636,7 +637,7 @@ const logoutUser = async(req,res) => {
                     return next(err);
                 }else{
                     console.log("User logged out successfully")
-                    return res.status(302).redirect('/home')
+                    return res.status(302).redirect('/')
                 }
             })
             
@@ -651,7 +652,7 @@ const logoutUser = async(req,res) => {
                 }
 
                 console.log("User logged out successfully");
-                return res.status(302).redirect('/home');
+                return res.status(302).redirect('/');
             });
         }else{
             console.log("Unknown Error while logging out")

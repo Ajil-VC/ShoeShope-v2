@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
             margin: 0;
             overflow: hidden;
         }
+
         .container {
             text-align: center;
             background-color: white;
@@ -23,16 +25,19 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: relative;
         }
+
         h1 {
             font-size: 3rem;
             color: #e74c3c;
             margin-bottom: 1rem;
         }
+
         p {
             font-size: 1.2rem;
             color: #34495e;
             margin-bottom: 2rem;
         }
+
         .btn {
             display: inline-block;
             padding: 10px 20px;
@@ -42,21 +47,26 @@
             border-radius: 5px;
             transition: background-color 0.3s ease;
         }
+
         .btn:hover {
             background-color: #2980b9;
         }
+
         .frustrated-icon {
             font-size: 5rem;
             animation: frustrated 0.5s ease-in-out infinite alternate;
         }
+
         @keyframes frustrated {
             from {
                 transform: rotate(-5deg);
             }
+
             to {
                 transform: rotate(5deg);
             }
         }
+
         .error-code {
             position: absolute;
             top: 10px;
@@ -66,13 +76,18 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="error-code" id="errorCode"></div>
+        <div class="error-code" id="errorCode"><%=code%></div>
         <div class="frustrated-icon">😖</div>
-        <h1 id="errorTitle"><%=code%></h1>
-        <p id="errorMessage"><%=message%></p>
-        <a href="/home" class="btn">Go Home</a>
+        <h1 id="errorTitle">
+            <%=title%>
+        </h1>
+        <p id="errorMessage">
+            <%=message%>
+        </p>
+        <a href="/" class="btn">Go Home</a>
     </div>
 
     <script>
@@ -82,7 +97,7 @@
             const errorMessage = document.getElementById('errorMessage');
             const errorCode = document.getElementById('errorCode');
 
-            switch(type) {
+            switch (type) {
                 case '404':
                     errorTitle.textContent = 'Page Not Found';
                     errorMessage.textContent = "We couldn't find the page you were looking for.";
@@ -104,4 +119,5 @@
         // For example: setErrorMessage('404');
     </script>
 </body>
+
 </html>
