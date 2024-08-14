@@ -271,8 +271,8 @@ const searchProduct = async (req, res) => {
 
 const getTopProducts = async () => {
 
-    
-    try{
+
+    try {
 
 
         const [bestSellingProducts, bestSellingCategories] = await Promise.all([
@@ -288,6 +288,7 @@ const getTopProducts = async () => {
                     $group: {
                         _id: "$items.product.id",
                         productName: { $first: "$items.product.name" },
+                        productPrice: { $first: "$items.product.price" },
                         productImage: { $first: "$items.product.images" },
                         totalUnitsSold: { $sum: "$items.quantity" },
                     }
@@ -297,7 +298,7 @@ const getTopProducts = async () => {
             ]),
 
             Order.aggregate([
-    
+
                 { $unwind: "$items" },
                 {
                     $match: {
@@ -308,6 +309,7 @@ const getTopProducts = async () => {
                     $group: {
                         _id: { category: "$items.product.Category", productId: "$items.product.id" },
                         productName: { $first: "$items.product.name" },
+                        productPrice: { $first: "$items.product.price" },
                         productImage: { $first: "$items.product.images" },
                         totalUnitsSold: { $sum: "$items.quantity" },
                     }
@@ -319,13 +321,13 @@ const getTopProducts = async () => {
 
         ]);
 
-        return {bestSellingProducts, bestSellingCategories};
+        return { bestSellingProducts, bestSellingCategories };
 
-    }catch(error){
-        console.error("Internal Error while trying to get best products.",error.stack);
+    } catch (error) {
+        console.error("Internal Error while trying to get best products.", error.stack);
         return null;
     }
-    
+
 
 }
 
@@ -334,13 +336,14 @@ const loadHomePage = async (req, res) => {
 
     try {
 
-        const products = await Product.find({ isActive: 1 }).sort({ _id: -1 }).limit(8);
+        const [products, { bestSellingProducts, bestSellingCategories }] = await Promise.all([
+            Product.find({ isActive: 1 }).sort({ _id: -1 }).limit(8),
+            getTopProducts()
+        ])
 
-        const {bestSellingProducts, bestSellingCategories} = await getTopProducts();
-
-        return res.status(200).render('home', { 
-            products, 
-            bestSellingProducts, 
+        return res.status(200).render('home', {
+            products,
+            bestSellingProducts,
             bestSellingCategories
         });
 
