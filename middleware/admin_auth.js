@@ -7,37 +7,37 @@ const noCacheMiddleware = (req, res, next) => {
     });
     next();
 };
-  
 
-const isLoggedIn = async(req,res,next) => {
 
-    try{
-        
+const isLoggedIn = async (req, res, next) => {
+
+    try {
+
         if (!req.session.admin_id || !req.session.isAuthorised) {
 
             return res.redirect('/admin/login');
-        
+
         }
 
         next();
-    }catch(error){
+    } catch (error) {
 
-        console.log("Internal error while checking isLoggedIn",error);
-        return res.status(500).send("Internal error while checking isLoggedIn",error);
+        console.log("Internal error while checking isLoggedIn", error);
+        return res.status(500).send("Internal error while checking isLoggedIn", error);
     }
 }
 
-const isLoggedOut = async(req,res,next) => {
+const isLoggedOut = async (req, res, next) => {
 
-    try{
+    try {
 
-        if( req.session.admin_id && req.session.isAuthorised ){
+        if (req.session.admin_id && req.session.isAuthorised) {
             return res.redirect('/admin/dashboard');
         }
         next();
-    }catch(error){
-        console.log("internal error occured while checking isLoggedOut",error);
-        return res.status(500).send("internal error occured while checking isLoggedOut",error)
+    } catch (error) {
+        console.log("internal error occured while checking isLoggedOut", error);
+        return res.status(500).send("internal error occured while checking isLoggedOut", error)
     }
 }
 
@@ -48,7 +48,7 @@ const setViews = async (req, res, next) => {
     next();
 }
 
- 
+
 module.exports = {
     isLoggedOut,
     isLoggedIn,
