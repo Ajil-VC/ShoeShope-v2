@@ -1134,6 +1134,59 @@ document.addEventListener('DOMContentLoaded', function () {
         })
     }
 
+    //Add to wishlist from product details.
+    const product_to_wishlist = document.getElementById('product-to-wishlist');
+    const go_to_wishlist = document.getElementById('go-to-wishlist');
+    if(product_to_wishlist){
+        product_to_wishlist.addEventListener('click',function() {
+
+            const productId = this.dataset.productid;
+
+            fetch(`http://localhost:2000/wishlist?productId=${productId}`, {
+                method: "PATCH", headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => {
+
+                    if (!response.ok) {
+
+                        if (response.status == 401) {
+                            return window.location.href = '/login';
+                        }
+
+                        throw new Error('Network response was not ok while adding product to the wishlist.')
+                    }
+                    return response.json();
+                })
+                .then(data => {
+
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                        return
+                    }
+                    if (data.status && data.add == 1) {
+                        //Need to set from here.
+                        product_to_wishlist.classList.add('d-none');
+                        go_to_wishlist.classList.remove('d-none');
+                    } 
+
+                })
+                .catch(error => {
+                    console.log("Error while trying add product to wishlist", error)
+                })
+            
+        })
+    }
+
+    if(go_to_wishlist){
+        go_to_wishlist.addEventListener('click',function(){
+            
+            window.location.href = `/wishlist`;
+        })
+    }
+
 
     // Checkboxes
     document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {

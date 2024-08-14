@@ -124,9 +124,21 @@
                                         <div class="detail-extralink mt-2">
                                             
                                             <div class="product-extra-link2">
-                                                <button type="submit" class="button button-add-to-cart d-flex justify-content-between align-items-center " style="width: 215px;" >
-                                                    <span style="margin-right: 10px;" >Add to Wishlist</span>
-                                                    <img src="/assets/imgs/theme/icons/icon-white-heart.svg" alt="" style="width: 15px;" >
+                                                <% const addClass = isInWishlist ? 'd-none' : ''; %>
+                                                <% const goClass = isInWishlist ? '' : 'd-none'; %>
+
+                                                <button type="submit" id="product-to-wishlist" data-productid="<%=product_details._id%>" 
+                                                    class="button button-add-to-cart d-flex justify-content-between align-items-center <%= addClass %>" 
+                                                    style="width: 215px;">
+                                                    <span style="margin-right: 10px;">Add to Wishlist</span>
+                                                    <img src="/assets/imgs/theme/icons/icon-white-heart.svg" alt="" style="width: 15px;">
+                                                </button>
+
+                                                <button type="submit" id="go-to-wishlist"
+                                                    class="button button-add-to-cart d-flex justify-content-between align-items-center <%= goClass %>" 
+                                                    style="width: 215px;">
+                                                    <span style="margin-right: 10px;">Go to Wishlist</span>
+                                                    <img src="/assets/imgs/theme/icons/icon-white-heart.svg" alt="" style="width: 15px;">
                                                 </button>
                                             </div>
 

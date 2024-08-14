@@ -473,16 +473,18 @@ const loadShowcase = async (req, res) => {
 
 const loadProductDetails = async (req, res) => {
 
-    const product_id = req.query.product_id;
-    let userID = "";
-    if (req?.user?.user_id) {
-        userID = req.user.user_id;
-    } else if (req.session.user_id) {
-        userID = req.session.user_id
-    }
-    let elemMatch = null;
 
     try {
+
+        const product_id = new mongoose.Types.ObjectId(req.query.product_id);
+        let userID = "";
+        if (req?.user?.user_id) {
+            userID = req.user.user_id;
+        } else if (req.session.user_id) {
+            userID = req.session.user_id
+        }
+        let elemMatch = null;
+        let isInWishlist = null;
 
         if (userID) {
 
@@ -493,6 +495,11 @@ const loadProductDetails = async (req, res) => {
                         productId: product_id
                     }
                 }
+            });
+
+            isInWishlist = await User.findOne({
+                _id: userID,
+                wishlist: product_id
             })
         }
 
@@ -502,7 +509,13 @@ const loadProductDetails = async (req, res) => {
 
         const related_products = await Product.find({ $and: [{ Category: category }, { targetGroup: target }] });
 
-        return res.render('product_details', { product_details, related_products, target, elemMatch });
+        return res.render('product_details', {
+            product_details,
+            related_products,
+            target,
+            elemMatch,
+            isInWishlist
+        });
 
     } catch (error) {
 
