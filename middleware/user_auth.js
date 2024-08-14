@@ -1,4 +1,7 @@
 
+const { User, Cart } = require('../models/models');
+const mongoose = require('mongoose')
+
 const noCacheMiddleware = (req, res, next) => {
     res.set({
         'Cache-Control': 'no-store, no-cache, must-revalidate, private',
@@ -75,6 +78,45 @@ const setViews = async (req, res, next) => {
     next();
 }
 
+const badgeCount = async (req, res, next) => {
+
+    if (req?.session?.user_id || req?.user?.user_id) {
+
+        try {
+
+            if (req?.session?.user_id) {
+                var userId = new mongoose.Types.ObjectId(req.session.user_id);
+            } else if (req?.user?.user_id) {
+                var userId = new mongoose.Types.ObjectId(req.user.user_id);
+            }
+            const [wishlistData, cartData] = await Promise.all([
+                User.aggregate([ 
+                    { $match: { _id:userId }}, 
+                    { $project: { wishlistCount: { $size: "$wishlist" } } }
+                ]),
+                Cart.aggregate([
+                    {$match:{userId: userId}},
+                    {$project:{cartCount:{$size:"$items"}}}
+                ])
+            ]);
+
+            const wishlistCount = wishlistData[0].wishlistCount;
+            const cartCount     = cartData[0].cartCount;
+
+            res.locals.wishlistCount = wishlistCount;
+            res.locals.cartCount    = cartCount;
+
+        } catch (error) {
+            console.error("Inernal error occured while trying to get badge count in middleware.", error.stack);
+        }
+    }else{
+
+        res.locals.wishlistCount = 0;
+        res.locals.cartCount    = 0;
+    }
+    next();
+}
+
 
 module.exports = {
     isLoggedOut,
@@ -82,4 +124,5 @@ module.exports = {
     isBlocked,
     noCacheMiddleware,
     setViews,
+    badgeCount
 }

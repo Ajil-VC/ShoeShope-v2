@@ -41,14 +41,21 @@
                             <div class="header-action-icon-2">
                                 <a href="/wishlist">
                                     <img class="svgInject" alt="Evara" src="/assets/imgs/theme/icons/icon-heart.svg">
-                                    <span class="pro-count blue" style="background-color: #e24a4a;" >4</span>
+                                    <%if(wishlistCount > 0){%>
+
+                                        <span class="pro-count blue" style="background-color: #e24a4a;" ><%=wishlistCount%></span>
+                                    <%}%>
                                 </a>
                             </div>
 
                             <div class="header-action-icon-2">
                                 <a href="/cart">
                                     <img class="svgInject" alt="Evara" src="/assets/imgs/theme/icons/icon-cart.svg">
-                                    <span class="pro-count blue" style="background-color: #e24a4a;" >3</span>
+                                    <%if(cartCount > 0){%>
+
+                                        <span class="pro-count blue" style="background-color: #e24a4a;" ><%=cartCount%></span>
+                                      
+                                    <%}%>
                                 </a>
                             </div>
 

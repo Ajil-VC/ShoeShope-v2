@@ -6,7 +6,7 @@ const { passport } = require('../middleware/googleauth');
 userRouter.use(express.urlencoded({ extended: true }));
 userRouter.use(authenticate.noCacheMiddleware);
 userRouter.use(authenticate.setViews);
-
+userRouter.use(authenticate.badgeCount);
 
 const userController = require('../controllers/userController');
 
