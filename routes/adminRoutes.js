@@ -1,38 +1,12 @@
 const express = require('express');
 const adminRouter = express.Router();
-const path = require('path');
-const fs = require('fs');
 const authenticate = require('../middleware/admin_auth');
 
 adminRouter.use(authenticate.noCacheMiddleware);
 adminRouter.use(express.urlencoded({ extended: true }));
 
-const multer = require('multer')
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-
-        console.log("This is inside multer", req.body)
-        let directoryPath = path.join(__dirname, '../public/ProductImage')
-        if (fs.existsSync(directoryPath)) {
-
-            cb(null, directoryPath);
-
-        } else {
-
-           
-            fs.mkdirSync(directoryPath);
-            cb(null, directoryPath)
-
-        }
-
-    },
-    
-    filename: function (req, file, cb) {
-        const name = Date.now() + '_' + file.originalname;
-        cb(null, name)
-    }
-})
-const upload = multer({ storage: storage })
+//requiring multer here
+const upload = require('../middleware/admin_upload');
 
 adminRouter.use((req, res, next) => {
 
