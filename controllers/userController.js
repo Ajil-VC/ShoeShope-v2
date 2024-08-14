@@ -186,7 +186,8 @@ const loginUser = async (req, res) => {
         const userData = await User.findOne({ email }).exec();
         if (userData.google_id) {
             return res.status(200).redirect('/auth/google')
-        } else if (!userData.isBlocked) {//False means user is blocked.
+        } else 
+        if (!userData.isBlocked) {//False means user is blocked.
             return res.status(401).render('error', { title: 'Unauthorized', message: 'Unauthorized. You cannot enter into this page!', code: '401' });
         }
         else if (userData) {

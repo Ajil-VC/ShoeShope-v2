@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded',function() {
                                             
                         <div class="product-price">
                             <span>₹ ${product.salePrice} </span>
-                            <span class="old-price" style="color: rgb(255, 123, 0);" >₹ ${product.salePrice}</span>
+                        
                         </div>
                                                
                     </div>

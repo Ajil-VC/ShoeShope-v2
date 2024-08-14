@@ -68,9 +68,9 @@
                                         </div>
                                         <div class="clearfix product-price-cover">
                                             <div class="product-price primary-color float-left">
-                                                <ins><span class="text-brand">₹ <%=product_details.salePrice - ((product_details.salePrice * 15) / 100)  %></span></ins>
-                                                <ins><span class="old-price font-md ml-15">₹ <%=product_details.salePrice%></span></ins>
-                                                <span class="save-price  font-md color3 ml-15">15% Off</span>
+                                                <ins><span class="text-brand">₹ <%=product_details.salePrice%></span></ins>
+                                                <!-- <ins><span class="old-price font-md ml-15">₹ <%=product_details.salePrice%></span></ins> -->
+                                                <!-- <span class="save-price  font-md color3 ml-15">15% Off</span> -->
                                             </div>
                                         </div>
                                         <div class="bt-1 border-color-1 mt-15 mb-15"></div>
@@ -88,16 +88,16 @@
                                             </ul>
                                         </div>
                                    
-                                        <div class="attr-detail attr-size">
+                                        <!-- <div class="attr-detail attr-size">
                                             <strong class="mr-10">Size</strong>
                                             <ul class="list-filter size-filter font-small">
-                                                <li><a >S</a></li> <!--class="active"-->
+                                                <li class="active" ><a >S</a></li> 
                                                 <li><a >M</a></li>
                                                 <li><a >L</a></li>
                                                 <li><a >XL</a></li>
                                                 <li><a >XXL</a></li>
                                             </ul>
-                                        </div>
+                                        </div> -->
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                                         
                                         <div class="detail-extralink"  >
@@ -134,9 +134,9 @@
 
                                         <div class="detail-extralink mt-2">
                                             
-                                            <div class="product-extra-link2">
+                                            <!-- <div class="product-extra-link2">
                                                 <button type="submit" class="button button-add-to-cart" style="width: 215px;" >Buy now</button>
-                                            </div>
+                                            </div> -->
 
                                         </div>
                                         
@@ -218,8 +218,8 @@
                                                         <h2><a href="/product_details/?product_id=<%=related_products[i]._id%>" tabindex="0"> <%=related_products[i].ProductName%> </a></h2>
                                                         
                                                         <div class="product-price">
-                                                            <span>₹ <%=related_products[i].salePrice - 575%></span>
-                                                            <span class="old-price">₹ <%=related_products[i].salePrice%>  </span>
+                                                            <span>₹ <%=related_products[i].salePrice%></span>
+                                                            <!-- <span class="old-price">₹ <%=related_products[i].salePrice%>  </span> -->
                                                         </div>
                                                     </div>
                                                 </div>
