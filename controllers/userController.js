@@ -186,26 +186,26 @@ const loginUser = async (req, res) => {
         const userData = await User.findOne({ email }).exec();
         if (userData.google_id) {
             return res.status(200).redirect('/auth/google')
-        } else 
-        if (!userData.isBlocked) {//False means user is blocked.
-            return res.status(401).render('error', { title: 'Unauthorized', message: 'Unauthorized. You cannot enter into this page!', code: '401' });
-        }
-        else if (userData) {
-            const passwordMatch = await bcrypt.compare(password, userData.password)
-
-            if (passwordMatch) {
-
-                req.session.user_id = userData._id;
-                req.session.isAuthorised = userData.isAuthorised;
-                req.session.isBlocked = userData.isBlocked;
-
-                return res.status(200).redirect('/')
-            } else {
-                return res.status(401).render('error', { code: '401', title: 'Not Found!', message: "Email or Password Incorrect." });
+        } else
+            if (!userData.isBlocked) {//False means user is blocked.
+                return res.status(401).render('error', { title: 'Unauthorized', message: 'Unauthorized. You cannot enter into this page!', code: '401' });
             }
-        } else {
-            return res.status(404).render('error', { code: '404', title: 'Oops!', message: "User Not Found." });
-        }
+            else if (userData) {
+                const passwordMatch = await bcrypt.compare(password, userData.password)
+
+                if (passwordMatch) {
+
+                    req.session.user_id = userData._id;
+                    req.session.isAuthorised = userData.isAuthorised;
+                    req.session.isBlocked = userData.isBlocked;
+
+                    return res.status(200).redirect('/')
+                } else {
+                    return res.status(401).render('error', { code: '401', title: 'Not Found!', message: "Email or Password Incorrect." });
+                }
+            } else {
+                return res.status(404).render('error', { code: '404', title: 'Oops!', message: "User Not Found." });
+            }
 
     } catch (error) {
 
@@ -267,13 +267,82 @@ const searchProduct = async (req, res) => {
 }
 
 
+
+
+const getTopProducts = async () => {
+
+    
+    try{
+
+
+        const [bestSellingProducts, bestSellingCategories] = await Promise.all([
+
+            Order.aggregate([
+                { $unwind: "$items" },
+                {
+                    $match: {
+                        "items.paymentStatus": 'PAID'
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$items.product.id",
+                        productName: { $first: "$items.product.name" },
+                        productImage: { $first: "$items.product.images" },
+                        totalUnitsSold: { $sum: "$items.quantity" },
+                    }
+                },
+                { $sort: { totalUnitsSold: -1 } },
+                { $limit: 4 }
+            ]),
+
+            Order.aggregate([
+    
+                { $unwind: "$items" },
+                {
+                    $match: {
+                        "items.paymentStatus": 'PAID'
+                    }
+                },
+                {
+                    $group: {
+                        _id: { category: "$items.product.Category", productId: "$items.product.id" },
+                        productName: { $first: "$items.product.name" },
+                        productImage: { $first: "$items.product.images" },
+                        totalUnitsSold: { $sum: "$items.quantity" },
+                    }
+                },
+                { $sort: { "_id.category": 1, totalUnitsSold: -1 } },
+                { $limit: 4 }
+            ])
+
+
+        ]);
+
+        return {bestSellingProducts, bestSellingCategories};
+
+    }catch(error){
+        console.error("Internal Error while trying to get best products.",error.stack);
+        return null;
+    }
+    
+
+}
+
+
 const loadHomePage = async (req, res) => {
 
     try {
 
         const products = await Product.find({ isActive: 1 }).sort({ _id: -1 }).limit(8);
 
-        return res.status(200).render('home', { products });
+        const {bestSellingProducts, bestSellingCategories} = await getTopProducts();
+
+        return res.status(200).render('home', { 
+            products, 
+            bestSellingProducts, 
+            bestSellingCategories
+        });
 
     } catch (error) {
 
@@ -2159,11 +2228,11 @@ const cancelOrder = async (req, res) => {
                         _id: orderId,
                         'items.product.id': cancelledItemId
                     }, {
-                        $set: {
-                            'items.$[elem].status': 'Cancelled',
-                            'items.$[elem].paymentStatus': 'CANCELLED'
-                        }
-                    },
+                    $set: {
+                        'items.$[elem].status': 'Cancelled',
+                        'items.$[elem].paymentStatus': 'CANCELLED'
+                    }
+                },
                     {
                         arrayFilters: [{ 'elem.product.id': cancelledItemId }],
                         new: true

@@ -849,113 +849,121 @@ const getTopProducts = async (sortOn) => {
     //Same number of quantity sold then it will take the first one only 
     //after sorting.
 
-    if (sortOn == 'Products') {
+    try{
 
-        const bestSellers = await Order.aggregate([
-            { $unwind: "$items" },
-            {
-                $match: {
-                    "items.paymentStatus": 'PAID'
-                }
-            },
-            {
-                $group: {
-                    _id: "$items.product.id",
-                    productName: { $first: "$items.product.name" },
-                    productImage: { $first: "$items.product.images" },
-                    totalUnitsSold: { $sum: "$items.quantity" },
-                    totalOrders: { $sum: 1 },
-                    productPrice: { $first: "$items.product.price" },
-                    baseAmount: { $sum: "$items.subtotal" }
-                }
-            },
-            { $sort: { totalUnitsSold: -1 } },
-            { $limit: 10 }
-        ]);
-
-        return { bestSellers };
-
-    } else if (sortOn == 'Brands') {
-
-        const bestSellers = await Order.aggregate([
-
-            { $unwind: "$items" },
-            {
-                $match: {
-                    "items.paymentStatus": 'PAID'
-                }
-            },
-            {
-                $group: {
-                    _id: { brands: "$items.product.Brand", productId: "$items.product.id" },
-                    productName: { $first: "$items.product.name" },
-                    productImage: { $first: "$items.product.images" },
-                    totalUnitsSold: { $sum: "$items.quantity" },
-                    totalRevenue: { $sum: "$items.subtotal" }
-                }
-            },
-            { $sort: { "_id.brands": 1, totalUnitsSold: -1 } },
-            {
-                $group: {
-                    _id: "$_id.brands",
-                    totalUnitsSold: { $sum: "$totalUnitsSold" },
-                    totalOrders: { $sum: 1 },
-                    baseAmount: { $sum: "$totalRevenue" },
-                    bestSellingProduct: {
-                        $first: {
-                            productName: "$productName",
-                            productImage: "$productImage",
-                            totalUnitsSold: "$totalUnitsSold"
+        if (sortOn == 'Products') {
+    
+            const bestSellers = await Order.aggregate([
+                { $unwind: "$items" },
+                {
+                    $match: {
+                        "items.paymentStatus": 'PAID'
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$items.product.id",
+                        productName: { $first: "$items.product.name" },
+                        productImage: { $first: "$items.product.images" },
+                        totalUnitsSold: { $sum: "$items.quantity" },
+                        totalOrders: { $sum: 1 },
+                        productPrice: { $first: "$items.product.price" },
+                        baseAmount: { $sum: "$items.subtotal" }
+                    }
+                },
+                { $sort: { totalUnitsSold: -1 } },
+                { $limit: 10 }
+            ]);
+    
+            return { bestSellers };
+    
+        } else if (sortOn == 'Brands') {
+    
+            const bestSellers = await Order.aggregate([
+    
+                { $unwind: "$items" },
+                {
+                    $match: {
+                        "items.paymentStatus": 'PAID'
+                    }
+                },
+                {
+                    $group: {
+                        _id: { brands: "$items.product.Brand", productId: "$items.product.id" },
+                        productName: { $first: "$items.product.name" },
+                        productImage: { $first: "$items.product.images" },
+                        totalUnitsSold: { $sum: "$items.quantity" },
+                        totalRevenue: { $sum: "$items.subtotal" }
+                    }
+                },
+                { $sort: { "_id.brands": 1, totalUnitsSold: -1 } },
+                {
+                    $group: {
+                        _id: "$_id.brands",
+                        totalUnitsSold: { $sum: "$totalUnitsSold" },
+                        totalOrders: { $sum: 1 },
+                        baseAmount: { $sum: "$totalRevenue" },
+                        bestSellingProduct: {
+                            $first: {
+                                productName: "$productName",
+                                productImage: "$productImage",
+                                totalUnitsSold: "$totalUnitsSold"
+                            }
                         }
                     }
-                }
-            },
-            { $sort: { totalUnitsSold: -1 } },
-            { $limit: 10 }
-        ]);
-        return { bestSellers };
-
-    } else if (sortOn == 'Categories') {
-
-        const bestSellers = await Order.aggregate([
-
-            { $unwind: "$items" },
-            {
-                $match: {
-                    "items.paymentStatus": 'PAID'
-                }
-            },
-            {
-                $group: {
-                    _id: { category: "$items.product.Category", productId: "$items.product.id" },
-                    productName: { $first: "$items.product.name" },
-                    productImage: { $first: "$items.product.images" },
-                    totalUnitsSold: { $sum: "$items.quantity" },
-                    totalRevenue: { $sum: "$items.subtotal" }
-                }
-            },
-            { $sort: { "_id.category": 1, totalUnitsSold: -1 } },
-            {
-                $group: {
-                    _id: "$_id.category",
-                    totalUnitsSold: { $sum: "$totalUnitsSold" },
-                    totalOrders: { $sum: 1 },
-                    baseAmount: { $sum: "$totalRevenue" },
-                    bestSellingProduct: {
-                        $first: {
-                            productName: "$productName",
-                            productImage: "$productImage",
-                            totalUnitsSold: "$totalUnitsSold"
+                },
+                { $sort: { totalUnitsSold: -1 } },
+                { $limit: 10 }
+            ]);
+            return { bestSellers };
+    
+        } else if (sortOn == 'Categories') {
+    
+            const bestSellers = await Order.aggregate([
+    
+                { $unwind: "$items" },
+                {
+                    $match: {
+                        "items.paymentStatus": 'PAID'
+                    }
+                },
+                {
+                    $group: {
+                        _id: { category: "$items.product.Category", productId: "$items.product.id" },
+                        productName: { $first: "$items.product.name" },
+                        productImage: { $first: "$items.product.images" },
+                        totalUnitsSold: { $sum: "$items.quantity" },
+                        totalRevenue: { $sum: "$items.subtotal" }
+                    }
+                },
+                { $sort: { "_id.category": 1, totalUnitsSold: -1 } },
+                {
+                    $group: {
+                        _id: "$_id.category",
+                        totalUnitsSold: { $sum: "$totalUnitsSold" },
+                        totalOrders: { $sum: 1 },
+                        baseAmount: { $sum: "$totalRevenue" },
+                        bestSellingProduct: {
+                            $first: {
+                                productName: "$productName",
+                                productImage: "$productImage",
+                                totalUnitsSold: "$totalUnitsSold"
+                            }
                         }
                     }
-                }
-            },
-            { $sort: { totalUnitsSold: -1 } },
-            { $limit: 10 }
-        ]);
-        return { bestSellers };
+                },
+                { $sort: { totalUnitsSold: -1 } },
+                { $limit: 10 }
+            ]);
+            return { bestSellers };
+    
+        }
 
+    }catch(error){
+        console.error("Internal Error Occured while trying to fetch best sellers from db.",error.stack);
+        return null;
     }
+
 
 }
 
