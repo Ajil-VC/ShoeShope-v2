@@ -5,15 +5,9 @@ const authenticate = require('../middleware/admin_auth');
 adminRouter.use(authenticate.noCacheMiddleware);
 adminRouter.use(express.urlencoded({ extended: true }));
 
-//requiring multer here
+//requiring multer logic here
 const upload = require('../middleware/admin_upload');
-
-adminRouter.use((req, res, next) => {
-
-    req.app.set('views', './views/Admin');
-    next();
-
-})
+adminRouter.use(authenticate.setViews);
 const adminController = require('../controllers/adminController')
 
 // Admin Signup done by postman

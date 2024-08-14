@@ -42,9 +42,16 @@ const isLoggedOut = async(req,res,next) => {
 }
 
 
+const setViews = async (req, res, next) => {
+
+    req.app.set('views', './views/Admin');
+    next();
+}
+
  
 module.exports = {
     isLoggedOut,
     isLoggedIn,
-    noCacheMiddleware
+    noCacheMiddleware,
+    setViews
 }
