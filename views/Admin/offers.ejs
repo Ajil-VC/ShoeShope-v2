@@ -1,0 +1,153 @@
+<%- include("../layouts/adminHeader.ejs")  %>
+    
+<!--Aside Here-->
+<%- include("../layouts/adminAside.ejs")  %>
+
+<!--Head with search bar and other options Here-->
+<%- include("../layouts/adminHead.ejs")  %>
+    <!-- <div class="screen-overlay"></div> -->
+
+
+
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Offers</h2>
+                <p>Manage offers.</p>
+            </div>
+        </div>
+    
+        <form id="off-create-form">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="off-title" class="form-label">Title</label>
+                    <input type="text" class="form-control bg-white" id="off-title" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="off-description" class="form-label">Description</label>
+                    <textarea class="form-control bg-white" id="off-description" rows="1"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label for="off-products" class="form-label">Products (if applicable)</label>
+                    <select class="form-select bg-white" id="off-products" multiple>
+                        <!-- Add product options dynamically -->
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="off-categories" class="form-label">Categories (if applicable)</label>
+                    <select class="form-select bg-white" id="off-categories" multiple>
+                        <!-- Add category options dynamically -->
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="off-discount-type" class="form-label">Discount Type</label>
+                    <select class="form-select bg-white" id="off-discount-type" required>
+                        <option disabled selected value="">Choose...</option>
+                        <option value="percentage">Percentage</option>
+                        <option value="fixed">Fixed</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="off-discount-value" class="form-label">Discount Value</label>
+                    <input type="number" class="form-control bg-white" id="off-discount-value" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="off-applicable-on" class="form-label">Applicable On</label>
+                    <select class="form-select bg-white" id="off-applicable-on" required>
+                        <option disabled selected value="">Choose...</option>
+                        <option value="product">Product</option>
+                        <option value="category">Category</option>
+                        <option value="cart">Cart</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="off-min-purchase" class="form-label">Minimum Purchase Amount</label>
+                    <input type="number" class="form-control bg-white" id="off-min-purchase" value="0">
+                </div>
+                <div class="col-md-4">
+                    <label for="off-start-date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control bg-white" id="off-start-date" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="off-end-date" class="form-label">End Date</label>
+                    <input type="date" class="form-control bg-white" id="off-end-date" required>
+                </div>
+                <div class="col-12 d-flex justify-content-end align-items-center">
+                    <div class="form-check me-3">
+                        <input class="form-check-input" type="checkbox" id="off-is-active" checked>
+                        <label class="form-check-label" for="off-is-active">
+                            Is Active
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Offer</button>
+                </div>
+            </div>
+        </form>
+    </section>
+    
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Added Offer Details </h2>
+            
+            </div>
+         
+        </div>
+        <div class="card mb-4">
+            
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                
+                                <th scope="col">Coupon name</th>
+                                <th scope="col">Coupon code</th>
+                                <th scope="col">Discount</th>
+                                <th scope="col">Minimum Amount</th>
+                                <th scope="col">Maximum Amount</th>
+                                <th scope="col">Expiry</th>
+                                <th scope="col">Status</th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            
+                            
+
+                                <tr>
+                                   
+                                    <td>fasdfasf</td>
+                                    <td>fasdfasf</td>
+                                    <td>fasdfasf</td>
+                                    <td>fasdfasf</td>
+                                    <td>fasdfasf</td>
+                                    <td>fasdfasf</td>
+                                    <td>fasdfasf</td>
+                                  
+                                </tr>
+                                
+                       
+                            
+                        </tbody>
+                    </table>
+                </div> <!-- table-responsive //end -->
+            </div> <!-- card-body end// -->
+        </div> <!-- card end// -->
+        <div class="pagination-area mt-15 mb-50">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-start">
+                    
+
+
+                    <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </section> <!-- content-main end// -->
+  
+
+
+<%- include("../layouts/adminFooter.ejs")  %>

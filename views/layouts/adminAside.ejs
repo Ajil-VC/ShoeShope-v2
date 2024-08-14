@@ -37,6 +37,12 @@
                     <span class="text">Coupons</span> </a>
             </li>
 
+            <li class="menu-item <%= req.path === '/offers' ? 'active' : '' %> ">
+                <a class="menu-link" href="/admin/offers"> <i class="icon material-icons md-local_offer"></i>
+                    <span class="text"> Offers </span>
+                </a>
+            </li>
+
             <li class="menu-item has-submenu <%= ((req.path === '/order-list') || (req.path === '/returned-order')) ? 'active' : '' %> ">
                 <a class="menu-link" href="page-orders-1.html"> <i class="icon material-icons md-shopping_cart"></i>
                     <span class="text">Orders</span>

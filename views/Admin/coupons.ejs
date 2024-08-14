@@ -55,7 +55,7 @@
                         <span  class="text-danger" style="font-size: smaller;" id="coupon-min-error"></span>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="MaximumAmnt">Maximum Amount</label>
+                        <label for="MaximumAmnt">Maximum Discount</label>
                         <input type="number" name="MaxAmount" class="form-control" id="MaximumAmnt" >
                         <span  class="text-danger" style="font-size: smaller;" id="coupon-max-error"></span>
                     </div>
@@ -113,6 +113,14 @@
                             </thead>
                             <tbody>
 
+                                <%if(coupons?.length == 0){%>
+                                    <tr>
+                                        <td>
+
+                                            No coupons are added
+                                        </td>
+                                    </tr>
+                                <%}%>
                                 <% for(let i = 0 ; i < coupons?.length ; i++){ %>
 
                                     <tr>

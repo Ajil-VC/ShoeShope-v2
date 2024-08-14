@@ -561,7 +561,7 @@ const loadDashboard = async (req, res) => {
                             totalAmnt: { $sum: "$refundAmnt" }
                         }
                     },
-                    { $match: { _id: {$in:['approved','initiated']} } }
+                    { $match: { _id: { $in: ['approved', 'initiated'] } } }
                 ]),
 
                 saleReportByRange('currWeek')//Getting datas from this current week
@@ -849,10 +849,10 @@ const getTopProducts = async (sortOn) => {
     //Same number of quantity sold then it will take the first one only 
     //after sorting.
 
-    try{
+    try {
 
         if (sortOn == 'Products') {
-    
+
             const bestSellers = await Order.aggregate([
                 { $unwind: "$items" },
                 {
@@ -874,13 +874,13 @@ const getTopProducts = async (sortOn) => {
                 { $sort: { totalUnitsSold: -1 } },
                 { $limit: 10 }
             ]);
-    
+
             return { bestSellers };
-    
+
         } else if (sortOn == 'Brands') {
-    
+
             const bestSellers = await Order.aggregate([
-    
+
                 { $unwind: "$items" },
                 {
                     $match: {
@@ -916,11 +916,11 @@ const getTopProducts = async (sortOn) => {
                 { $limit: 10 }
             ]);
             return { bestSellers };
-    
+
         } else if (sortOn == 'Categories') {
-    
+
             const bestSellers = await Order.aggregate([
-    
+
                 { $unwind: "$items" },
                 {
                     $match: {
@@ -956,11 +956,11 @@ const getTopProducts = async (sortOn) => {
                 { $limit: 10 }
             ]);
             return { bestSellers };
-    
+
         }
 
-    }catch(error){
-        console.error("Internal Error Occured while trying to fetch best sellers from db.",error.stack);
+    } catch (error) {
+        console.error("Internal Error Occured while trying to fetch best sellers from db.", error.stack);
         return null;
     }
 
@@ -974,14 +974,14 @@ const loadBestSellers = async (req, res) => {
         if (req.accepts('html')) {
 
             const initiatedReturns = await returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ]);
             const initiatedReturnCount = initiatedReturns[0].total;
 
             const { bestSellers } = await getTopProducts('Products');
-            return res.status(200).render('best-sellers', { bestSellers,initiatedReturnCount });
+            return res.status(200).render('best-sellers', { bestSellers, initiatedReturnCount });
 
         } else {
 
@@ -1065,22 +1065,51 @@ const loadCoupons = async (req, res) => {
             }
         }
 
-        const [coupons,initiatedReturns] = await Promise.all([
+        const [coupons, initiatedReturns] = await Promise.all([
             coupon.find().exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ]);
         const initiatedReturnCount = initiatedReturns[0].total;
-        return res.status(200).render('coupons', { coupons,initiatedReturnCount });
+        return res.status(200).render('coupons', { coupons, initiatedReturnCount });
 
     } catch (error) {
         console.log("Internal error while trying to load coupons", error);
         return res.status(500).send("Internal error while trying to load coupons", error);
     }
 
+}
+
+
+const loadOffers = async (req, res) => {
+
+    try {
+
+        const [initiatedReturns] = await Promise.all([
+
+            returnItem.aggregate([
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
+            ])
+        ]);
+        const initiatedReturnCount = initiatedReturns[0].total;
+
+        return res.status(200).render('offers', { initiatedReturnCount })
+
+    } catch (error) {
+
+        console.error('Internal error while trying to load offer page', error.stack);
+        return res.status(500).render('error', {
+            code: '500',
+            title: 'Oops!',
+            message: "Something went wrong. Please try again later.",
+            redirect: '/admin/dashboard'
+        });
+    }
 }
 
 
@@ -1112,18 +1141,18 @@ const loadCustomerList = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        const [userData,totalDocuments,initiatedReturns] = await Promise.all([
+        const [userData, totalDocuments, initiatedReturns] = await Promise.all([
             User.find().skip(skip).limit(limit).exec(),
             User.countDocuments().exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ]);
         const initiatedReturnCount = initiatedReturns[0].total;
         const totalPages = Math.ceil(totalDocuments / limit);
-        return res.status(200).render('customerList', { user: userData, totalPages: totalPages, currentPage: page,initiatedReturnCount });
+        return res.status(200).render('customerList', { user: userData, totalPages: totalPages, currentPage: page, initiatedReturnCount });
         // return res.status(200).json({user : userData, totalPages : totalPages, currentPage : page})
 
 
@@ -1221,18 +1250,18 @@ const deleteUser = async (req, res) => {
 const loadCategory = async (req, res) => {
 
     try {
-        
+
         const [brands, categoryDetails, initiatedReturns] = await Promise.all([
             Brand.find({}).exec(),
             Category.find({}).exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ])
         const initiatedReturnCount = initiatedReturns[0].total;
-        return res.status(200).render('categories', { brands, categoryDetails,initiatedReturnCount });
+        return res.status(200).render('categories', { brands, categoryDetails, initiatedReturnCount });
 
     } catch (error) {
 
@@ -1366,13 +1395,13 @@ const loadAllProducts = async (req, res) => {
     try {
 
         const skip = (page - 1) * limit;
-        const [products, totalDocuments,initiatedReturns] = await Promise.all([
+        const [products, totalDocuments, initiatedReturns] = await Promise.all([
             Product.find().skip(skip).limit(limit).sort({ createdAt: -1 }).exec(),
             Product.countDocuments().exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
@@ -1419,13 +1448,13 @@ const loadAddNewProduct = async (req, res) => {
 
     try {
 
-        const [categories,brand, initiatedReturns] = await Promise.all([
+        const [categories, brand, initiatedReturns] = await Promise.all([
             Category.find({}).exec(),
             Brand.find({}).exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ]);
         const initiatedReturnCount = initiatedReturns[0].total;
@@ -1499,9 +1528,9 @@ const loadEditProduct = async (req, res) => {
             Brand.find({}).exec(),
             Product.findOne({ _id: productId }),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ]);
         if (!product) {
@@ -1513,7 +1542,7 @@ const loadEditProduct = async (req, res) => {
             });
         }
         const initiatedReturnCount = initiatedReturns[0].total;
-        
+
         return res.status(200).render('edit-product', { categories, brand, product, initiatedReturnCount })
 
     } catch (error) {
@@ -1580,20 +1609,20 @@ const loadOrderList = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        const [orders, totalDocuments,initiatedReturns] = await Promise.all([
+        const [orders, totalDocuments, initiatedReturns] = await Promise.all([
 
             Order.find().skip(skip).limit(limit).populate('customer').sort({ createdAt: -1 }).exec(),
             Order.countDocuments().exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
         const initiatedReturnCount = initiatedReturns[0].total;
 
-        return res.status(200).render('order-list', { orderlist: orders, totalPages: totalPages, currentPage: page,initiatedReturnCount });
+        return res.status(200).render('order-list', { orderlist: orders, totalPages: totalPages, currentPage: page, initiatedReturnCount });
 
     } catch (error) {
         console.log("Internal error while trying to load order list", error);
@@ -1601,19 +1630,19 @@ const loadOrderList = async (req, res) => {
 }
 
 const loadOrderDetails = async (req, res) => {
-    
+
     try {
         const orderId = new mongoose.Types.ObjectId(req.query.orderId)
 
-        const [orderDetails,initiatedReturns] = await Promise.all([
+        const [orderDetails, initiatedReturns] = await Promise.all([
             Order.findOne({ _id: orderId }).populate('customer').populate('shippingAddress').exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ])
-        
+
         const initiatedReturnCount = initiatedReturns[0].total;
 
         let grandSubTotal = 0;
@@ -1768,13 +1797,13 @@ const loadReturnedOrders = async (req, res) => {
 
     try {
 
-        const [returnedProducts, totalDocuments,initiatedReturns] = await Promise.all([
+        const [returnedProducts, totalDocuments, initiatedReturns] = await Promise.all([
             returnItem.find().sort({ returnDate: -1 }).skip(skip).limit(limit).populate('customer').exec(),
             returnItem.countDocuments().exec(),
             returnItem.aggregate([
-                
-                { $match: { status : 'initiated' } },
-                {$count : 'total'}
+
+                { $match: { status: 'initiated' } },
+                { $count: 'total' }
             ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
@@ -1988,6 +2017,8 @@ module.exports = {
     loadCoupons,
     addNewCoupon,
     changeCouponStatus,
+
+    loadOffers,
 
     loadCustomerList,
     blockOrUnblockUser,

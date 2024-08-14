@@ -28,6 +28,8 @@ adminRouter.get('/coupons', authenticate.isLoggedIn, adminController.loadCoupons
 adminRouter.post('/coupons', authenticate.isLoggedIn, adminController.addNewCoupon);
 adminRouter.patch('/coupons', authenticate.isLoggedIn, adminController.changeCouponStatus);
 
+adminRouter.get('/offers', authenticate.isLoggedIn, adminController.loadOffers);
+
 adminRouter.get('/customers', authenticate.isLoggedIn, adminController.loadCustomerList);
 adminRouter.patch('/customers', authenticate.isLoggedIn, adminController.blockOrUnblockUser);
 adminRouter.delete('/customers', authenticate.isLoggedIn, adminController.deleteUser);
