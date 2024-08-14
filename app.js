@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const connectDB = require('./config/db');
 const session = require('express-session')
 const morgan = require('morgan')
 const methodOverride = require('method-override');
@@ -34,15 +34,8 @@ const userRouter = require('./routes/userRoutes')
 const adminRouter = require('./routes/adminRoutes')
 const path = require('path')
 
-
-mongoose.connect("mongodb://127.0.0.1:27017/ShoeShope")
-    .then(() => {
-        console.log("Connected to the database")
-    })
-    .catch((err) => {
-        console.error("Something went wrong !!!", err);
-    })
-
+//Connect To mongodb here.
+connectDB();
 
 app.use(express.static(path.join(__dirname, 'public')))
 

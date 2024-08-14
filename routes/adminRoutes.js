@@ -15,43 +15,18 @@ const storage = multer.diskStorage({
         let directoryPath = path.join(__dirname, '../public/ProductImage')
         if (fs.existsSync(directoryPath)) {
 
-            // if(fs.existsSync(path.join(directoryPath,req.body.brand))){
-
-            //     directoryPath = path.join(directoryPath,req.body.brand);
-            //     cb(null,directoryPath);
-
-            // }else{
-
-            //     fs.mkdirSync(path.join(directoryPath,req.body.brand),{recursive : true});
-            //     directoryPath = path.join(directoryPath,req.body.brand);
-            //     cb(null,directoryPath);
-            // }
-
             cb(null, directoryPath);
 
         } else {
 
-            // fs.mkdir(directoryPath, {recursive : true}, (err) => {
-
-            //     if(err){
-            //         console.log("Error while creating parent folder(ProductImage)",err);
-            //     }else{
-            //         console.log("ProductImage Folder created successfully");
-            //         fs.mkdirSync( path.join(directoryPath,req.body.brand),{recursive : true})
-
-            //                 console.log(`Folder ${req.body.brand} created successfully`)
-            //                 directoryPath = path.join(directoryPath,req.body.brand);
-            //                 cb(null,directoryPath);
-
-
-            //     }
-            // });
+           
             fs.mkdirSync(directoryPath);
             cb(null, directoryPath)
 
         }
 
     },
+    
     filename: function (req, file, cb) {
         const name = Date.now() + '_' + file.originalname;
         cb(null, name)

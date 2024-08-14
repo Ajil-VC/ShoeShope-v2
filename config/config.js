@@ -9,7 +9,8 @@ const config = {
      GOOGLE_CLIENT_SECRET : process.env.GOOGLE_CLIENT_SECRET,
      Key_id : process.env.RazorPay_Key_Id,
      Key_Secret : process.env.RazorPay_Key_Secret,
-     webhookSecret : process.env.Webhook_Secret
+     webhookSecret : process.env.Webhook_Secret,
+     MONGO_URI : process.env.MONGO_URI
 }
 
 module.exports = config;
