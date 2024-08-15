@@ -1,4 +1,4 @@
-const { Admin, User, Category, Brand, Product, Order, returnItem, transaction, coupon, wallet } = require('../models/models')
+const { Admin, User, Category, Brand, Product, Order, returnItem, transaction, coupon, wallet, Offer } = require('../models/models')
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const { format, setDate, endOfWeek } = require('date-fns');
@@ -1007,7 +1007,7 @@ const addNewCoupon = async (req, res) => {
         } else {
             var status = false;
         }
-        console.log(req.body.expiry, 'req.body.expiry');
+
         const newCoupon = new coupon({
             couponName: req.body.couponName,
             couponCode: req.body.couponCode,
@@ -1041,7 +1041,7 @@ const changeCouponStatus = async (req, res) => {
         const updatedCoupon = await coupon.findByIdAndUpdate({ _id: couponId }, { $set: { status: !currentCoupon.status } }, { new: true })
 
     } catch (error) {
-        console.log('Internal error occured while changing coupon status', error);
+        console.error('Internal error occured while changing coupon status', error.stack);
         return res.status(500).send('Internal error occured while changing coupon status', error);
     }
 }
@@ -1088,17 +1088,19 @@ const loadOffers = async (req, res) => {
 
     try {
 
-        const [initiatedReturns] = await Promise.all([
+        const [initiatedReturns, offers] = await Promise.all([
 
             returnItem.aggregate([
 
                 { $match: { status: 'initiated' } },
                 { $count: 'total' }
-            ])
+            ]),
+            Offer.find().exec()
         ]);
         const initiatedReturnCount = initiatedReturns[0].total;
 
-        return res.status(200).render('offers', { initiatedReturnCount })
+        console.log(offers)
+        return res.status(200).render('offers', { initiatedReturnCount, offers })
 
     } catch (error) {
 
@@ -1116,7 +1118,27 @@ const addNewOffer = async (req, res) => {
 
     try {
 
+        const isOfferActive = (req.body.is_active == 'on') ? true : false;
 
+        const newOffer = new Offer({
+
+            title: req.body.title,
+            description: req.body.description,
+            discountType: req.body.discount_type,
+            discountValue: req.body.discount_value,
+            applicableOn: req.body.applicable,
+            minPurchaseAmount: req.body.minimum_amnt,
+            startDate: new Date(req.body.start_date),
+            endDate: new Date(req.body.end_date),
+            isActive: isOfferActive
+
+        });
+
+        const newOfferData = await newOffer.save();
+        if(newOfferData){
+
+            return res.status(201).redirect('/admin/offers');
+        } 
 
     } catch (error) {
 

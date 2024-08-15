@@ -662,8 +662,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const offer_discount_value = document.getElementById('off-discount-value').value;
         const offer_applicable_on = document.getElementById('off-applicable-on').value;
         const offer_min_purchase = document.getElementById('off-min-purchase').value;
+
         const offer_start_date = document.getElementById('off-start-date').value;
         const offer_end_date = document.getElementById('off-end-date').value;
+        const startDate = new Date(offer_start_date);
+        const endDate = new Date(offer_end_date);
 
         if (!offer_title) {
 
@@ -684,6 +687,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }else if(offer_discount_value < 1){
 
             offer_disvalue_error.innerText = "Minimum value is 1";
+            validation = false;
+        }else if((offer_discount_type == 'percentage') && (offer_discount_value <1 || offer_discount_value > 100)){
+
+            offer_disvalue_error.innerText = "Discount percentage must be between 0% and 100%";
             validation = false;
         }
 
@@ -707,7 +714,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!offer_end_date) {
 
-            offer_enddate_error.innerText = "Please elect a offer ending date.";
+            offer_enddate_error.innerText = "Please select a offer ending date.";
+            validation = false;
+        }else if(startDate > endDate){
+
+            offer_enddate_error.innerText = "Please select a date greater than starting date.";
             validation = false;
         }
 
