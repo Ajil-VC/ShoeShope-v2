@@ -21,7 +21,8 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="off-title" class="form-label">Title</label>
-                    <input type="text" class="form-control bg-white" id="off-title" required>
+                    <input type="text" class="form-control bg-white" id="off-title" >
+                    <span  class="text-danger" style="font-size: smaller;" id="offer-title-error"></span>
                 </div>
                 <div class="col-md-6">
                     <label for="off-description" class="form-label">Description</label>
@@ -30,6 +31,7 @@
                 <div class="col-md-6">
                     <label for="off-products" class="form-label">Products (if applicable)</label>
                     <select class="form-select bg-white" id="off-products" multiple>
+                        
                         <!-- Add product options dynamically -->
                     </select>
                 </div>
@@ -41,37 +43,43 @@
                 </div>
                 <div class="col-md-4">
                     <label for="off-discount-type" class="form-label">Discount Type</label>
-                    <select class="form-select bg-white" id="off-discount-type" required>
+                    <select class="form-select bg-white" id="off-discount-type" >
                         <option disabled selected value="">Choose...</option>
                         <option value="percentage">Percentage</option>
                         <option value="fixed">Fixed</option>
                     </select>
+                    <span  class="text-danger" style="font-size: smaller;" id="offer-discount-error"></span>
                 </div>
                 <div class="col-md-4">
                     <label for="off-discount-value" class="form-label">Discount Value</label>
-                    <input type="number" class="form-control bg-white" id="off-discount-value" required>
+                    <input type="number" class="form-control bg-white" id="off-discount-value" >
+                    <span  class="text-danger" style="font-size: smaller;" id="offer-disvalue-error"></span>
                 </div>
                 <div class="col-md-4">
                     <label for="off-applicable-on" class="form-label">Applicable On</label>
-                    <select class="form-select bg-white" id="off-applicable-on" required>
+                    <select class="form-select bg-white" id="off-applicable-on" >
                         <option disabled selected value="">Choose...</option>
                         <option value="product">Product</option>
                         <option value="category">Category</option>
                         <option value="cart">Cart</option>
                     </select>
+                    <span  class="text-danger" style="font-size: smaller;" id="offer-applicable-error"></span>
                 </div>
                 
                 <div class="col-md-4">
                     <label for="off-min-purchase" class="form-label">Minimum Purchase Amount</label>
                     <input type="number" class="form-control bg-white" id="off-min-purchase" value="0">
+                    <span  class="text-danger" style="font-size: smaller;" id="offer-min-purchase-error"></span>
                 </div>
                 <div class="col-md-4">
                     <label for="off-start-date" class="form-label">Start Date</label>
-                    <input type="date" class="form-control bg-white" id="off-start-date" required>
+                    <input type="date" class="form-control bg-white" id="off-start-date" >
+                    <span  class="text-danger" style="font-size: smaller;" id="offer-startdate-error"></span>
                 </div>
                 <div class="col-md-4">
                     <label for="off-end-date" class="form-label">End Date</label>
-                    <input type="date" class="form-control bg-white" id="off-end-date" required>
+                    <input type="date" class="form-control bg-white" id="off-end-date" >
+                    <span  class="text-danger" style="font-size: smaller;" id="offer-enddate-error"></span>
                 </div>
                 <div class="col-12 d-flex justify-content-end align-items-center">
                     <div class="form-check me-3">

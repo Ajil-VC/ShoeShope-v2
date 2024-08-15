@@ -1112,6 +1112,24 @@ const loadOffers = async (req, res) => {
     }
 }
 
+const addNewOffer = async (req, res) => {
+
+    try {
+
+
+
+    } catch (error) {
+
+        console.error("Internal error occured while trying to add new Offer.", error.stack);
+        return res.status(500).render('error', {
+            code: '500',
+            title: 'Oops!',
+            message: "Something went wrong. Please try again later.",
+            redirect: '/admin/offers'
+        });
+    }
+}
+
 
 const loadCustomerList = async (req, res) => {
 
@@ -2019,6 +2037,7 @@ module.exports = {
     changeCouponStatus,
 
     loadOffers,
+    addNewOffer,
 
     loadCustomerList,
     blockOrUnblockUser,
