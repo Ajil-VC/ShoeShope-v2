@@ -52,7 +52,7 @@ const gen_otp = async (req, res) => {
 
     const otp = otpGenerator.generate(5, { digits: true, alphabets: false, upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
     try {
-        console.log("Your OTP is : ", otp)
+      
         await OTP.create({ email, otp })
 
         //Sending OTP to the email
@@ -85,7 +85,7 @@ const resend_otp = async (req, res) => {
 
     const otp = otpGenerator.generate(5, { digits: true, alphabets: false, upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
     try {
-        console.log("Your OTP is : ", otp)
+       
         await OTP.create({ email, otp })
 
         //Sending OTP to the email
@@ -376,13 +376,6 @@ const loadShowcase = async (req, res) => {
 
             const totalPages = Math.ceil(totalDocuments / limit);
 
-            if (category.length == 0) {
-                console.log("\n\n\n Category is empty\n\n\n");
-            }
-            if (brand.length == 0) {
-                console.log("\n\n\n Brand is empty\n\n\n");
-            }
-
             return res.status(200).render('showcase', {
                 category,
                 brand,
@@ -618,7 +611,7 @@ const getOrderDetails = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Internal error while gettting order details.", error)
+        console.error("Internal error while gettting order details.", error.stack)
     }
 
 }
@@ -628,7 +621,7 @@ const updateUserProfile = async (req, res) => {
     const firstName = req.body.Fname;
     const lastName = req.body.Lname;
     const newPassword = req.body.npassword;
-    console.log(newPassword)
+  
     const newHashedPassword = await securePassword(newPassword);
 
     let userID = "";
@@ -644,7 +637,7 @@ const updateUserProfile = async (req, res) => {
         return res.redirect('/profile')
 
     } catch (error) {
-        console.log("Internal Error whil updloading the profile details", error);
+        console.error("Internal Error whil updloading the profile details", error.stack);
         return res.status(500).send("Internal Error whil updloading the profile details", error);
     }
 }
@@ -688,7 +681,7 @@ const addItemToWishlist = async (req, res) => {
         }
 
     } catch (error) {
-        console.log("Ineternal error occured while trying to add product to wishlist.", error);
+        console.error("Ineternal error occured while trying to add product to wishlist.", error.stack);
         return res.status(500).send("Ineternal error occured while trying to add product to wishlist.", error);
     }
 
@@ -707,12 +700,11 @@ const loadWishlist = async (req, res) => {
         }
 
         const userData = await User.findOne({ _id: userID }).populate('wishlist');
-        console.log(userData);
 
         return res.status(200).render('wishlist', { userData });
 
     } catch (error) {
-        console.log("Internal error occured while trying to load wishlist", error);
+        console.error("Internal error occured while trying to load wishlist", error.stack);
         return res.status(500).send("Internal error occured while trying to load wishlist", error);
     }
 
@@ -730,10 +722,10 @@ const logoutUser = async (req, res) => {
             req.logout((err) => {
 
                 if (err) {
-                    console.log("Error occured while trying to logout the passport authenticated user", err);
+                    console.error("Error occured while trying to logout the passport authenticated user", err);
                     return next(err);
                 } else {
-                    console.log("User logged out successfully")
+              
                     return res.status(302).redirect('/')
                 }
             })
@@ -748,15 +740,13 @@ const logoutUser = async (req, res) => {
                     return res.status(500).send("Error while destroying session : ", err);
                 }
 
-                console.log("User logged out successfully");
+            
                 return res.status(302).redirect('/');
             });
-        } else {
-            console.log("Unknown Error while logging out")
-        }
+        } 
 
     } catch (error) {
-        console.log("Internal error while trying to logout", error);
+        console.error("Internal error while trying to logout", error.stack);
         return res.status(500).send("Internal error while trying to logout", error);
     }
 
@@ -819,12 +809,12 @@ const addNewAddress = async (req, res) => {
             return res.status(201).redirect('/profile')
 
         } else {
-            console.log("Something went wrong while creating address");
+            console.error("Something went wrong while creating address",error.stack);
             return res.send("Something went wrong while creating address");
         }
 
     } catch (error) {
-        console.log("Internal error while adding new Address", error);
+        console.error("Internal error while adding new Address", error.stack);
         return res.status(500).send("Internal erro while adding new Address", error);
     }
 }
@@ -832,7 +822,7 @@ const addNewAddress = async (req, res) => {
 const makeDefaultAddress = async (req, res) => {
 
     const AddressId = req.query.AddressID;
-    console.log("Why", AddressId)
+
     try {
         const address_id = new mongoose.Types.ObjectId(AddressId);
 
@@ -845,7 +835,6 @@ const makeDefaultAddress = async (req, res) => {
 
         const userDetails = await User.findOne({ _id: userID })
         const removeDefaultAddress = await Address.updateMany({ _id: { $in: userDetails.address }, defaultAdd: 1 }, { $set: { defaultAdd: 0 } }).exec();
-        console.log("Status of removal:", removeDefaultAddress.modifiedCount);
 
         await Address.updateOne({ _id: address_id }, { $set: { defaultAdd: 1 } }).exec();
 
@@ -853,7 +842,7 @@ const makeDefaultAddress = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal server error while trying to make default address", error)
+        console.error("Internal server error while trying to make default address", error.stack)
         res.status(500).send("Internal server error while trying to make default address", error);
     }
 
@@ -863,7 +852,7 @@ const deleteAddress = async (req, res) => {
 
     const address_id = req.query.AddressID;
     const addressId = new mongoose.Types.ObjectId(address_id);
-    console.log("new mongoose.Types.ObjectId(address_id);", addressId)
+
     let isDefault = 0;
 
     let userID = "";
@@ -895,7 +884,7 @@ const deleteAddress = async (req, res) => {
             if (isDeleted.deletedCount) {
 
                 await User.updateOne({ _id: userID }, { $pull: { address: addressId } }).exec();
-                console.log("Address deleted Successfully.");
+               
                 return res.json({ status: true });
             }
 
@@ -915,13 +904,13 @@ const deleteAddress = async (req, res) => {
                 Address.deleteOne({ _id: addressId }).exec()
 
             ]);
-            console.log(prome);
+         
             return res.json({ status: true });
         }
 
     } catch (error) {
 
-        console.log("Internal error while trying to delete address", error);
+        console.error("Internal error while trying to delete address", error.stack);
         return res.status(500).send("Internal error while trying to delete address", error);
     }
 }
@@ -942,14 +931,14 @@ const getAddressDetails = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal error occured while trying to fetch Address.", error);
+        console.error("Internal error occured while trying to fetch Address.", error.stack);
         return res.status(500).json({ status: false, message: `Internal error occured while trying to fetch Address.\nError: ${error}` })
     }
 }
 
 const updateAddress = async (req, res) => {
 
-    console.log('Its putting.', req.body);
+   
     try {
 
         const addressId = new mongoose.Types.ObjectId(req.body.addressId);
@@ -968,16 +957,16 @@ const updateAddress = async (req, res) => {
         })
 
         const updatedAddress = await addressDetails.save();
-        console.log(updatedAddress)
+      
         if (updatedAddress) {
-            console.log("hooooi")
+         
             return res.status(201).redirect('/profile')
         } else {
             return res.status(403).send('Address updation failed!');
         }
 
     } catch (error) {
-        console.log("Internal error while trying to update the address.", error);
+        console.error("Internal error while trying to update the address.", error.stack);
         return res.status(500).send("Internal error while trying to update the address.", error);
     }
 
@@ -1072,7 +1061,7 @@ const loadCart = async (req, res) => {
         return res.status(200).render('cart', { cartItemsArray, subTotal, totalAmount, gst, totalSelectedItems, coupons })
 
     } catch (error) {
-        console.log("Internal server error while trying to get cart", error);
+        console.error("Internal server error while trying to get cart", error.stack);
         return res.status(500).send("Internal server error while trying to get cart", error);
     }
 }
@@ -1120,18 +1109,14 @@ const addProductToCart = async (req, res) => {
             });
 
             const cartData = await newCart.save();
-            if (cartData) {
-                console.log("This is cartdata", cartData);
-            } else {
-                console.log("cart not added")
-            }
+    
             return res.status(201).json({ status: true });
         }
 
 
     } catch (error) {
 
-        console.log("Internal Error while trying add product to the Cart", error);
+        console.error("Internal Error while trying add product to the Cart", error.stack);
         return res.status(500).send("Internal Error while trying add product to the Cart", error);
     }
 }
@@ -1150,7 +1135,6 @@ const removeProductFromCart = async (req, res) => {
     try {
 
         const userCart = await Cart.findOne({ userId: userID });
-        console.log(userCart, "This is remova")
 
         await Cart.updateOne({ userId: userID }, { $pull: { items: { productId: productId } } });
         const { cartItemsArray,
@@ -1180,7 +1164,7 @@ const removeProductFromCart = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal Error while trying to remove the product from cart", error);
+        console.error("Internal Error while trying to remove the product from cart", error.stack);
         return res.status(500).send("Internal Error while trying to remove the product from cart", error);
     }
 }
@@ -1236,7 +1220,7 @@ const selectItemToOrder = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal error while trying to select the item", error);
+        console.error("Internal error while trying to select the item", error.stack);
         return res.status(500).send("Internal error while trying to select the item", error)
     }
 
@@ -1299,7 +1283,7 @@ const changeQuantity = async (req, res) => {
             })
 
         } catch (error) {
-            console.log("Internal Error while changing product quantity", error);
+            console.error("Internal Error while changing product quantity", error.stack);
             return res.status(500).send("Internal Error while changing product quantity", error);
         }
     }
@@ -1314,7 +1298,7 @@ const changeQuantity = async (req, res) => {
             );
 
         } catch (error) {
-            console.log("Internal Error while trying to change the size.", error);
+            console.error("Internal Error while trying to change the size.", error.stack);
             return res.status(500).send("Internal Error while trying to change the size.", error);
         }
 
@@ -1358,7 +1342,7 @@ const addCoupon = async (req, res) => {
 
     } catch (error) {
 
-        console.log('Internal error occured while trying to add coupon.', error);
+        console.error('Internal error occured while trying to add coupon.', error.stack);
         return res.status(500).send('Internal error occured while trying to add coupon.', error);
     }
 }
@@ -1420,7 +1404,7 @@ const loadCheckout = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal error while loading checkout", error);
+        console.error("Internal error while loading checkout", error.stack);
         return res.status(500).send("Internal error while loading checkout", error);
     }
 
@@ -1489,7 +1473,7 @@ const loadRetryCheckout = async (req, res) => {
         })
 
     } catch (error) {
-        console.log("Internal erro occured while trying to retry checkout page.", error);
+        console.error("Internal erro occured while trying to retry checkout page.", error.stack);
         return res.status(500).send("Internal erro occured while trying to retry checkout page.", error);
     }
 
@@ -1558,7 +1542,7 @@ const retryPaymentForFailed = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal server error while trying to retry the payment.", error);
+        console.error("Internal server error while trying to retry the payment.", error.stack);
         return res.status(500).send("Internal server error while trying to retry the payment.", error);
     }
 
@@ -1599,7 +1583,7 @@ const validateCart = async (req, res) => {
         })
 
     } catch (error) {
-        console.log("Internal error while validating cart", error);
+        console.error("Internal error while validating cart", error.stack);
         return res.status(500).send("Internal error while validating cart", error);
     }
 }
@@ -1627,7 +1611,7 @@ const changeDeliveryAddress = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal Error while trying to change the address", error)
+        console.error("Internal Error while trying to change the address", error.stack)
         return res.status(500).send("Internal Error while trying to change the address", error);
     }
 
@@ -1694,22 +1678,21 @@ const getItemsAndReserve = async (cartItemsArray) => {
                 return acc + cur.modifiedCount;
             }, 0);
             if (reservedItemCount == productsToOrder.length) {
-                console.log("Completly reserved");
+            
                 return productsToOrder;
             } else {
-                console.log("Couldn't reserve all the products choosed.");
-                console.log("Here is the reservation result: ", reservationResult);
+        
                 return null;
             }
 
         } catch (error) {
 
-            console.log("Internal error while reserving the products", error);
+            console.error("Internal error while reserving the products", error.stack);
         }
 
 
     } catch (error) {
-        console.log("Error while getting and reserving the items.", error);
+        console.error("Error while getting and reserving the items.", error.stack);
         return res.status(500).send("Error while getting and reserving the items.", error);
     }
 
@@ -1731,7 +1714,7 @@ const makeRazorpayment = async (razorpay, amountToPay, orderId) => {
         return order;
     } catch (error) {
 
-        console.log("Internal error while trying to perform razorpayment", error);
+        console.error("Internal error while trying to perform razorpayment", error.stack);
         return false;
     }
 
@@ -1765,7 +1748,7 @@ const placeOrder = async (req, res) => {
             }
 
         } catch (error) {
-            console.log("Internal error occured while trying to check if address is selected.", error);
+            console.error("Internal error occured while trying to check if address is selected.", error.stack);
             return res.status(500).send("Internal error occured while trying to check if address is selected.", error);
         }
     }
@@ -1864,7 +1847,7 @@ const placeOrder = async (req, res) => {
                 return res.status(201).json({ status: true, redirect: `/order_placed?order_id=${orderDetails._id}` })
 
             } else {
-                console.log("Couldn't make the order")
+             
                 return res.json({ status: false, message: "Couldn't place the order" })
             }
 
@@ -1874,7 +1857,7 @@ const placeOrder = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal error while trying to place order.", error);
+        console.error("Internal error while trying to place order.", error.stack);
         return res.json({ status: false, message: "Internal server error while placing the order" })
 
     }
@@ -1942,7 +1925,7 @@ const placeOrder = async (req, res) => {
 //         res.json({ status: true });
 
 //     }catch(error){
-//         console.log("Internal error while handling payment status in webhook",error);
+//         console.error("Internal error while handling payment status in webhook",error.stack);
 //         res.status(500).send("Internal error while handling payment status in webhook",error);
 //     }
 
@@ -2049,10 +2032,10 @@ const paymentVerification = async (req, res) => {
                 { new: true }
             );
 
-            console.log(updatedOrder, "Tis is updatedOrder from payment verification");
+    
             if (updatedOrder) {
                 const paidProductsCount = updatedOrder.items.filter(item => (item.paymentStatus === 'PAID')).length;
-                console.log(paidProductsCount, "paidProductsCount");
+               
                 if (updatedOrder.items.length > paidProductsCount) {
                     updatedOrder.overallPaymentStatus = 'PARTIALLY_PAID';
                     await updatedOrder.save();
@@ -2070,7 +2053,7 @@ const paymentVerification = async (req, res) => {
         }
     } catch (error) {
 
-        console.log("Internal error while trying to make transaction.", error);
+        console.error("Internal error while trying to make transaction.", error.stack);
     }
 }
 
@@ -2106,7 +2089,7 @@ const updateOrderForWalletPayment = async (orderId, paymentId) => {
 
         if (updatedOrder) {
             const paidProductsCount = updatedOrder.items.filter(item => (item.paymentStatus === 'PAID')).length;
-            console.log(paidProductsCount, "paidProductsCount");
+        
             if (updatedOrder.items.length > paidProductsCount) {
                 updatedOrder.overallPaymentStatus = 'PARTIALLY_PAID';
                 await updatedOrder.save();
@@ -2114,7 +2097,7 @@ const updateOrderForWalletPayment = async (orderId, paymentId) => {
         }
 
     } catch (error) {
-        console.log("Internal Error while trying to update order\n", error);
+        console.error("Internal Error while trying to update order\n", error.stack);
     }
 
 
@@ -2127,7 +2110,7 @@ const loadOrderPlaced = async (req, res) => {
         return res.status(200).render('order_placed', { order_id: req.query.order_id })
 
     } catch (error) {
-        console.log("Internal error while loading order placed page", error);
+        console.error("Internal error while loading order placed page", error.stack);
     }
 }
 
@@ -2231,9 +2214,7 @@ const cancelOrder = async (req, res) => {
 
             flag = true;
 
-        } else {
-            console.log('Already cancelled maaannnnn')
-        }
+        } 
 
         if (flag) {
 
@@ -2291,7 +2272,7 @@ const cancelOrder = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(`Internal error while trying to cancel the order.\n${error}`);
+        console.error(`Internal error while trying to cancel the order.\n${error.stack}`);
         return res.status(500).send(`Internal error while trying to cancel the order.\n${error}`);
     }
 }
@@ -2352,13 +2333,13 @@ const initiateReturn = async (req, res) => {
             await order.save();
             return res.status(200).json({ status: true, message: 'Return initialized.' });
         } else {
-            console.log("Couldn't initiate the return.");
+      
             return res.json({ status: false, message: 'Couldnt initiate the return.' });
         }
 
 
     } catch (error) {
-        console.log("Internal error while trying to post the return request", error);
+        console.error("Internal error while trying to post the return request", error.stack);
         return res.status(500).send("Internal error while trying to post the return request", error);
     }
 }
@@ -2465,7 +2446,7 @@ const downloadInvoice = async (req, res) => {
 
     } catch (error) {
 
-        console.log("Internal error occured while trying to create invoice.", error);
+        console.error("Internal error occured while trying to create invoice.", error.stack);
         return res.status(500).send("Internal error occured while trying to create invoice.", error);
     }
 

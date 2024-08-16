@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.addProduct-image-input').forEach(inputField => {
         
         inputField.addEventListener('change',(e) => {
-            console.log("Thisise",e)
+           
             let file = e.target.files[0];
             if(!file){
                 return;
@@ -69,13 +69,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 croppedImages.toBlob((blob) => {
     
                     if(blob){
-                        console.log(blob)
-                        console.log(currentInputField,"This is the input ha")
-                        console.log(formDataForAddNewProduct);
+                     
                         imageBlobs[currentInputField] = blob;
                         modal_close_button.click();
 
-                        console.log(imageBlobs,"\nUpper one is arrya of blobs ");
+                     
                     }
     
                 });
@@ -210,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                      
                 })
                 .catch(error => {
-                    console.log("There was a problem with submission of add new pRoduct operation",error)
+                    console.error("There was a problem with submission of add new pRoduct operation",error.stack)
                 });
             }
  

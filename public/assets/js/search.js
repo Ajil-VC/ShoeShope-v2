@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded',function() {
                         
                     })
                     .catch(error =>{
-                        console.log("Error while trying add product to wishlist",error)
+                        console.error("Error while trying add product to wishlist",error.stack)
                     })
                 })
             })
@@ -136,42 +136,7 @@ document.addEventListener('DOMContentLoaded',function() {
 
     }
     
-    // const searchProducts = async(home_product_grid, searchKey) =>{
-
-    //     try{
-
-    //         const response = await fetch(`http://localhost:2000/search_products?searchkey=${searchKey}`);
-    //         if(!response.ok){
-    //             throw new Error('Network response was not ok while fetching products.'); 
-    //         }
-    //         const data = await response.json();
-    //         if(data.status){
-
-    //             home_product_grid.innerHTML = data.products.map(item => makeProductCard(item)).join('');
-
-    //         }else{
-    //             home_product_grid.innerHTML = data.message;
-    //         }
-    //         console.log(data);
-
-    //     }catch(error){
-    //         console.log("Error occured while fetching products.",error);
-    //     }
-    // }
-
-    // const user_product_search = document.getElementById('user_product_search');
-    // if(user_product_search){
-    //     const home_product_grid = document.getElementById('home-product-grid');
-    //     user_product_search.addEventListener('keypress',(e)=> {
-
-    //         if(e.key = 'Enter'){
-    //             const query = e.target.value.trim();
-    //             window.location.href = `http://localhost:2000/search_products?searchkey=${query}`;
-    //         }
-    //         const searchKey = user_product_search.value.trim();
-    //         searchProducts(home_product_grid, searchKey);
-    //     } )
-    // }
+  
 
     function updateShowcase(target_products_parent,products,totalPages,currentPage,targetGroup){
 
@@ -239,7 +204,7 @@ document.addEventListener('DOMContentLoaded',function() {
                              
         })
         .catch(error => {
-            console.log("There was a problem while performing Advanced search",error)
+            console.error("There was a problem while performing Advanced search",error.stack)
         });
 
     }

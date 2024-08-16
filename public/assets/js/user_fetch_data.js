@@ -75,7 +75,7 @@ if (resend_otp) {
 
         fetch('http://localhost:2000/resend_otp')
             .then(response => {
-                console.log(response)
+              
                 if (!response.ok) {
                     throw new Error('Network Response was not ok while sending otp');
                 }
@@ -99,7 +99,7 @@ if (resend_otp) {
                 }
             })
             .catch(error => {
-                console.log("There was a problem While resending otp", error)
+                console.error("There was a problem While resending otp", error.stack)
             });
         resend_otp.disabled = true;
     })
@@ -118,17 +118,16 @@ if (otp_submit_btn) {
         for (let i = 1; i <= 5; i++) {
             otp += document.getElementById('otp' + i).value;
         }
-        console.log(typeof otp, "Type of otp", otp)
+       
         let intOTP = parseInt(otp);
-        console.log(intOTP, typeof intOTP)
+      
         let hidden_otp = document.createElement('input');
         hidden_otp.type = 'hidden';
         hidden_otp.name = 'otp';
         hidden_otp.value = intOTP;
-        console.log("Consoling from frontend", otp)
+   
         const otpformData = new FormData(otp_form);
-        //Checking down
-        console.log(typeof hidden_otp.value, "Type")
+       
         otp_form.appendChild(hidden_otp);
         let urlEncodedData = new URLSearchParams(otpformData);
 
@@ -152,7 +151,7 @@ if (otp_submit_btn) {
             })
             .then(data => {
 
-                console.log("Data recieved: ", data);
+               
                 if (!data.status) {
 
                     otp_success_msg.classList.remove('text-success')
@@ -165,7 +164,7 @@ if (otp_submit_btn) {
 
             })
             .catch(error => {
-                console.log("Error while trying to submit otp", error)
+                console.error("Error while trying to submit otp", error.stack)
             })
         otp_form.removeChild(hidden_otp);
     })
@@ -326,7 +325,7 @@ if (registrationForm) {
 async function makeDefaultAddress(AddressId) {
 
     if (!AddressId) {
-        console.log("Didnt get the Address Id");
+      
         return;
     }
 
@@ -345,8 +344,7 @@ async function makeDefaultAddress(AddressId) {
         }
 
         const data = await response.json();
-        console.log(data);
-        // window.location.reload();
+   
         let currentUrl = window.location.href;
         let currentFragment = window.location.hash;
 
@@ -365,7 +363,7 @@ async function makeDefaultAddress(AddressId) {
 
 
     } catch (error) {
-        console.log("There was a problem with making default address", error)
+        console.error("There was a problem with making default address", error.stack)
     }
 
 }
@@ -443,7 +441,7 @@ async function deleteAddress(addressID) {
         }
 
     } catch (error) {
-        console.log("There wa a problem while deleting address.", error)
+        console.error("There wa a problem while deleting address.", error.stack)
     }
 }
 
@@ -463,7 +461,6 @@ if (newPassword) {
     newPassword.addEventListener('input', () => {
         confirmPasswordValue = newPasswordConfirm.value;
         newPasswordValue = newPassword.value.trim();
-        console.log("First", newPasswordValue, confirmPasswordValue)
 
         const validatedResult = passwordValidation(newPasswordValue);
         newPasswordError.textContent = validatedResult.message;
@@ -495,15 +492,6 @@ if (newPasswordConfirm) {
     })
 }
 
-//Existing password
-// const chage_password_form = document.getElementById('chage-password-form');
-// if(chage_password_form){
-
-//     chage_password_form.addEventListener('submit',(e)=> {
-//         e.preventDefault();
-//         console.log(newPassword.value.trim(),"HAHAHAHA")
-//     })
-// }
 
 
 //form validation for Add new Address
@@ -628,7 +616,6 @@ async function updateAddress(addressID) {
     try {
         $('#editAddressModalCenter').modal('show');
 
-        console.log(addressID, "And this is from updateAddress")
         const response = await fetch(`http://localhost:2000/profile/address/edit?addressId=${addressID}`, {
             method: 'GET',
             headers: {
@@ -639,7 +626,6 @@ async function updateAddress(addressID) {
             throw new Error('Network response was not ok while trying to fetch the address detilas.')
         }
         const data = await response.json();
-        console.log(data);
 
         if (data.status) {
 
@@ -652,11 +638,10 @@ async function updateAddress(addressID) {
             editAddressPlace.value = data.addressDetails.place;
             editAddressMobile.value = data.addressDetails.mobile_no;
             editAddressLandmark.value = data.addressDetails.landmark;
-        } else {
-            console.log("Coudn't findout the address.")
-        }
+        } 
+
     } catch (error) {
-        console.log("Error occured while editing address", error)
+        console.error("Error occured while editing address", error.stack)
     }
 }
 
@@ -757,7 +742,7 @@ async function addProductToCart(productId, flag) {
                     }
                 })
                 .catch(error => {
-                    console.log('Error occured while trying to fetch wishlist items.', error);
+                    console.error('Error occured while trying to fetch wishlist items.', error.stack);
                 })
 
         }
@@ -842,7 +827,7 @@ async function removeProductFromCart(productId) {
 
     } catch (error) {
 
-        console.log("Error while fetching operation of remove product from cart");
+        console.error("Error while fetching operation of remove product from cart",error.stack);
     }
 }
 
@@ -874,7 +859,7 @@ async function addCoupon(selectedCoupon) {
         }
 
         const data = await response.json();
-        console.log(data, 'forn')
+       
         if (data.status && data.discountAmount == 0) {
             Swal.fire(
                 'Oops',
@@ -892,7 +877,7 @@ async function addCoupon(selectedCoupon) {
         }
 
     } catch (error) {
-        console.log("Error while trying to add coupn", error)
+        console.error("Error while trying to add coupn", error.stack)
     }
 
 }
@@ -940,7 +925,7 @@ async function loadCheckout() {
         }
 
     } catch (error) {
-        console.log("Error while going to checkout page")
+        console.error("Error while going to checkout page",error.stack)
         Swal.fire('Error', 'There was a problem loading the checkout page', 'error');
     }
 }
@@ -1018,7 +1003,6 @@ const cancelProduct = async (productOrderId, orderId, itemOrderId) => {
 
 const returnProduct = async (productOrderId, orderId) => {
 
-    console.log("This is productOrderId:", productOrderId, "\norderId: ", orderId, "End");
 
     const { value: reason } = await Swal.fire({
         title: "Are you sure? Want to return the product?",
@@ -1128,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     })
                     .catch(error => {
-                        console.log("Error while trying add product to wishlist", error)
+                        console.error("Error while trying add product to wishlist", error.stack)
                     })
             })
         })
@@ -1174,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 })
                 .catch(error => {
-                    console.log("Error while trying add product to wishlist", error)
+                    console.error("Error while trying add product to wishlist", error.stack)
                 })
             
         })
@@ -1232,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
 
                 .catch(error => {
-                    console.log("Error while trying select the product", error)
+                    console.error("Error while trying select the product", error.stack)
                 })
 
         });
@@ -1245,7 +1229,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const productId = this.dataset.productId;
             const newQuantity = this.value;
             selectedCoupon = document.getElementById('addedCoupon').value;
-            console.log(`Quantity for product ${productId} changed to ${newQuantity}`);
 
             fetch(`http://localhost:2000/cart?productId=${productId}&newQuantity=${newQuantity}&coupon=${selectedCoupon}`, { method: "PATCH" })
                 .then(response => {
@@ -1307,13 +1290,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             )
 
                         }
-                        console.log("Something wrong with selecting product there is no data")
+                      
 
                     }
 
                 })
                 .catch(error => {
-                    console.log("Error while trying change item quantity", error)
+                    console.error("Error while trying change item quantity", error.stack)
                 })
 
         });
@@ -1325,7 +1308,6 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('change', function () {
             const productId = this.dataset.productId;
             const shoeSize = this.value;
-            console.log(`size of  product ${productId} changed to ${shoeSize}`);
 
             fetch(`http://localhost:2000/cart?productId=${productId}&shoeSize=${shoeSize}`, { method: "PATCH" })
                 .then(response => {
@@ -1335,7 +1317,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 })
                 .catch(error => {
-                    console.log("Error while trying change item size", error)
+                    console.error("Error while trying change item size", error.stack)
                 })
 
         })
@@ -1372,7 +1354,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Get the address ID from the dataset and log it to the console
             selectedAddressId = clickedCard.dataset.addressId;
-            console.log('Selected Address ID:', selectedAddressId);
 
 
         });
@@ -1395,7 +1376,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return response.json();
                     })
                     .then(data => {
-                        console.log(data)
+                  
                         dAddress_adType.textContent = data.address.addressType;
                         dAddress_ldMark.textContent = `LandMark: ${data.address.landmark},`;
                         dAddress_place.textContent = `Place: ${data.address.place},`;
@@ -1406,7 +1387,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         changeAddress_modal_close_button.click();
                     })
                     .catch(error => {
-                        console.log("Error while trying change item size", error)
+                        console.error("Error while trying change item size", error.stack)
                     })
             }
 
@@ -1542,7 +1523,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
         } catch (error) {
-            console.log("Error occured while trying to check address is selected.")
+            console.error("Error occured while trying to check address is selected.",error.stack)
         }
 
         try {
@@ -1577,7 +1558,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         catch (error) {
-            console.log("Error occured while making order", error)
+            console.error("Error occured while making order", error.stack)
         }
     }
 
@@ -1591,7 +1572,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 placeOrderByCheckingAddress();
 
             } else {
-                console.log("Please select a payment option")
+          
                 Swal.fire({
                     title: "Payment Method Required",
                     text: "Please select a payment method to proceed.s",
@@ -1720,12 +1701,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 invoiceBtn.disabled = false;
             } else {
                 invoiceBtn.disabled = false;
-                console.log("No data recieved.");
+          
             }
 
 
         } catch (error) {
-            console.log("Error occured while trying to create and  download invoice.", error);
+            console.error("Error occured while trying to create and  download invoice.", error.stack);
         }
     }
 
@@ -1762,7 +1743,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         catch (error) {
-            console.log("Error occured while making order", error)
+            console.error("Error occured while making order", error.stack)
         }
     }
 
@@ -1776,7 +1757,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 makePaymentForFailed(paymentMethod, orderId);
 
             } else {
-                console.log("Please select a payment option")
+           
                 Swal.fire({
                     title: "Payment Method Required",
                     text: "Please select a payment method to proceed.s",
@@ -1824,8 +1805,7 @@ document.addEventListener('DOMContentLoaded', function () {
         order_address_landmark_pincode.innerText = `${addres.landmark}, Pin: ${addres.pinCode}`;
 
         invoiceBtn.dataset.orderId = orderId;
-        console.log(orderPaymentStatus, "orderPaymentStatus ")
-        console.log(paymentMethod, "paymentMethod");
+      
         if ((orderPaymentStatus == 'FAILED') || ((orderPaymentStatus == 'PENDING') && (paymentMethod == 'UPI Method'))) {
             retryPaymentBtn.classList.remove('display-order-details')
         } else {
@@ -1886,7 +1866,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
 
                     .catch(error => {
-                        console.log("Error occured while getting order details.", error)
+                        console.error("Error occured while getting order details.", error.stack)
                     })
 
             }

@@ -51,10 +51,9 @@ function blockUser(userID){
     return response.json();  
 })
 .then(data => {
-    console.log('data recieved : ',data.userID);
+   
     const btnId = document.getElementById(`blockBtn-${userID}`);
-    console.log(btnId,'btnId')
-    console.log(data.isBlocked,'data.isBlocked')
+   
     if(data.isBlocked){
         btnId.textContent = 'Block';
         btnId.style.color = 'black';
@@ -74,7 +73,7 @@ function blockUser(userID){
                              
 })
 .catch(error => {
-    console.log("There was a problem with the fetch operation of blocking user",error)
+    console.error("There was a problem with the fetch operation of blocking user",error.stack)
 });
 
 }
@@ -83,7 +82,6 @@ function blockUser(userID){
 
 function deletUser(userID){
 
-    console.log("Inside delete user");
 
     if(confirm("Are you sure you want to delete this user??")){
         
@@ -98,11 +96,11 @@ function deletUser(userID){
         })
         .then(data => {
 
-            console.log('data recieved : ',data)
+          //Need the data from backend to update this.
                              
         })
         .catch(error => {
-            console.log("There was a problem with the Deleting fetch operation",error)
+            console.error("There was a problem with the Deleting fetch operation",error.stack)
         });
        
     }  
@@ -128,11 +126,11 @@ if(btnForAddBrand){
             })
             .then(data => {
     
-                console.log('data recieved : ',data)
+                //Need data from backend to update this
                                  
             })
             .catch(error => {
-                console.log("There was a problem while adding brand fetch operation",error)
+                console.error("There was a problem while adding brand fetch operation",error.stack)
             });
         
         }
@@ -173,10 +171,10 @@ if(category_form){
                     icon: 'error'
                 });
             }
-            console.log("data recieved :",data)
+           
         })
         .catch(error => {
-            console.log("There was a problem while performing category submission.",error);
+            console.error("There was a problem while performing category submission.",error.stack);
         })
     })
 }
@@ -194,11 +192,11 @@ function listProduct(productID){
     })
     .then(data => {
 
-        console.log('data recieved : ',data)
+        //Need data from backend to update this
                          
     })
     .catch(error => {
-        console.log("There was a problem while performing listProducts fetch operation",error)
+        console.error("There was a problem while performing listProducts fetch operation",error.stack)
     });
 }
 
@@ -235,7 +233,7 @@ function listCategory(categoryID){
            
         })
         .catch(error => {
-            console.log("There was a problem while performing listcategory fetch operation",error)
+            console.error("There was a problem while performing listcategory fetch operation",error.stack)
         });
 }
 
@@ -320,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     reader.readAsArrayBuffer(file);
                 })
             )).then(blobFiles => {
-                console.log(blobFiles);
+               
                 
                 // Add new files to the selectedFiles array
                 selectedFiles = [...selectedFiles, ...blobFiles];
@@ -345,10 +343,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
                     if(blob){
 
-                        // console.log(formDataForAddNewProduct);
+                    
                     
                         selectedFiles[btn_crop.dataset.index] = blob;
-                        console.log(selectedFiles)
+                      
                         updatePreview();
                         modal_close_button.click();
                     }
@@ -392,14 +390,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     validation = false;
                     alreadyExistName = true;
                     
-                    console.log(productExist,"This Product exist value in function jjj")
+                   
                     if(productExist){
                         return true;
                     }
                 }
             }
             catch(error){
-                console.log("Error while trying to fetch data to check if product is there.",error);
+                console.error("Error while trying to fetch data to check if product is there.",error.stack);
             }
         }
     }
@@ -578,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                     catch(error){
-                        console.log("There was a problem with submission of add new pRoduct operation",error)
+                        console.error("There was a problem with submission of add new pRoduct operation",error.stack)
                     };
                     
                 }
@@ -720,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const returnId = e.target.getAttribute('data-returnId');
                 const returnStatus = e.target.value;
-                console.log(returnId,"\n",returnStatus)
+               
                 if(returnStatus){
                     confirmReturnCommit(returnId,returnStatus);
                 }
@@ -775,48 +773,7 @@ async function updateOrderStatus(orderId){
 
 
     }catch(error){
-        console.log("Error while fetching operation of update order status.",error);
+        console.error("Error while fetching operation of update order status.",error.stack);
     }
 }
-
-
-
-// function clearExistingRows() {
-//     $('#UsersTable').empty(); // Remove all child elements from the element with ID 'Users'
-//     //This is JQUERY
-// }
-
-
-
-// function fetchData(page){
-//     console.log("Hellloo",page)
-//     fetch(`http://localhost:2000/admin/customers/?page=${page}`)
-//     .then(response => {
-//     if(!response.ok){
-//         throw new Error("Network response was not ok")
-//     }
-   
-//     return response.json();  
-// })
-// .then(data => {
-//     console.log('data recieved : ',data)
-                             
-// })
-// .catch(error => {
-//     console.log("There was a problem with the fetch operation",error)
-// });
-
-// }
-
-// document.addEventListener('DOMContentLoaded',() => {
-//     console.log("How are you")
-//     fetchData(1);
-// });
-
-// const customerSearch = document.getElementById('customerSearch');
-// customerSearch.addEventListener('input',(event) => {
-
-//     const query = event.target.value;
-//     fetchData(query)
-// })
 

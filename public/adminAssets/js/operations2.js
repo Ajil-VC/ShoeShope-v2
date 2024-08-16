@@ -15,7 +15,7 @@ const listCoupons = async (couponId) => {
         const data = await response.json();
 
     } catch (error) {
-        console.log("Error occured while trying to patch coupon", error);
+        console.error("Error occured while trying to patch coupon", error.stack);
     }
 }
 
@@ -70,12 +70,10 @@ async function downloadFile(format, timeRange) {
             });
 
 
-        } else {
-            console.log("No data");
-        }
+        } 
 
     } catch (error) {
-        console.log('Error occured while fetching and trying to download the file', error);
+        console.error('Error occured while fetching and trying to download the file', error.stack);
     }
 
 }
@@ -216,7 +214,7 @@ const getSaleReport = async (range, customRangeOb = null) => {
         }
 
     } catch (error) {
-        console.log("Error occured while trying to get sales report.", error);
+        console.error("Error occured while trying to get sales report.", error.stack);
     }
 }
 
@@ -333,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 })
                 .catch(error => {
-                    console.log("There was a problem with the fetch operation of getting coupon code", error)
+                    console.error("There was a problem with the fetch operation of getting coupon code", error.stack)
                 });
         })
     }
@@ -609,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Network response was not ok while trying to fetch best selling products.');
             }
             const data = await response.json();
-            console.log(data);
+           
             if (data.status) {
 
                 if (data.sortOn == 'Categories') {
@@ -635,7 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (error) {
-            console.log("Error occured while trying to fetch and set best seller products.", error);
+            console.error("Error occured while trying to fetch and set best seller products.", error.stack);
         }
 
     }
