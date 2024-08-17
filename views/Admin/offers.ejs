@@ -43,7 +43,7 @@
                 </div>
                 <div class="col-md-4">
                     <label for="off-discount-type" class="form-label">Discount Type</label>
-                    <select class="form-select bg-white" name="discount_type" id="off-discount-type" >
+                    <select class="form-select bg-white" name="discountType" id="off-discount-type" >
                         <option disabled selected value="">Choose...</option>
                         <option value="percentage">Percentage</option>
                         <option value="fixed">Fixed</option>
@@ -52,12 +52,12 @@
                 </div>
                 <div class="col-md-4">
                     <label for="off-discount-value" class="form-label">Discount Value</label>
-                    <input type="number" class="form-control bg-white" name="discount_value" id="off-discount-value" >
+                    <input type="number" class="form-control bg-white" name="discountValue" id="off-discount-value" >
                     <span  class="text-danger" style="font-size: smaller;" id="offer-disvalue-error"></span>
                 </div>
                 <div class="col-md-4">
                     <label for="off-applicable-on" class="form-label">Applicable On</label>
-                    <select class="form-select bg-white" name="applicable" id="off-applicable-on" >
+                    <select class="form-select bg-white" name="applicableOn" id="off-applicable-on" >
                         <option disabled selected value="">Choose...</option>
                         <option value="product">Product</option>
                         <option value="category">Category</option>
@@ -68,22 +68,22 @@
                 
                 <div class="col-md-4">
                     <label for="off-min-purchase" class="form-label">Minimum Purchase Amount</label>
-                    <input type="number" class="form-control bg-white" name="minimum_amnt" id="off-min-purchase" value="0">
+                    <input type="number" class="form-control bg-white" name="minPurchaseAmount" id="off-min-purchase" value="0">
                     <span  class="text-danger" style="font-size: smaller;" id="offer-min-purchase-error"></span>
                 </div>
                 <div class="col-md-4">
                     <label for="off-start-date" class="form-label">Start Date</label>
-                    <input type="date" class="form-control bg-white" name="start_date" id="off-start-date" >
+                    <input type="date" class="form-control bg-white" name="startDate" id="off-start-date" >
                     <span  class="text-danger" style="font-size: smaller;" id="offer-startdate-error"></span>
                 </div>
                 <div class="col-md-4">
                     <label for="off-end-date" class="form-label">End Date</label>
-                    <input type="date" class="form-control bg-white" name="end_date" id="off-end-date" >
+                    <input type="date" class="form-control bg-white" name="endDate" id="off-end-date" >
                     <span  class="text-danger" style="font-size: smaller;" id="offer-enddate-error"></span>
                 </div>
                 <div class="col-12 d-flex justify-content-end align-items-center">
                     <div class="form-check me-3">
-                        <input class="form-check-input" name="is_active" type="checkbox" id="off-is-active" checked>
+                        <input class="form-check-input" name="isActive" type="checkbox" id="off-is-active" checked>
                         <label class="form-check-label" for="off-is-active">
                             Is Active
                         </label>

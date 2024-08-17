@@ -1098,6 +1098,7 @@ const loadOffers = async (req, res) => {
             Offer.find().exec()
         ]);
         const initiatedReturnCount = initiatedReturns[0].total;
+
         return res.status(200).render('offers', { initiatedReturnCount, offers })
 
     } catch (error) {
@@ -1116,18 +1117,18 @@ const addNewOffer = async (req, res) => {
 
     try {
 
-        const isOfferActive = (req.body.is_active == 'on') ? true : false;
-
+        const isOfferActive = (req.body.isActive == 'on') ? true : false;
+console.log(req.body)
         const newOffer = new Offer({
 
             title: req.body.title,
             description: req.body.description,
-            discountType: req.body.discount_type,
-            discountValue: req.body.discount_value,
-            applicableOn: req.body.applicable,
-            minPurchaseAmount: req.body.minimum_amnt,
-            startDate: new Date(req.body.start_date),
-            endDate: new Date(req.body.end_date),
+            discountType: req.body.discountType,
+            discountValue: req.body.discountValue,
+            applicableOn: req.body.applicableOn,
+            minPurchaseAmount: req.body.minPurchaseAmount,
+            startDate: new Date(req.body.startDate),
+            endDate: new Date(req.body.endDate),
             isActive: isOfferActive
 
         });
