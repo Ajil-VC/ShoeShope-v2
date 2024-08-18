@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded',function() {
                     const productId = this.dataset.id;
                     const isRemoveCard = this.dataset.card;
 
-                    fetch(`http://localhost:2000/wishlist?productId=${productId}`,{method : "PATCH",headers : {
+                    fetch(`/wishlist?productId=${productId}`,{method : "PATCH",headers : {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     }})
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded',function() {
       
         const target_products_parent = document.getElementById('target-products');
 
-        fetch(`http://localhost:2000/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}`,{
+        fetch(`/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}`,{
             headers:{  'Accept': 'application/json' }
         })
         .then(response => {

@@ -47,68 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error fetching sales data:', error));
     }
 
-    /*Sale statistics Chart 2*/
-    // if (document.getElementById('myChart2')) {
-    //     var ctx = document.getElementById("myChart2").getContext('2d');
-    //     var myChart = new Chart(ctx, {
-    //         type: 'bar',
-    //         data: {
-    //             labels: ["900", "1200", "1400", "1600"],
-    //             datasets: [
-    //                 {
-    //                     label: "US",
-    //                     backgroundColor: "#5897fb",
-    //                     barThickness: 10,
-    //                     data: []  // We'll fetch this data from the backend
-    //                 },
-    //                 {
-    //                     label: "Europe",
-    //                     backgroundColor: "#7bcf86",
-    //                     barThickness: 10,
-    //                     data: []  // We'll fetch this data from the backend
-    //                 },
-    //                 {
-    //                     label: "Asian",
-    //                     backgroundColor: "#ff9076",
-    //                     barThickness: 10,
-    //                     data: []  // We'll fetch this data from the backend
-    //                 },
-    //                 {
-    //                     label: "Africa",
-    //                     backgroundColor: "#d595e5",
-    //                     barThickness: 10,
-    //                     data: []  // We'll fetch this data from the backend
-    //                 },
-    //             ]
-    //         },
-    //         options: {
-    //             plugins: {
-    //                 legend: {
-    //                     labels: {
-    //                         usePointStyle: true,
-    //                     },
-    //                 }
-    //             },
-    //             scales: {
-    //                 y: {
-    //                     beginAtZero: true
-    //                 }
-    //             }
-    //         }
-    //     });
-
-    //     // Fetch data from backend
-    //     // fetch('/api/region-sales')
-    //     //     .then(response => response.json())
-    //     //     .then(data => {
-    //     //         myChart.data.datasets[0].data = data.us;
-    //     //         myChart.data.datasets[1].data = data.europe;
-    //     //         myChart.data.datasets[2].data = data.asian;
-    //     //         myChart.data.datasets[3].data = data.africa;
-    //     //         myChart.update();
-    //     //     })
-    //     //     .catch(error => console.error('Error fetching region sales data:', error));
-    // }
 
     if (document.getElementById('myChart2')) {
         var ctx = document.getElementById("myChart2").getContext('2d');

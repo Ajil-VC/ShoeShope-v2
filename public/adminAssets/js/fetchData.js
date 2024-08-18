@@ -42,7 +42,7 @@ function swalConfirm(alertMsg,confirmMsg,commitedMsg,commitedHead,safeMsg) {
 
 function blockUser(userID){
     
-    fetch(`http://localhost:2000/admin/customers/?id=${userID}`, {method : 'PATCH'})
+    fetch(`/admin/customers/?id=${userID}`, {method : 'PATCH'})
     .then(response => {
     if(!response.ok){
         throw new Error("Network response was not ok")
@@ -85,7 +85,7 @@ function deletUser(userID){
 
     if(confirm("Are you sure you want to delete this user??")){
         
-        fetch( `http://localhost:2000/admin/customers/?id=${userID}`, {method : 'delete'} )
+        fetch( `/admin/customers/?id=${userID}`, {method : 'delete'} )
         .then(response => {
 
             if(!response.ok){
@@ -115,7 +115,7 @@ if(btnForAddBrand){
         const inputForBrand = document.getElementById('inputForBrand').value ;
         if(inputForBrand){
             
-            fetch(`http://localhost:2000/admin/category/?brand=${inputForBrand}`, {method : 'post'})
+            fetch(`/admin/category/?brand=${inputForBrand}`, {method : 'post'})
             .then(response => {
     
                 if(!response.ok){
@@ -150,7 +150,7 @@ if(category_form){
         const formdata = new FormData(this);
         
         
-        fetch(`http://localhost:2000/admin/category`,{
+        fetch(`/admin/category`,{
             method : 'post',
             body : new URLSearchParams(formdata) 
         })
@@ -162,7 +162,7 @@ if(category_form){
         })
         .then(data => {
             if(data.status){
-                window.location.href = "http://localhost:2000/admin/category"
+                window.location.href = "/admin/category"
             }else{
 
                 Swal.fire({
@@ -182,7 +182,7 @@ if(category_form){
 
 function listProduct(productID){
 
-    fetch(`http://localhost:2000/admin/productslist?productID=${productID}`, {method : 'PATCH'})
+    fetch(`/admin/productslist?productID=${productID}`, {method : 'PATCH'})
     .then(response => {
         if(!response.ok){
 
@@ -205,7 +205,7 @@ function listProduct(productID){
 
 function listCategory(categoryID){
 
-        fetch(`http://localhost:2000/admin/category/?categoryID=${categoryID}`, {method : 'PATCH'})
+        fetch(`/admin/category/?categoryID=${categoryID}`, {method : 'PATCH'})
         .then(response => {
             if(!response.ok){
 
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try{
 
-                const response = await fetch(`http://localhost:2000/admin/productslist/add_new_product?product_name=${newValue.trim()}`,{method : 'post'});
+                const response = await fetch(`/admin/productslist/add_new_product?product_name=${newValue.trim()}`,{method : 'post'});
                 if(!response.ok){
                     throw new Error("Network response was not ok while fetching data to check product is exist.");
                 }
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
                    
                     try{
 
-                        const response = await fetch(`http://localhost:2000/admin/productslist/add_new_product`,{
+                        const response = await fetch(`/admin/productslist/add_new_product`,{
                             method : 'post',
                             body : formDataForAddNewProduct
                         });
@@ -640,7 +640,7 @@ document.addEventListener('DOMContentLoaded', function() {
            
             new_modal_close_button.click();
 
-            fetch(`http://localhost:2000/admin/category?id=${categoryUpdationCurrentInput}&category_name=${categoryNameUpdate.value}&description=${categoryDescriptionUpdate.value}`,{method:"PUT"})
+            fetch(`/admin/category?id=${categoryUpdationCurrentInput}&category_name=${categoryNameUpdate.value}&description=${categoryDescriptionUpdate.value}`,{method:"PUT"})
             .then(response => {
                 if(!response.ok){
                     throw new Error("Network response was not ok")
@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
 
                 if(data.status){
-                    window.location.href = "http://localhost:2000/admin/category";
+                    window.location.href = "/admin/category";
                 }else{
                     Swal.fire({
                         title: 'Error',
@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if(takeConfirmation){
 
-            const response = await fetch(`http://localhost:2000/admin/returned-order`,{
+            const response = await fetch(`/admin/returned-order`,{
                 method : 'put',
                 headers : {
                     'Content-Type': 'application/json'
@@ -754,7 +754,7 @@ async function updateOrderStatus(orderId){
             }
         }
    
-        const response = await fetch(`http://localhost:2000/admin/order-list/order-details?orderId=${orderId}&orderStatus=${selectStatus}`,{method : 'PATCH'});
+        const response = await fetch(`/admin/order-list/order-details?orderId=${orderId}&orderStatus=${selectStatus}`,{method : 'PATCH'});
         if(!response.ok){
             throw new Error('Network response was not ok while fetching operation of update order status.');
         }

@@ -73,7 +73,7 @@ if (resend_otp) {
 
     resend_otp.addEventListener('click', () => {
 
-        fetch('http://localhost:2000/resend_otp')
+        fetch('/resend_otp')
             .then(response => {
               
                 if (!response.ok) {
@@ -131,7 +131,7 @@ if (otp_submit_btn) {
         otp_form.appendChild(hidden_otp);
         let urlEncodedData = new URLSearchParams(otpformData);
 
-        fetch('http://localhost:2000/signup/verify-otp', {
+        fetch('/signup/verify-otp', {
             method: 'POST', headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }, body: urlEncodedData
@@ -159,7 +159,7 @@ if (otp_submit_btn) {
                     otp_success_msg.textContent = data.message;
                 } else {
 
-                    window.location.href = "http://localhost:2000/h"
+                    window.location.href = "/h"
                 }
 
             })
@@ -332,7 +332,7 @@ async function makeDefaultAddress(AddressId) {
 
     try {
 
-        const response = await fetch(`http://localhost:2000/profile/address?AddressID=${AddressId}`, {
+        const response = await fetch(`/profile/address?AddressID=${AddressId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -421,7 +421,7 @@ async function deleteAddress(addressID) {
         let confirmDeletion = await swalConfirm(alertMsg, confirmMsg, commitedMsg, commitedHead, safeMsg);
         if (confirmDeletion) {
 
-            const response = await fetch(`http://localhost:2000/profile/address?AddressID=${addressID}`, { method: "DELETE" });
+            const response = await fetch(`/profile/address?AddressID=${addressID}`, { method: "DELETE" });
             if (!response.ok) {
                 throw new Error('Network response was not ok while deleting the address');
             }
@@ -616,7 +616,7 @@ async function updateAddress(addressID) {
     try {
         $('#editAddressModalCenter').modal('show');
 
-        const response = await fetch(`http://localhost:2000/profile/address/edit?addressId=${addressID}`, {
+        const response = await fetch(`/profile/address/edit?addressId=${addressID}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -688,7 +688,7 @@ async function addProductToCart(productId, flag) {
 
     let wishlistControl = flag ?? false;
 
-    const response = await fetch(`http://localhost:2000/product_details?product_id=${productId}`, {
+    const response = await fetch(`/product_details?product_id=${productId}`, {
         method: "post", headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -715,13 +715,13 @@ async function addProductToCart(productId, flag) {
             IdForaddToCartFn.textContent = "Go to cart"
             IdForaddToCartFn.removeAttribute('onclick');
             IdForaddToCartFn.addEventListener('click', () => {
-                window.location.href = "http://localhost:2000/cart"
+                window.location.href = "/cart"
             })
         } else if (wishlistControl) {
 
             document.getElementById(productId).remove();
 
-            fetch(`http://localhost:2000/wishlist?productId=${productId}`, {
+            fetch(`/wishlist?productId=${productId}`, {
                 method: "PATCH", headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
@@ -750,7 +750,7 @@ async function addProductToCart(productId, flag) {
 }
 
 function goToCart() {
-    window.location.href = "http://localhost:2000/cart"
+    window.location.href = "/cart"
 }
 
 
@@ -776,7 +776,7 @@ async function removeProductFromCart(productId) {
     try {
         if (confirmDeletion) {
 
-            const response = await fetch(`http://localhost:2000/cart?productId=${productId}&coupon=${selectedCoupon}`, { method: "delete" });
+            const response = await fetch(`/cart?productId=${productId}&coupon=${selectedCoupon}`, { method: "delete" });
             if (!response.ok) {
                 throw new Error('Network response was not ok while removing product from cart');
             }
@@ -853,7 +853,7 @@ async function addCoupon(selectedCoupon) {
 
     try {
 
-        const response = await fetch(`http://localhost:2000/cart/addcoupon?coupon=${selectedCoupon}`, { method: 'PATCH' });
+        const response = await fetch(`/cart/addcoupon?coupon=${selectedCoupon}`, { method: 'PATCH' });
         if (!response.ok) {
             throw new Error("Network response was not ok while adding coupon.");
         }
@@ -905,7 +905,7 @@ async function loadCheckout() {
 
     try {
         const selectedCoupon = document.getElementById('addedCoupon').value;
-        const response = await fetch(`http://localhost:2000/checkout?coupon=${selectedCoupon}`, { redirect: 'manual' });
+        const response = await fetch(`/checkout?coupon=${selectedCoupon}`, { redirect: 'manual' });
 
         if (!response.ok) {
             throw new Error('Network response was not ok while removing product from cart');
@@ -943,7 +943,7 @@ const cancelProduct = async (productOrderId, orderId, itemOrderId) => {
 
     if (confirmCancellation) {
         // Swal.fire(`You selected: ${reason}`);
-        const response = await fetch(`http://localhost:2000/profile/cancelproduct?return_item_id=${productOrderId}&order_id=${orderId}`, { method: 'post' });
+        const response = await fetch(`/profile/cancelproduct?return_item_id=${productOrderId}&order_id=${orderId}`, { method: 'post' });
 
         if (!response.ok) {
 
@@ -1030,7 +1030,7 @@ const returnProduct = async (productOrderId, orderId) => {
     });
     if (reason) {
         // Swal.fire(`You selected: ${reason}`);
-        const response = await fetch(`http://localhost:2000/profile/returnproduct?return_item_id=${productOrderId}&order_id=${orderId}&reason=${reason}`, { method: 'post' });
+        const response = await fetch(`/profile/returnproduct?return_item_id=${productOrderId}&order_id=${orderId}&reason=${reason}`, { method: 'post' });
 
         if (!response.ok) {
 
@@ -1073,7 +1073,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const productId = this.dataset.id;
                 const isRemoveCard = this.dataset.card;
 
-                fetch(`http://localhost:2000/wishlist?productId=${productId}`, {
+                fetch(`/wishlist?productId=${productId}`, {
                     method: "PATCH", headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
@@ -1126,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const productId = this.dataset.productid;
 
-            fetch(`http://localhost:2000/wishlist?productId=${productId}`, {
+            fetch(`/wishlist?productId=${productId}`, {
                 method: "PATCH", headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
@@ -1180,7 +1180,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // const isChecked = this.checked;
 
-            fetch(`http://localhost:2000/cart?productId=${productId}&coupon=${selectedCoupon}`, { method: "PUT" })
+            fetch(`/cart?productId=${productId}&coupon=${selectedCoupon}`, { method: "PUT" })
                 .then(response => {
 
                     if (!response.ok) {
@@ -1230,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const newQuantity = this.value;
             selectedCoupon = document.getElementById('addedCoupon').value;
 
-            fetch(`http://localhost:2000/cart?productId=${productId}&newQuantity=${newQuantity}&coupon=${selectedCoupon}`, { method: "PATCH" })
+            fetch(`/cart?productId=${productId}&newQuantity=${newQuantity}&coupon=${selectedCoupon}`, { method: "PATCH" })
                 .then(response => {
 
                     if (!response.ok) {
@@ -1309,7 +1309,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const productId = this.dataset.productId;
             const shoeSize = this.value;
 
-            fetch(`http://localhost:2000/cart?productId=${productId}&shoeSize=${shoeSize}`, { method: "PATCH" })
+            fetch(`/cart?productId=${productId}&shoeSize=${shoeSize}`, { method: "PATCH" })
                 .then(response => {
 
                     if (!response.ok) {
@@ -1367,7 +1367,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (selectedAddressId) {
 
-                fetch(`http://localhost:2000/checkout_page?addressId=${selectedAddressId}`, { method: "PATCH" })
+                fetch(`/checkout_page?addressId=${selectedAddressId}`, { method: "PATCH" })
                     .then(response => {
 
                         if (!response.ok) {
@@ -1471,7 +1471,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
 
-                const result = await fetch('http://localhost:2000/payment-failed', {
+                const result = await fetch('/payment-failed', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1506,7 +1506,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
 
-            const response = await fetch(`http://localhost:2000/checkout_page/check_address`);
+            const response = await fetch(`/checkout_page/check_address`);
             if (!response.ok) {
                 throw new Error('Network response was not ok while checking address is selected.');
             }
@@ -1528,7 +1528,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
 
-            const response = await fetch(`http://localhost:2000/checkout_page?paymentMethod=${paymentMethod}`, { method: 'post' });
+            const response = await fetch(`/checkout_page?paymentMethod=${paymentMethod}`, { method: 'post' });
             if (!response.ok) {
                 throw new Error('Network response was not ok while making order.');
             }
@@ -1671,7 +1671,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
 
-            const response = await fetch(`http://localhost:2000/profile/invoice?order_id=${orderId}`);
+            const response = await fetch(`/profile/invoice?order_id=${orderId}`);
 
             if (!response.ok) {
                 throw new Error("Network response was not ok whilte trying to create invoice.");
@@ -1715,7 +1715,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
 
-            const response = await fetch(`http://localhost:2000/checkout_page/retry/make-payment?paymentMethod=${paymentMethod}&order_id=${orderId}`, {
+            const response = await fetch(`/checkout_page/retry/make-payment?paymentMethod=${paymentMethod}&order_id=${orderId}`, {
                 method: 'post'
             });
             if (!response.ok) {
@@ -1786,7 +1786,7 @@ document.addEventListener('DOMContentLoaded', function () {
         retryPaymentBtn.addEventListener('click', () => {
 
             const orderId = invoiceBtn.dataset.orderId;
-            window.location.href = `http://localhost:2000/checkout_page/retry/${orderId}`
+            window.location.href = `/checkout_page/retry/${orderId}`
 
         })
     }
@@ -1832,7 +1832,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const orderButton = e.target.closest('.odsIdUnifiedRow');
             if (orderButton) {
 
-                fetch(`http://localhost:2000/profile/get-order-details?order_id=${orderButton.dataset.id}`)
+                fetch(`/profile/get-order-details?order_id=${orderButton.dataset.id}`)
                     .then(response => {
 
                         if (!response.ok) {

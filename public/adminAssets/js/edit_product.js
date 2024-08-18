@@ -117,24 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 stockQuantity_error.textContent = "Must be a positive number.";
                 formValidation = false;
             }
-            // if(productName === ""){
-                
-            //     product_name_error.textContent = "This field should not be empty.";
-            //     product_name_error.classList.remove('d-none');
-            //     formValidation = false;
-            // }else if(alreadyExistName){
-
-            //     product_name_error.classList.remove('d-none');
-            //     product_name_error.textContent = "A product is already exist in this name"
-            // }
-
-            // if(descriptionOfProduct === ""){
-                
-            //     descriptionOfProduct_error.textContent = "Please type something here";
-            //     formValidation = false;
-            // }
-            
-
             
             if(formValidation){
                 const category = document.getElementById('category').value;
@@ -170,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 
-                fetch(`http://localhost:2000/admin/productslist/edit_product?productId=${productId}`,{
+                fetch(`/admin/productslist/edit_product?productId=${productId}`,{
                     method : 'PUT',
                     body : formDataForAddNewProduct
                 })
@@ -198,11 +180,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
                     }else{
     
-                        // Swal.fire({
-                        //     title: '',
-                        //     text: data.message,
-                        //     icon: 'success'
-                        // });
                         window.location.href = data.redirect;
                     }
                                      

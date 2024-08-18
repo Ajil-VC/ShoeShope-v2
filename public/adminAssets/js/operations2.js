@@ -6,7 +6,7 @@ const listCoupons = async (couponId) => {
 
     try {
 
-        const response = await fetch(`http://localhost:2000/admin/coupons?coupon=${couponId}`, { method: 'PATCH' });
+        const response = await fetch(`/admin/coupons?coupon=${couponId}`, { method: 'PATCH' });
 
         if (!response.ok) {
             throw new Error('Network repsonse was not ok while changing coupon status.');
@@ -34,7 +34,7 @@ async function downloadFile(format, timeRange) {
             var range = `&range=${timeRange.range}`;
         }
 
-        const response = await fetch(`http://localhost:2000/admin/dashboard/export?format=${format}${range}`);
+        const response = await fetch(`/admin/dashboard/export?format=${format}${range}`);
         if (!response.ok) {
             throw new Error(`Network response was not ok while trying to download the ${format} file`);
         }
@@ -164,7 +164,7 @@ const getSaleReport = async (range, customRangeOb = null) => {
 
     try {
 
-        const response = await fetch(`http://localhost:2000/admin/dashboard/sales-report?range=${range}${customrange}`, {
+        const response = await fetch(`/admin/dashboard/sales-report?range=${range}${customrange}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const input = e.target.value;
 
-            fetch(`http://localhost:2000/admin/coupons?code=${input}`)
+            fetch(`/admin/coupons?code=${input}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error("Network response was not ok")
@@ -596,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
 
-            const response = await fetch(`http://localhost:2000/admin/best_sellers?sort_on=${sortOn}`, {
+            const response = await fetch(`/admin/best_sellers?sort_on=${sortOn}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json'
