@@ -5,7 +5,6 @@ const fs = require('fs');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
 
-        console.log("This is inside multer", req.body)
         let directoryPath = path.join(__dirname, '../public/ProductImage')
         if (fs.existsSync(directoryPath)) {
 
