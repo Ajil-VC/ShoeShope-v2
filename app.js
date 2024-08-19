@@ -60,5 +60,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`ShoeShope is listening at http://13.200.103.63:${PORT}`)
+    console.log(`ShoeShope is listening at http://localhost:${PORT}`)
 })
