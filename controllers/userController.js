@@ -52,7 +52,7 @@ const gen_otp = async (req, res) => {
 
     const otp = otpGenerator.generate(5, { digits: true, alphabets: false, upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
     try {
-   
+
         await OTP.create({ email, otp })
 
         //Sending OTP to the email
@@ -85,7 +85,7 @@ const resend_otp = async (req, res) => {
 
     const otp = otpGenerator.generate(5, { digits: true, alphabets: false, upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
     try {
-       
+
         await OTP.create({ email, otp })
 
         //Sending OTP to the email
@@ -370,8 +370,8 @@ const loadShowcase = async (req, res) => {
             const [category, brand, groupProducts, totalDocuments] = await Promise.all([
                 Category.find({ isActive: 1 }).exec(),
                 Brand.find().exec(),
-                Product.find({ targetGroup: targetGroup }).skip(skip).limit(limit).exec(),
-                Product.countDocuments({ targetGroup: targetGroup }).exec()
+                Product.find({ targetGroup: targetGroup, isActive: 1 }).skip(skip).limit(limit).exec(),
+                Product.countDocuments({ targetGroup: targetGroup, isActive: 1 }).exec()
             ]);
 
             const totalPages = Math.ceil(totalDocuments / limit);
@@ -398,7 +398,7 @@ const loadShowcase = async (req, res) => {
             const limit = 6;
             const skip = (page - 1) * limit;
 
-            let query = { targetGroup: req.query.group };
+            let query = { targetGroup: req.query.group, isActive: 1 };
             const queryArray = []
             const matchQuery = { $match: null };
             const facetQuery = {
@@ -621,7 +621,7 @@ const updateUserProfile = async (req, res) => {
     const firstName = req.body.Fname;
     const lastName = req.body.Lname;
     const newPassword = req.body.npassword;
-  
+
     const newHashedPassword = await securePassword(newPassword);
 
     let userID = "";
@@ -725,7 +725,7 @@ const logoutUser = async (req, res) => {
                     console.error("Error occured while trying to logout the passport authenticated user", err);
                     return next(err);
                 } else {
-              
+
                     return res.status(302).redirect('/')
                 }
             })
@@ -740,10 +740,10 @@ const logoutUser = async (req, res) => {
                     return res.status(500).send("Error while destroying session : ", err);
                 }
 
-            
+
                 return res.status(302).redirect('/');
             });
-        } 
+        }
 
     } catch (error) {
         console.error("Internal error while trying to logout", error.stack);
@@ -809,7 +809,7 @@ const addNewAddress = async (req, res) => {
             return res.status(201).redirect('/profile')
 
         } else {
-            console.error("Something went wrong while creating address",error.stack);
+            console.error("Something went wrong while creating address", error.stack);
             return res.send("Something went wrong while creating address");
         }
 
@@ -884,7 +884,7 @@ const deleteAddress = async (req, res) => {
             if (isDeleted.deletedCount) {
 
                 await User.updateOne({ _id: userID }, { $pull: { address: addressId } }).exec();
-               
+
                 return res.json({ status: true });
             }
 
@@ -904,7 +904,7 @@ const deleteAddress = async (req, res) => {
                 Address.deleteOne({ _id: addressId }).exec()
 
             ]);
-         
+
             return res.json({ status: true });
         }
 
@@ -938,7 +938,7 @@ const getAddressDetails = async (req, res) => {
 
 const updateAddress = async (req, res) => {
 
-   
+
     try {
 
         const addressId = new mongoose.Types.ObjectId(req.body.addressId);
@@ -957,9 +957,9 @@ const updateAddress = async (req, res) => {
         })
 
         const updatedAddress = await addressDetails.save();
-      
+
         if (updatedAddress) {
-         
+
             return res.status(201).redirect('/profile')
         } else {
             return res.status(403).send('Address updation failed!');
@@ -1109,7 +1109,7 @@ const addProductToCart = async (req, res) => {
             });
 
             const cartData = await newCart.save();
-    
+
             return res.status(201).json({ status: true });
         }
 
@@ -1678,10 +1678,10 @@ const getItemsAndReserve = async (cartItemsArray) => {
                 return acc + cur.modifiedCount;
             }, 0);
             if (reservedItemCount == productsToOrder.length) {
-            
+
                 return productsToOrder;
             } else {
-        
+
                 return null;
             }
 
@@ -1847,7 +1847,7 @@ const placeOrder = async (req, res) => {
                 return res.status(201).json({ status: true, redirect: `/order_placed?order_id=${orderDetails._id}` })
 
             } else {
-             
+
                 return res.json({ status: false, message: "Couldn't place the order" })
             }
 
@@ -2032,10 +2032,10 @@ const paymentVerification = async (req, res) => {
                 { new: true }
             );
 
-    
+
             if (updatedOrder) {
                 const paidProductsCount = updatedOrder.items.filter(item => (item.paymentStatus === 'PAID')).length;
-               
+
                 if (updatedOrder.items.length > paidProductsCount) {
                     updatedOrder.overallPaymentStatus = 'PARTIALLY_PAID';
                     await updatedOrder.save();
@@ -2089,7 +2089,7 @@ const updateOrderForWalletPayment = async (orderId, paymentId) => {
 
         if (updatedOrder) {
             const paidProductsCount = updatedOrder.items.filter(item => (item.paymentStatus === 'PAID')).length;
-        
+
             if (updatedOrder.items.length > paidProductsCount) {
                 updatedOrder.overallPaymentStatus = 'PARTIALLY_PAID';
                 await updatedOrder.save();
@@ -2214,7 +2214,7 @@ const cancelOrder = async (req, res) => {
 
             flag = true;
 
-        } 
+        }
 
         if (flag) {
 
@@ -2333,7 +2333,7 @@ const initiateReturn = async (req, res) => {
             await order.save();
             return res.status(200).json({ status: true, message: 'Return initialized.' });
         } else {
-      
+
             return res.json({ status: false, message: 'Couldnt initiate the return.' });
         }
 
