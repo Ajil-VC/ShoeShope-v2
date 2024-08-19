@@ -101,10 +101,10 @@ const badgeCount = async (req, res, next) => {
             ]);
 
             const wishlistCount = wishlistData[0].wishlistCount;
-            const cartCount     = cartData[0].cartCount;
+            const cartCount     = cartData[0]?.cartCount;
 
             res.locals.wishlistCount = wishlistCount;
-            res.locals.cartCount    = cartCount;
+            res.locals.cartCount    = cartCount ?? 0;
 
         } catch (error) {
             console.error("Inernal error occured while trying to get badge count in middleware.", error.stack);
