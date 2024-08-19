@@ -159,7 +159,7 @@ if (otp_submit_btn) {
                     otp_success_msg.textContent = data.message;
                 } else {
 
-                    window.location.href = "/h"
+                    window.location.href = "/"
                 }
 
             })

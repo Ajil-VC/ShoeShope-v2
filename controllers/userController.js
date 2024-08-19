@@ -52,7 +52,7 @@ const gen_otp = async (req, res) => {
 
     const otp = otpGenerator.generate(5, { digits: true, alphabets: false, upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
     try {
-      
+   
         await OTP.create({ email, otp })
 
         //Sending OTP to the email
