@@ -2351,7 +2351,13 @@ async function generateInvoice(invoiceData) {
     const template = Handlebars.compile(templateHtml);
     const html = template(invoiceData);
 
-    const browser = await puppeteer.launch();
+    const chromePath = process.env.CHROME_PATH || undefined;//Checking in which enviornment it is working.
+
+    const browser = await puppeteer.launch({
+        executablePath: chromePath,
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
     const page = await browser.newPage();
     await page.setContent(html);
 
