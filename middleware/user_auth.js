@@ -100,7 +100,7 @@ const badgeCount = async (req, res, next) => {
                 ])
             ]);
 
-            const wishlistCount = wishlistData[0].wishlistCount;
+            const wishlistCount = wishlistData[0]?.wishlistCount;
             const cartCount     = cartData[0]?.cartCount;
 
             res.locals.wishlistCount = wishlistCount;
