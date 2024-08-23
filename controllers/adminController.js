@@ -1095,7 +1095,10 @@ const loadOffers = async (req, res) => {
                 { $match: { status: 'initiated' } },
                 { $count: 'total' }
             ]),
-            Offer.find().exec()
+            
+            Offer.find().exec(),
+
+
         ]);
         const initiatedReturnCount = initiatedReturns[0].total;
 
@@ -1148,6 +1151,35 @@ console.log(req.body)
             message: "Something went wrong. Please try again later.",
             redirect: '/admin/offers'
         });
+    }
+}
+
+
+const getCategoriesOrProductsForOffer = async(req,res)=> {
+
+    try{
+
+        const searchCategory = req.query.searchCat;
+        if (mongoose.Types.ObjectId.isValid(searchCategory)) {
+            // If the searchKey is a valid ObjectId
+            var categoryQuery = { _id: new mongoose.Types.ObjectId(searchCategory) };
+        }else {
+            // If the searchKey is a string, perform a case-insensitive search by name
+            var categoryQuery = { name: { $regex: `^${searchCategory}`, $options: 'i' } };
+        }
+
+        const categories = await Category.find(categoryQuery);
+        if(categories.length < 1){
+            
+            return res.status(200).json({status : false});    
+        }
+        console.log(categories,"This is the data")
+        return res.status(200).json({status : true, categories});
+
+    }catch(error){
+
+        console.error('Internal Error occured while trying to fetch the categories for offers.',error);
+        return res.status(500).send(`Internal Error occured while trying to fetch the categories for offers\n${error}`);
     }
 }
 
@@ -2052,6 +2084,7 @@ module.exports = {
 
     loadOffers,
     addNewOffer,
+    getCategoriesOrProductsForOffer,
 
     loadCustomerList,
     blockOrUnblockUser,

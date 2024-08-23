@@ -213,6 +213,10 @@ const productSchema = new mongoose.Schema({
     },
     targetGroup: {
         type: String
+    },
+    isOnOffer : {
+        type : Boolean,
+        default : false
     }
 
 }, { timestamps: true });

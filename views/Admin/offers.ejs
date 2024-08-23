@@ -28,19 +28,53 @@
                     <label for="off-description" class="form-label">Description</label>
                     <textarea class="form-control bg-white" name="description" id="off-description" rows="1"></textarea>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6" hidden >
                     <label for="off-products" class="form-label">Products (if applicable)</label>
                     <select class="form-select bg-white" name="products" id="off-products" multiple>
                         
                         <!-- Add product options dynamically -->
                     </select>
                 </div>
-                <div class="col-md-6">
+
+                <div class="col-md-6 position-relative">
+                    <label for="offStProductSearch" class="form-label">Add Products (if applicable)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-white" id="offStProductSearch" placeholder="Search products...">
+                        <button class="btn btn-outline-secondary" type="button" id="offStProductAddBtn">Add</button>
+                    </div>
+                    <div id="offStProductPopup" class="position-absolute bg-white border rounded p-2 mt-1 w-100" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                        <div id="offStProdRecentProducts">
+                            <!-- Recent products will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <div class="col-md-6" hidden >
                     <label for="off-categories" class="form-label">Categories (if applicable)</label>
                     <select class="form-select bg-white" name="categories" id="off-categories" multiple>
                         <!-- Add category options dynamically -->
                     </select>
                 </div>
+
+
+                <div class="col-md-6 position-relative">
+                    <label for="offStCategorySearch" class="form-label">Add Categories (if applicable)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-white" id="offStCategorySearch" placeholder="Search products...">
+                        <button class="btn btn-outline-secondary" type="button" id="offStCategoryAddBtn">Add</button>
+                    </div>
+                    <div id="offStCategoryPopup" class="position-absolute bg-white border rounded p-2 mt-1 w-100" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                        <div id="offStCatRecentProducts">
+                            <!-- Recent products will be dynamically added here -->
+
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="col-md-4">
                     <label for="off-discount-type" class="form-label">Discount Type</label>
                     <select class="form-select bg-white" name="discountType" id="off-discount-type" >

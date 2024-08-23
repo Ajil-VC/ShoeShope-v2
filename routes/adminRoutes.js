@@ -29,7 +29,8 @@ adminRouter.post('/coupons', authenticate.isLoggedIn, adminController.addNewCoup
 adminRouter.patch('/coupons', authenticate.isLoggedIn, adminController.changeCouponStatus);
 
 adminRouter.get('/offers', authenticate.isLoggedIn, adminController.loadOffers);
-adminRouter.post('/offers',authenticate.isLoggedIn, adminController.addNewOffer);
+adminRouter.post('/offers', authenticate.isLoggedIn, adminController.addNewOffer);
+adminRouter.get('/offers/category', authenticate.isLoggedIn, adminController.getCategoriesOrProductsForOffer);
 
 adminRouter.get('/customers', authenticate.isLoggedIn, adminController.loadCustomerList);
 adminRouter.patch('/customers', authenticate.isLoggedIn, adminController.blockOrUnblockUser);

@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
             product_name_error.textContent = "Give a product name"
             validation = false;
           
-        }else{
+        }else{  
             
             try{
 
