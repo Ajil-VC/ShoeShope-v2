@@ -13,11 +13,22 @@ const isLoggedIn = async (req, res, next) => {
 
     try {
 
+        
         if (!req.session.admin_id || !req.session.isAuthorised) {
 
-            return res.redirect('/admin/login');
+            const acceptHeader = req.headers.accept || "";
+            
+            if (req.xhr || acceptHeader.indexOf('json') > -1) {
+                // If the client expects a JSON response
+                return res.status(401).json({ redirect: '/admin/login'});
+            } else {
+                // For regular HTTP requests
+                return res.redirect('/admin/login');
+            }
+            
 
         }
+        
 
         next();
     } catch (error) {

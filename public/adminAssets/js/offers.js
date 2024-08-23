@@ -11,33 +11,18 @@ document.addEventListener('DOMContentLoaded', ()=> {
             {id: 5, name: 'Product 5'}
         ];
 
-        displayProducts(products, 'recentProd');
+        displayProducts(products, 'product');
      
     }
-
-    // async function fetchRecentCategories(){
-
-    //     let products = [
-    //         {id: 1, name: 'Product 6'},
-    //         {id: 2, name: 'Product 7'},
-    //         {id: 3, name: 'Product 8'},
-    //         {id: 4, name: 'Product 9'},
-    //         {id: 5, name: 'Product 10'}
-    //     ];
-
-    //     displayProducts(products, 'recentCat');
-
-    // }
-
 
 
     // Function to display products
     /// This function will used for both.
-    function displayProducts(products, updateOn) {
+    function displayProducts(result, updateOn) {
 
-        if(updateOn === 'recentProd'){
+        if(updateOn === 'product'){
 
-            prodProductsContainer.innerHTML = products.map(product => `
+            prodProductsContainer.innerHTML = result.map(product => `
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="${product.id}" id="product${product.id}">
                     <label class="form-check-label" for="product${product.id}">
@@ -46,20 +31,30 @@ document.addEventListener('DOMContentLoaded', ()=> {
                 </div>
             `).join('');
 
-        }else if(updateOn === 'recentCat'){
+        }else if(updateOn === 'category'){
 
-            catProductsContainer.innerHTML = products.categories.map(product => `
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="${product.name}" id="product${product._id}">
-                    <label class="form-check-label" for="product${product._id}">
-                        ${product.name}
+            const selectedValues = Array.from(categoryAddingField).map(option => option.value);
+
+            catProductsContainer.innerHTML = result.categories.map(category => {
+                
+                let isSelected = '';
+                if(selectedValues.length > 0){
+
+                    checkIsSelected = selectedValues.filter(categoryId => categoryId == category._id ).length === 1;
+                    isSelected = checkIsSelected ? 'checked' : '';
+                }
+
+                return `<div class="form-check">
+                    <input class="form-check-input" ${isSelected} type="checkbox" data-id="${category._id}" value="${category.name}" id="category${category._id}">
+                    <label class="form-check-label" for="category${category._id}">
+                        ${category.name}
                     </label>
                 </div>
-            `).join('');
+
+            `}).join('');
 
         }
     }
-
 
 
     const prodOffSearchInput = document.getElementById('offStProductSearch');
@@ -111,7 +106,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
             product.name.toLowerCase().includes(query.toLowerCase())
         );
 
-        displayProducts(searchResults, 'recentProd');
+        displayProducts(searchResults, 'product');
     }
 
     /////////////////////////////////////////
@@ -119,6 +114,43 @@ document.addEventListener('DOMContentLoaded', ()=> {
     const catOffSearchInput = document.getElementById('offStCategorySearch');
     const catOffpopup = document.getElementById('offStCategoryPopup');
     const catProductsContainer = document.getElementById('offStCatRecentProducts');
+    const categoryAddingField = document.getElementById('off-categories');
+
+    if(catProductsContainer){
+        catProductsContainer.addEventListener('change',function(event){
+            
+            if (event.target.classList.contains('form-check-input')) {
+                // Handle the checkbox change event
+                const checkbox = event.target;
+                const isChecked = checkbox.checked;
+                const categoryId = checkbox.dataset.id;
+                const categoryName = checkbox.value;
+                
+                //Creating option and adding or removing accordingly to the input field.
+                if(isChecked){
+                    const option = document.createElement('option');
+                    option.value = categoryId;
+                    option.textContent = categoryName;
+                    categoryAddingField.appendChild(option);
+                }else{
+                    const selectedValues = Array.from(categoryAddingField.options)
+                    .forEach(option => {
+                        if(option.value == categoryId){
+                            categoryAddingField.removeChild(option);
+                        }
+                    })
+                }
+
+                const selectedValues = Array.from(categoryAddingField).map(option => option.value);
+                console.log(selectedValues,"Tjis is input values");  // Logs an array of selected values to the console
+
+                console.log(`Checkbox with value "${categoryName}" is now ${isChecked ? 'checked' : 'unchecked'}.`);
+        
+            }
+            
+        })
+    }
+
 
     // Show catOffpopup when the search input is focused
     catOffSearchInput.addEventListener('focus', function() {
@@ -140,7 +172,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
         if (this.value.trim() === '') {
             catSearchProducts('');
         } else {
-            catSearchProducts(this.value);
+            catSearchProducts(this.value.trim());
         }
     });
 
@@ -157,20 +189,24 @@ document.addEventListener('DOMContentLoaded', ()=> {
             }
     
             const data = await response.json();
-            if(!data.status){
+          
+            if(data.redirect){
+
+                window.location.href = data.redirect;
+                return;
+
+            }else if(!data.status){
     
                 catOffpopup.style.display = 'none';
-                console.log("Data not found.");
                 return;
             }
     
-            console.log("This is the data:\n",data);
-
             catOffpopup.style.display = 'block';
-            displayProducts(data, 'recentCat');
+            displayProducts(data, 'category');
 
             
         }catch(error){
+          
             console.error("Error occured while trying to get category search results.",error);
         }
 
