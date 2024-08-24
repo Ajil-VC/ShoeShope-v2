@@ -39,7 +39,7 @@
                 <div class="col-md-6 position-relative">
                     <label for="offStProductSearch" class="form-label">Add Products (if applicable)</label>
                     <div class="input-group">
-                        <input type="text" class="form-control bg-white" id="offStProductSearch" placeholder="Search products...">
+                        <input type="text" class="form-control bg-white border " id="offStProductSearch" placeholder="Search products..." disabled >
                         <!-- <button class="btn btn-outline-secondary" type="button" id="offStProductAddBtn">Add</button> -->
                     </div>
                     <div id="offStProductPopup" class="position-absolute bg-white border rounded p-2 mt-1 w-100" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
@@ -63,7 +63,7 @@
                 <div class="col-md-6 position-relative">
                     <label for="offStCategorySearch" class="form-label">Add Categories (if applicable)</label>
                     <div class="input-group">
-                        <input type="text" class="form-control bg-white" id="offStCategorySearch" placeholder="Search products...">
+                        <input type="text" class="form-control bg-white border " id="offStCategorySearch" placeholder="Search categories..." disabled >
                         <!-- <button class="btn btn-outline-secondary" type="button" id="offStCategoryAddBtn">Add</button> -->
                     </div>
                     <div id="offStCategoryPopup" class="position-absolute bg-white border rounded p-2 mt-1 w-100" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
@@ -90,8 +90,8 @@
                     <span  class="text-danger" style="font-size: smaller;" id="offer-disvalue-error"></span>
                 </div>
                 <div class="col-md-4">
-                    <label for="off-applicable-on" class="form-label">Applicable On</label>
-                    <select class="form-select bg-white" name="applicableOn" id="off-applicable-on" >
+                    <label for="off-applicable-on" class="form-label ">Applicable On</label>
+                    <select class="form-select bg-white border border-danger " name="applicableOn" id="off-applicable-on" >
                         <option disabled selected value="">Choose...</option>
                         <option value="product">Product</option>
                         <option value="category">Category</option>
@@ -102,7 +102,7 @@
                 
                 <div class="col-md-4">
                     <label for="off-min-purchase" class="form-label">Minimum Purchase Amount</label>
-                    <input type="number" class="form-control bg-white" name="minPurchaseAmount" id="off-min-purchase" value="0">
+                    <input type="number" class="form-control bg-white border " name="minPurchaseAmount" id="off-min-purchase" value="0" disabled >
                     <span  class="text-danger" style="font-size: smaller;" id="offer-min-purchase-error"></span>
                 </div>
                 <div class="col-md-4">

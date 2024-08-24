@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', ()=> {
+document.addEventListener('DOMContentLoaded', () => {
 
     // Function to display products
     /// This function will used for both.
     function displayProducts(result, updateOn) {
 
-        if(updateOn === 'product'){
+        if (updateOn === 'product') {
 
             const selectedValues = Array.from(productAddingField).map(option => option.value);
             // ${isSelected}
@@ -12,13 +12,13 @@ document.addEventListener('DOMContentLoaded', ()=> {
 
                 let isSelected = '';
                 let prodIsSelected = '';
-                if(selectedValues.length > 0){
+                if (selectedValues.length > 0) {
 
-                    checkIsSelected = selectedValues.filter(productId => productId == product._id ).length === 1;
+                    checkIsSelected = selectedValues.filter(productId => productId == product._id).length === 1;
                     isSelected = checkIsSelected ? 'checked' : '';
                     prodIsSelected = checkIsSelected ? 'prodIsSelected' : '';
                 }
-                
+
                 return `
                 <a class="itemside pb-1 ${prodIsSelected} " id="pro-${product._id}" href="#">
                 
@@ -34,16 +34,16 @@ document.addEventListener('DOMContentLoaded', ()=> {
               
             `}).join('');
 
-        }else if(updateOn === 'category'){
+        } else if (updateOn === 'category') {
 
             const selectedValues = Array.from(categoryAddingField).map(option => option.value);
 
             catProductsContainer.innerHTML = result.categories.map(category => {
-                
-                let isSelected = '';
-                if(selectedValues.length > 0){
 
-                    checkIsSelected = selectedValues.filter(categoryId => categoryId == category._id ).length === 1;
+                let isSelected = '';
+                if (selectedValues.length > 0) {
+
+                    checkIsSelected = selectedValues.filter(categoryId => categoryId == category._id).length === 1;
                     isSelected = checkIsSelected ? 'checked' : '';
                 }
 
@@ -65,19 +65,19 @@ document.addEventListener('DOMContentLoaded', ()=> {
     const prodProductsContainer = document.getElementById('offStProdRecentProducts');
     const productAddingField = document.getElementById('off-products');
 
-    if(prodProductsContainer){
-       
-        prodProductsContainer.addEventListener('click', function(event) {
+    if (prodProductsContainer) {
+
+        prodProductsContainer.addEventListener('click', function (event) {
             // Check if the event target is an <a> tag or a child of an <a> tag with the class 'itemside'
             const aTag = event.target.closest('a.itemside');
-        
+
             if (aTag) {
                 // Prevent the default action of the <a> tag (if needed)
                 event.preventDefault();
-        
+
                 // Find the checkbox within the clicked <a> tag
                 const checkbox = aTag.querySelector('.product-checkbox');
-                
+
                 if (checkbox) {
 
                     // Get the checkbox value
@@ -86,19 +86,20 @@ document.addEventListener('DOMContentLoaded', ()=> {
                     const isChecked = !checkbox.checked;
 
                     //Creating option and adding or removing accordingly to the input field.
-                    if(isChecked){
+                    if (isChecked) {
                         const option = document.createElement('option');
                         option.value = productId;
                         option.textContent = productName;
+                        option.selected = true;
                         productAddingField.appendChild(option);
                         aTag.classList.add('prodIsSelected');
-                    }else{
+                    } else {
                         Array.from(productAddingField.options)
-                        .forEach(option => {
-                            if(option.value == productId){
-                                productAddingField.removeChild(option);
-                            }
-                        })
+                            .forEach(option => {
+                                if (option.value == productId) {
+                                    productAddingField.removeChild(option);
+                                }
+                            })
                         aTag.classList.remove('prodIsSelected');
                     }
 
@@ -110,7 +111,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
     }
 
     // Show prodOffpopup when the search input is focused
-    prodOffSearchInput.addEventListener('focus', function() {
+    prodOffSearchInput.addEventListener('focus', function () {
         prodOffpopup.style.display = 'block';
         if (!prodOffSearchInput.value) {
             prodSearchProducts('');
@@ -118,14 +119,14 @@ document.addEventListener('DOMContentLoaded', ()=> {
     });
 
     // Hide prodOffpopup when clicking outside
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         if (!prodOffSearchInput.contains(event.target) && !prodOffpopup.contains(event.target)) {
             prodOffpopup.style.display = 'none';
         }
     });
 
     // Add search functionality
-    prodOffSearchInput.addEventListener('input', function() {
+    prodOffSearchInput.addEventListener('input', function () {
         if (this.value.trim() === '') {
             prodSearchProducts('');
         } else {
@@ -136,34 +137,34 @@ document.addEventListener('DOMContentLoaded', ()=> {
     // Function to search products
     async function prodSearchProducts(query) {
         // Here you would typically send the search query to your backend
-        
-         try{
+
+        try {
 
             const response = await fetch(`/admin/offers/category?searchProd=${query}`);
-            if(!response.ok){
+            if (!response.ok) {
                 throw new Error('Network response was not ok while trying to fetch search categories');
             }
-    
+
             const data = await response.json();
-   
-            if(data.redirect){
+
+            if (data.redirect) {
 
                 window.location.href = data.redirect;
                 return;
 
-            }else if(!data.status){
-    
+            } else if (!data.status) {
+
                 prodOffpopup.style.display = 'none';
                 return;
             }
-    
+
             prodOffpopup.style.display = 'block';
             displayProducts(data, 'product');
 
-            
-        }catch(error){
-          
-            console.error("Error occured while trying to get products search results.",error);
+
+        } catch (error) {
+
+            console.error("Error occured while trying to get products search results.", error);
         }
 
     }
@@ -175,39 +176,40 @@ document.addEventListener('DOMContentLoaded', ()=> {
     const catProductsContainer = document.getElementById('offStCatRecentProducts');
     const categoryAddingField = document.getElementById('off-categories');
 
-    if(catProductsContainer){
-        catProductsContainer.addEventListener('change',function(event){
-            
+    if (catProductsContainer) {
+        catProductsContainer.addEventListener('change', function (event) {
+
             if (event.target.classList.contains('form-check-input')) {
                 // Handle the checkbox change event
                 const checkbox = event.target;
                 const isChecked = checkbox.checked;
                 const categoryId = checkbox.dataset.id;
                 const categoryName = checkbox.value;
-                
+
                 //Creating option and adding or removing accordingly to the input field.
-                if(isChecked){
+                if (isChecked) {
                     const option = document.createElement('option');
                     option.value = categoryId;
                     option.textContent = categoryName;
+                    option.selected = true;
                     categoryAddingField.appendChild(option);
-                }else{
+                } else {
                     Array.from(categoryAddingField.options)
-                    .forEach(option => {
-                        if(option.value == categoryId){
-                            categoryAddingField.removeChild(option);
-                        }
-                    })
-                }   
-        
+                        .forEach(option => {
+                            if (option.value == categoryId) {
+                                categoryAddingField.removeChild(option);
+                            }
+                        })
+                }
+
             }
-            
+
         })
     }
 
 
     // Show catOffpopup when the search input is focused
-    catOffSearchInput.addEventListener('focus', function() {
+    catOffSearchInput.addEventListener('focus', function () {
         catOffpopup.style.display = 'block';
         if (!catOffSearchInput.value) {
             catSearchProducts('');
@@ -215,14 +217,14 @@ document.addEventListener('DOMContentLoaded', ()=> {
     });
 
     // Hide catOffpopup when clicking outside
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         if (!catOffSearchInput.contains(event.target) && !catOffpopup.contains(event.target)) {
             catOffpopup.style.display = 'none';
         }
     });
 
     // Add search functionality
-    catOffSearchInput.addEventListener('input', function() {
+    catOffSearchInput.addEventListener('input', function () {
         if (this.value.trim() === '') {
             catSearchProducts('');
         } else {
@@ -233,40 +235,105 @@ document.addEventListener('DOMContentLoaded', ()=> {
     // Function to search products
     async function catSearchProducts(query) {
         // Here you would typically send the search query to your backend
-        
 
-        try{
+
+        try {
 
             const response = await fetch(`/admin/offers/category?searchCat=${query}`);
-            if(!response.ok){
+            if (!response.ok) {
                 throw new Error('Network response was not ok while trying to fetch search categories');
             }
-    
+
             const data = await response.json();
-          
-            if(data.redirect){
+
+            if (data.redirect) {
 
                 window.location.href = data.redirect;
                 return;
 
-            }else if(!data.status){
-    
+            } else if (!data.status) {
+
                 catOffpopup.style.display = 'none';
                 return;
             }
-    
+
             catOffpopup.style.display = 'block';
             displayProducts(data, 'category');
 
-            
-        }catch(error){
-          
-            console.error("Error occured while trying to get category search results.",error);
+
+        } catch (error) {
+
+            console.error("Error occured while trying to get category search results.", error);
         }
 
     }
-    
 
+
+    const offerMinPurchase = document.getElementById('off-min-purchase');
+    const offApplicableOn = document.getElementById('off-applicable-on');
+    if(offApplicableOn){
+
+        offApplicableOn.addEventListener('change',function(e){
+
+            const applicableOn = this.value;
+            offApplicableOn.classList.remove('border-danger');
+
+            if(applicableOn === 'product'){
+
+                prodOffSearchInput.removeAttribute('disabled');
+                prodOffSearchInput.classList.add('border-info');
+                catOffSearchInput.classList.remove('border-info');
+                offerMinPurchase.classList.remove('border-info');
+                if(!offApplicableOn.classList.contains('border-info')){
+
+                    offApplicableOn.classList.add('border-info');
+                }
+
+                if(!catOffSearchInput.hasAttribute('disabled')){
+                    catOffSearchInput.setAttribute('disabled','disabled');
+                }
+                if(!offerMinPurchase.hasAttribute('disabled')){
+                    offerMinPurchase.setAttribute('disabled','disabled');
+                }
+
+            }else if(applicableOn === 'category'){
+
+                catOffSearchInput.removeAttribute('disabled');
+                catOffSearchInput.classList.add('border-info');
+                prodOffSearchInput.classList.remove('border-info');
+                offerMinPurchase.classList.remove('border-info');
+                if(!offApplicableOn.classList.contains('border-info')){
+
+                    offApplicableOn.classList.add('border-info');
+                }
+
+                if(!prodOffSearchInput.hasAttribute('disabled')){
+                    prodOffSearchInput.setAttribute('disabled','disabled');
+                }
+                if(!offerMinPurchase.hasAttribute('disabled')){
+                    offerMinPurchase.setAttribute('disabled','disabled');
+                }
+
+            }else if(applicableOn === 'cart'){
+
+                offerMinPurchase.removeAttribute('disabled');
+                offerMinPurchase.classList.add('border-info');
+                prodOffSearchInput.classList.remove('border-info');
+                catOffSearchInput.classList.remove('border-info');
+                if(!offApplicableOn.classList.contains('border-info')){
+
+                    offApplicableOn.classList.add('border-info');
+                }
+
+                if(!prodOffSearchInput.hasAttribute('disabled')){
+                    prodOffSearchInput.setAttribute('disabled','disabled');
+                }
+                if(!catOffSearchInput.hasAttribute('disabled')){
+                    catOffSearchInput.setAttribute('disabled','disabled');
+                }
+            }
+        })
+    }
 
     function offerFormValidation() {
 
@@ -299,11 +366,11 @@ document.addEventListener('DOMContentLoaded', ()=> {
 
             offer_disvalue_error.innerText = "Please enter a discount value";
             validation = false;
-        }else if(offer_discount_value < 1){
+        } else if (offer_discount_value < 1) {
 
             offer_disvalue_error.innerText = "Minimum value is 1";
             validation = false;
-        }else if((offer_discount_type == 'percentage') && (offer_discount_value <1 || offer_discount_value > 100)){
+        } else if ((offer_discount_type == 'percentage') && (offer_discount_value < 1 || offer_discount_value > 100)) {
 
             offer_disvalue_error.innerText = "Discount percentage must be between 0% and 100%";
             validation = false;
@@ -331,7 +398,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
 
             offer_enddate_error.innerText = "Please select a offer ending date.";
             validation = false;
-        }else if(startDate > endDate){
+        } else if (startDate > endDate) {
 
             offer_enddate_error.innerText = "Please select a date greater than starting date.";
             validation = false;
@@ -342,7 +409,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
     }
 
     const offer_start_date = document.getElementById('off-start-date');
-    if(offer_start_date){
+    if (offer_start_date) {
         const today = new Date();
         const minDate = today.toISOString().split('T')[0];
         offer_start_date.setAttribute('min', minDate);
@@ -380,6 +447,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
             const formIsValidated = offerFormValidation();
 
             if (formIsValidated) {
+
                 this.submit();
             }
         }))
