@@ -271,12 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const offerMinPurchase = document.getElementById('off-min-purchase');
     const offApplicableOn = document.getElementById('off-applicable-on');
+    const offer_applicable_error = document.getElementById('offer-applicable-error');
     if(offApplicableOn){
 
         offApplicableOn.addEventListener('change',function(e){
 
             const applicableOn = this.value;
             offApplicableOn.classList.remove('border-danger');
+            offer_applicable_error.innerText = '';
 
             if(applicableOn === 'product'){
 
@@ -395,9 +397,23 @@ document.addEventListener('DOMContentLoaded', () => {
             validation = false;
         }
 
-        if (offer_min_purchase < 0) {
+        if ((offer_min_purchase < 1) && (offer_applicable_on === 'cart') ) {
 
-            offer_min_purchase_error.innerText = "Minimum value is 0. ";
+            offer_min_purchase_error.innerText = "Minimum value is 1. ";
+            validation = false;
+        }
+
+        const productArray = Array.from(productAddingField.options);
+        if((productArray.length < 1) && (offer_applicable_on === 'product') ){
+
+            offer_add_product_error.innerText = 'Please add atleast 1 product';
+            validation = false;
+        }
+
+        const categoryArray = Array.from(categoryAddingField.options);
+        if((categoryArray.length < 1) && (offer_applicable_on === 'category') ){
+
+            offer_add_category_error.innerText = 'Please add atleast 1 category';
             validation = false;
         }
 
@@ -438,10 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const offer_title_error = document.getElementById('offer-title-error');
     const offer_discount_error = document.getElementById('offer-discount-error');
     const offer_disvalue_error = document.getElementById('offer-disvalue-error');
-    const offer_applicable_error = document.getElementById('offer-applicable-error');
+    
     const offer_min_purchase_error = document.getElementById('offer-min-purchase-error');
     const offer_startdate_error = document.getElementById('offer-startdate-error');
     const offer_enddate_error = document.getElementById('offer-enddate-error');
+
+    const offer_add_category_error = document.getElementById('offer-add-category-error');
+    const offer_add_product_error = document.getElementById('offer-add-product-error');
 
     const offer_create_form = document.getElementById('off-create-form');
     if (offer_create_form) {
@@ -456,6 +475,8 @@ document.addEventListener('DOMContentLoaded', () => {
             offer_min_purchase_error.innerText = '';
             offer_startdate_error.innerText = '';
             offer_enddate_error.innerText = '';
+            offer_add_category_error.innerText = '';
+            offer_add_product_error.innerText = '';
 
             const formIsValidated = offerFormValidation();
 
