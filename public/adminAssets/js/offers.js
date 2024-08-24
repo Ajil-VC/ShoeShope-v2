@@ -1,35 +1,38 @@
 document.addEventListener('DOMContentLoaded', ()=> {
 
-
-    async function fetchRecentProducts(){
-
-        let products = [
-            {id: 1, name: 'Product 1'},
-            {id: 2, name: 'Product 2'},
-            {id: 3, name: 'Product 3'},
-            {id: 4, name: 'Product 4'},
-            {id: 5, name: 'Product 5'}
-        ];
-
-        displayProducts(products, 'product');
-     
-    }
-
-
     // Function to display products
     /// This function will used for both.
     function displayProducts(result, updateOn) {
 
         if(updateOn === 'product'){
 
-            prodProductsContainer.innerHTML = result.map(product => `
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="${product.id}" id="product${product.id}">
-                    <label class="form-check-label" for="product${product.id}">
-                        ${product.name}
-                    </label>
-                </div>
-            `).join('');
+            const selectedValues = Array.from(productAddingField).map(option => option.value);
+            // ${isSelected}
+            prodProductsContainer.innerHTML = result.products.map(product => {
+
+                let isSelected = '';
+                let prodIsSelected = '';
+                if(selectedValues.length > 0){
+
+                    checkIsSelected = selectedValues.filter(productId => productId == product._id ).length === 1;
+                    isSelected = checkIsSelected ? 'checked' : '';
+                    prodIsSelected = checkIsSelected ? 'prodIsSelected' : '';
+                }
+                
+                return `
+                <a class="itemside pb-1 ${prodIsSelected} " id="pro-${product._id}" href="#">
+                
+                    <div class="left">
+                        <img src="/ProductImage/${product.image[0]}" class="img-sm img-thumbnail" alt="Item">
+                    </div>
+                    <div class="info">
+                        <h6 class="mb-0"> ${product.ProductName} </h6>
+                        <input class="product-checkbox" hidden ${isSelected} type="checkbox" data-id="${product._id}" value="${product.ProductName}" id="pro-check-${product._id}">
+                    </div>
+
+                </a>
+              
+            `}).join('');
 
         }else if(updateOn === 'category'){
 
@@ -60,12 +63,57 @@ document.addEventListener('DOMContentLoaded', ()=> {
     const prodOffSearchInput = document.getElementById('offStProductSearch');
     const prodOffpopup = document.getElementById('offStProductPopup');
     const prodProductsContainer = document.getElementById('offStProdRecentProducts');
+    const productAddingField = document.getElementById('off-products');
+
+    if(prodProductsContainer){
+       
+        prodProductsContainer.addEventListener('click', function(event) {
+            // Check if the event target is an <a> tag or a child of an <a> tag with the class 'itemside'
+            const aTag = event.target.closest('a.itemside');
+        
+            if (aTag) {
+                // Prevent the default action of the <a> tag (if needed)
+                event.preventDefault();
+        
+                // Find the checkbox within the clicked <a> tag
+                const checkbox = aTag.querySelector('.product-checkbox');
+                
+                if (checkbox) {
+
+                    // Get the checkbox value
+                    const productName = checkbox.value;
+                    const productId = checkbox.dataset.id;
+                    const isChecked = !checkbox.checked;
+
+                    //Creating option and adding or removing accordingly to the input field.
+                    if(isChecked){
+                        const option = document.createElement('option');
+                        option.value = productId;
+                        option.textContent = productName;
+                        productAddingField.appendChild(option);
+                        aTag.classList.add('prodIsSelected');
+                    }else{
+                        Array.from(productAddingField.options)
+                        .forEach(option => {
+                            if(option.value == productId){
+                                productAddingField.removeChild(option);
+                            }
+                        })
+                        aTag.classList.remove('prodIsSelected');
+                    }
+
+                    checkbox.checked = isChecked; // Toggle the checkbox state
+                }
+            }
+        });
+
+    }
 
     // Show prodOffpopup when the search input is focused
     prodOffSearchInput.addEventListener('focus', function() {
         prodOffpopup.style.display = 'block';
         if (!prodOffSearchInput.value) {
-            fetchRecentProducts();
+            prodSearchProducts('');
         }
     });
 
@@ -76,12 +124,10 @@ document.addEventListener('DOMContentLoaded', ()=> {
         }
     });
 
-
-
     // Add search functionality
     prodOffSearchInput.addEventListener('input', function() {
         if (this.value.trim() === '') {
-            fetchRecentProducts();
+            prodSearchProducts('');
         } else {
             prodSearchProducts(this.value);
         }
@@ -90,26 +136,39 @@ document.addEventListener('DOMContentLoaded', ()=> {
     // Function to search products
     async function prodSearchProducts(query) {
         // Here you would typically send the search query to your backend
-        // For this example, we'll use a dummy search function
-        const allProducts = [
-            {id: 1, name: 'Product 1'},
-            {id: 2, name: 'Product 2'},
-            {id: 3, name: 'Product 3'},
-            {id: 4, name: 'Product 4'},
-            {id: 5, name: 'Product 5'},
-            {id: 6, name: 'Another Product'},
-            {id: 7, name: 'Special Item'},
-            {id: 8, name: 'Unique Thing'}
-        ];
+        
+         try{
 
-        const searchResults = allProducts.filter(product => 
-            product.name.toLowerCase().includes(query.toLowerCase())
-        );
+            const response = await fetch(`/admin/offers/category?searchProd=${query}`);
+            if(!response.ok){
+                throw new Error('Network response was not ok while trying to fetch search categories');
+            }
+    
+            const data = await response.json();
+   
+            if(data.redirect){
 
-        displayProducts(searchResults, 'product');
+                window.location.href = data.redirect;
+                return;
+
+            }else if(!data.status){
+    
+                prodOffpopup.style.display = 'none';
+                return;
+            }
+    
+            prodOffpopup.style.display = 'block';
+            displayProducts(data, 'product');
+
+            
+        }catch(error){
+          
+            console.error("Error occured while trying to get products search results.",error);
+        }
+
     }
 
-    /////////////////////////////////////////
+    /////////////////Above the product search and belewo the category search////////////////////////
 
     const catOffSearchInput = document.getElementById('offStCategorySearch');
     const catOffpopup = document.getElementById('offStCategoryPopup');
@@ -133,18 +192,13 @@ document.addEventListener('DOMContentLoaded', ()=> {
                     option.textContent = categoryName;
                     categoryAddingField.appendChild(option);
                 }else{
-                    const selectedValues = Array.from(categoryAddingField.options)
+                    Array.from(categoryAddingField.options)
                     .forEach(option => {
                         if(option.value == categoryId){
                             categoryAddingField.removeChild(option);
                         }
                     })
-                }
-
-                const selectedValues = Array.from(categoryAddingField).map(option => option.value);
-                console.log(selectedValues,"Tjis is input values");  // Logs an array of selected values to the console
-
-                console.log(`Checkbox with value "${categoryName}" is now ${isChecked ? 'checked' : 'unchecked'}.`);
+                }   
         
             }
             
@@ -179,7 +233,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
     // Function to search products
     async function catSearchProducts(query) {
         // Here you would typically send the search query to your backend
-        // For this example, we'll use a dummy search function
+        
 
         try{
 

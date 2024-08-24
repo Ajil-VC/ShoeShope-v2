@@ -1159,22 +1159,48 @@ const getCategoriesOrProductsForOffer = async(req,res)=> {
 
     try{
 
+        const searchProduct = req.query.searchProd;
         const searchCategory = req.query.searchCat;
-        if (mongoose.Types.ObjectId.isValid(searchCategory)) {
-            // If the searchKey is a valid ObjectId
-            var categoryQuery = { _id: new mongoose.Types.ObjectId(searchCategory) };
-        }else {
-            // If the searchKey is a string, perform a case-insensitive search by name
-            var categoryQuery = { name: { $regex: `^${searchCategory}`, $options: 'i' } };
+        
+        if(typeof searchCategory !== 'undefined' ){
+
+            if (mongoose.Types.ObjectId.isValid(searchCategory)) {
+                // If the searchKey is a valid ObjectId
+                var categoryQuery = { _id: new mongoose.Types.ObjectId(searchCategory) };
+            }else {
+                // If the searchKey is a string, perform a case-insensitive search by name
+                var categoryQuery = { name: { $regex: `^${searchCategory}`, $options: 'i' } };
+            }
+
+            const categories = await Category.find(categoryQuery);
+            if(categories.length < 1){
+                
+                return res.status(200).json({status : false});    
+            }
+            console.log(categories,"This is the data")
+            return res.status(200).json({status : true, categories});
+
         }
 
-        const categories = await Category.find(categoryQuery);
-        if(categories.length < 1){
-            
-            return res.status(200).json({status : false});    
+        if(typeof searchProduct !== 'undefined'){
+
+            if (mongoose.Types.ObjectId.isValid(searchProduct)) {
+                // If the searchKey is a valid ObjectId
+                var productQuery = { _id: new mongoose.Types.ObjectId(searchProduct) };
+            }else {
+                // If the searchKey is a string, perform a case-insensitive search by name
+                var productQuery = { ProductName: { $regex: `^${searchProduct}`, $options: 'i' } };
+            }
+
+            const products = await Product.find(productQuery);
+            if(products.length < 1){
+                
+                return res.status(200).json({status : false});    
+            }
+            console.log(products,"This is the data")
+            return res.status(200).json({status : true, products});
+
         }
-        console.log(categories,"This is the data")
-        return res.status(200).json({status : true, categories});
 
     }catch(error){
 
