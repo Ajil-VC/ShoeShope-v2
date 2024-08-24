@@ -292,8 +292,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(!catOffSearchInput.hasAttribute('disabled')){
                     catOffSearchInput.setAttribute('disabled','disabled');
                 }
+                Array.from(categoryAddingField.options)
+                .forEach(option => categoryAddingField.removeChild(option));
+
                 if(!offerMinPurchase.hasAttribute('disabled')){
                     offerMinPurchase.setAttribute('disabled','disabled');
+                    offerMinPurchase.value = 0;
                 }
 
             }else if(applicableOn === 'category'){
@@ -310,8 +314,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(!prodOffSearchInput.hasAttribute('disabled')){
                     prodOffSearchInput.setAttribute('disabled','disabled');
                 }
+                Array.from(productAddingField.options)
+                .forEach(option => productAddingField.removeChild(option));
+                
                 if(!offerMinPurchase.hasAttribute('disabled')){
                     offerMinPurchase.setAttribute('disabled','disabled');
+                    offerMinPurchase.value = 0;
                 }
 
             }else if(applicableOn === 'cart'){
@@ -326,11 +334,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if(!prodOffSearchInput.hasAttribute('disabled')){
-                    prodOffSearchInput.setAttribute('disabled','disabled');
+                    prodOffSearchInput.setAttribute('disabled','disabled');    
                 }
+                Array.from(productAddingField.options)
+                .forEach(option => productAddingField.removeChild(option));
+
                 if(!catOffSearchInput.hasAttribute('disabled')){
                     catOffSearchInput.setAttribute('disabled','disabled');
                 }
+                Array.from(categoryAddingField.options)
+                .forEach(option => categoryAddingField.removeChild(option));
             }
         })
     }
