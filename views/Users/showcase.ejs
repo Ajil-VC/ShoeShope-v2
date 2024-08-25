@@ -127,8 +127,13 @@
                                                 <h2><a><%=groupProducts[i]?.ProductName%></a></h2>
                                             
                                                 <div class="product-price">
-                                                    <span>₹ <%=groupProducts[i]?.salePrice%> </span>
-                                                    <!-- <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=groupProducts[i]?.salePrice%> </span> -->
+                                                    <%if(groupProducts[i]?.isOnOffer){%>
+
+                                                        <span>₹ <%=groupProducts[i]?.salePrice%> </span>
+                                                        <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=groupProducts[i]?.regularPrice%> </span>
+                                                    <%}else{%>
+                                                        <span>₹ <%=groupProducts[i]?.regularPrice%> </span>
+                                                    <%}%>
                                                 </div>
                                                
                                             </div>

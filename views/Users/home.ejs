@@ -203,8 +203,13 @@
                                                         </a></h2>
 
                                                     <div class="product-price">
-                                                        <span>₹ <%=products[i].salePrice%> </span>
-                                                        <!-- <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=products[i].salePrice+821%></span> -->
+                                                        <%if(products[i]?.isOnOffer){%>
+                                                            
+                                                            <span>₹ <%=products[i].salePrice%> </span>
+                                                            <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=products[i].regularPrice%></span>
+                                                        <%}else{%>
+                                                            <span>₹ <%=products[i].regularPrice%> </span>
+                                                        <%}%>
                                                     </div>
 
                                                 </div>
@@ -965,7 +970,7 @@
 
 
                 <!--Offers...-->
-                <section class="deals section-padding homeOfferSection">
+                <!-- <section class="deals section-padding homeOfferSection">
                     <div class="container">
                         <div class="row justify-content-center gy-5">
                             <div class="col-12 col-md-10 col-lg-8 col-xl-5">
@@ -995,8 +1000,7 @@
                                                                 <%=bestSellingProducts[i].productName%>
                                                             </a></h2>
                                                         <div class="product-price">
-                                                            <span class="text-success">₹
-                                                                <%=bestSellingProducts[i].productPrice%></span>
+                                                            <span class="text-success">₹<%=bestSellingProducts[i].productPrice%></span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1045,7 +1049,7 @@
                             </div>
                         </div>
                     </div>
-                </section>
+                </section> -->
 
 
             </main>

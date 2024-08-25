@@ -59,6 +59,14 @@ document.addEventListener('DOMContentLoaded',function() {
     }
 
     function makeProductCard(product){
+
+        let price = '';
+        if(product.isOnOffer){
+            price = `<span>₹ ${product.salePrice} </span>
+                    <span class="old-price" style="color: rgb(255, 123, 0);" >₹ ${product.regularPrice}</span>`;
+        }else{
+            price = `<span>₹ ${product.regularPrice} </span>`;
+        }
         
         return `
             <div class="col-lg-4 col-md-4 col-12 col-sm-6">
@@ -93,7 +101,7 @@ document.addEventListener('DOMContentLoaded',function() {
                         <h2><a>${product.ProductName}</a></h2>
                                             
                         <div class="product-price">
-                            <span>₹ ${product.salePrice} </span>
+                            ${price}
                         
                         </div>
                                                

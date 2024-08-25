@@ -3,6 +3,9 @@ const session = require('express-session')
 const morgan = require('morgan')
 const methodOverride = require('method-override');
 
+//requiring sheduled task here.
+const setupSheduledTask = require('./controllers/sheduleTask.js');
+
 const { passport } = require('./middleware/googleauth')
 
 const { PORT, sessionSecret, Key_id } = require('./config/config');
@@ -36,6 +39,9 @@ const path = require('path')
 
 //Connect To mongodb here.
 connectDB();
+
+//Start sheduled task here.
+setupSheduledTask();
 
 app.use(express.static(path.join(__dirname, 'public')))
 
