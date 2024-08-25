@@ -217,6 +217,10 @@ const productSchema = new mongoose.Schema({
     isOnOffer : {
         type : Boolean,
         default : false
+    },
+    appliedOffer: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Offer' 
     }
 
 }, { timestamps: true });

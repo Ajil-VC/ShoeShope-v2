@@ -1095,7 +1095,7 @@ const loadOffers = async (req, res) => {
                 { $match: { status: 'initiated' } },
                 { $count: 'total' }
             ]),
-            
+
             Offer.find().exec(),
 
 
@@ -1116,12 +1116,111 @@ const loadOffers = async (req, res) => {
     }
 }
 
+
+async function addOfferToProducts(newOfferData) {
+
+    try {
+
+        if (newOfferData.applicableOn === 'product') {
+
+
+
+        } else if ((newOfferData.applicableOn === 'category') && (newOfferData.isActive === true)) {
+
+            const discountValue = newOfferData.discountValue;
+            const discountType = newOfferData.discountType;
+
+            const fetchedCategories = newOfferData.categories.map(async catId => {
+
+                return Category.findOne({ _id: catId }).exec();
+            })
+            const categoryDocuments = await Promise.all(fetchedCategories);
+            const categoryNames = categoryDocuments.map(category => category.name);
+            const products = await Product.find({ Category: { $in: categoryNames } });
+
+            const categoryOfferUpdation = products.map(async item => {
+
+                let newDiscount = 0;
+                if (discountType == 'percentage') {
+
+                    newDiscount = (item.regularPrice * discountValue) / 100;
+
+                } else if (discountType == 'fixed') {
+
+                    newDiscount = discountValue;
+                }
+
+                if (item.isOnOffer) {
+
+                    const oldItemDiscount = item.regularPrice - item.salePrice;
+                    if (oldItemDiscount < newDiscount) {
+                        item.salePrice = item.regularPrice - newDiscount;
+                        item.appliedOffer = newOfferData._id;
+                        return await item.save();
+                    }
+
+                } else {
+
+                    item.salePrice = item.regularPrice - newDiscount;
+                    item.appliedOffer = newOfferData._id;
+                    item.isOnOffer = true;
+                    return await item.save();
+
+                }
+
+                return item;
+            })
+
+            const categoryOfferPromise = await Promise.all(categoryOfferUpdation);
+            if (categoryOfferPromise) {
+
+                return true;
+            }
+
+            return false;
+
+        }
+
+
+    } catch (error) {
+
+        console.error("Error occured while trying to add offer to products.", error);
+        return false;
+    }
+
+}
+
 const addNewOffer = async (req, res) => {
 
     try {
 
         const isOfferActive = (req.body.isActive == 'on') ? true : false;
-console.log(req.body)
+        console.log(req.body)
+        let productIds = [];
+        let categoryIds = [];
+        let minPurchaseAmount = 0;
+        if (req?.body?.products) {
+
+            let returnedProductId = req.body.products;
+            if (!Array.isArray(returnedProductId)) {
+                returnedProductId = [returnedProductId];
+            }
+            productIds = returnedProductId.map(id => new mongoose.Types.ObjectId(id));
+
+        } else if (req?.body?.categories) {
+
+            let returnedCategoryId = req.body.categories;
+            if (!Array.isArray(returnedCategoryId)) {
+                returnedCategoryId = [new mongoose.Types.ObjectId(returnedCategoryId)];
+            }
+            categoryIds = returnedCategoryId.map(id => new mongoose.Types.ObjectId(id));
+
+        } else if (req?.body?.minPurchaseAmount) {
+
+            minPurchaseAmount = req.body.minPurchaseAmount;
+
+        }
+
         const newOffer = new Offer({
 
             title: req.body.title,
@@ -1129,7 +1228,11 @@ console.log(req.body)
             discountType: req.body.discountType,
             discountValue: req.body.discountValue,
             applicableOn: req.body.applicableOn,
-            minPurchaseAmount: req.body.minPurchaseAmount,
+
+            products: productIds,
+            categories: categoryIds,
+            minPurchaseAmount: minPurchaseAmount,
+
             startDate: new Date(req.body.startDate),
             endDate: new Date(req.body.endDate),
             isActive: isOfferActive
@@ -1137,10 +1240,20 @@ console.log(req.body)
         });
 
         const newOfferData = await newOffer.save();
-        if(newOfferData){
+        if (newOfferData) {
 
-            return res.status(201).redirect('/admin/offers');
-        } 
+            if (req.body.applicableOn !== 'cart') {
+                const result = await addOfferToProducts(newOfferData);
+                console.log(result)
+                if (result) {
+
+                    return res.status(201).redirect('/admin/offers');
+                } else {
+                    console.error("Something went wrong while trying to add offer to the products.");
+                }
+            }
+
+        }
 
     } catch (error) {
 
@@ -1155,56 +1268,56 @@ console.log(req.body)
 }
 
 
-const getCategoriesOrProductsForOffer = async(req,res)=> {
+const getCategoriesOrProductsForOffer = async (req, res) => {
 
-    try{
+    try {
 
         const searchProduct = req.query.searchProd;
         const searchCategory = req.query.searchCat;
-        
-        if(typeof searchCategory !== 'undefined' ){
+
+        if (typeof searchCategory !== 'undefined') {
 
             if (mongoose.Types.ObjectId.isValid(searchCategory)) {
                 // If the searchKey is a valid ObjectId
                 var categoryQuery = { _id: new mongoose.Types.ObjectId(searchCategory) };
-            }else {
+            } else {
                 // If the searchKey is a string, perform a case-insensitive search by name
                 var categoryQuery = { name: { $regex: `^${searchCategory}`, $options: 'i' } };
             }
 
             const categories = await Category.find(categoryQuery);
-            if(categories.length < 1){
-                
-                return res.status(200).json({status : false});    
+            if (categories.length < 1) {
+
+                return res.status(200).json({ status: false });
             }
-            console.log(categories,"This is the data")
-            return res.status(200).json({status : true, categories});
+
+            return res.status(200).json({ status: true, categories });
 
         }
 
-        if(typeof searchProduct !== 'undefined'){
+        if (typeof searchProduct !== 'undefined') {
 
             if (mongoose.Types.ObjectId.isValid(searchProduct)) {
                 // If the searchKey is a valid ObjectId
                 var productQuery = { _id: new mongoose.Types.ObjectId(searchProduct) };
-            }else {
+            } else {
                 // If the searchKey is a string, perform a case-insensitive search by name
                 var productQuery = { ProductName: { $regex: `^${searchProduct}`, $options: 'i' } };
             }
 
             const products = await Product.find(productQuery);
-            if(products.length < 1){
-                
-                return res.status(200).json({status : false});    
+            if (products.length < 1) {
+
+                return res.status(200).json({ status: false });
             }
-            console.log(products,"This is the data")
-            return res.status(200).json({status : true, products});
+
+            return res.status(200).json({ status: true, products });
 
         }
 
-    }catch(error){
+    } catch (error) {
 
-        console.error('Internal Error occured while trying to fetch the categories for offers.',error);
+        console.error('Internal Error occured while trying to fetch the categories for offers.', error);
         return res.status(500).send(`Internal Error occured while trying to fetch the categories for offers\n${error}`);
     }
 }
@@ -1291,7 +1404,7 @@ const blockOrUnblockUser = async (req, res) => {
                                 console.error('Error destroying session:', err);
                                 reject(err);
                             } else {
-                                
+
                                 resolve();
                             }
                         });
@@ -1359,7 +1472,7 @@ const loadCategory = async (req, res) => {
 
     } catch (error) {
 
-        console.error("Couldn't load category page",error.stack);
+        console.error("Couldn't load category page", error.stack);
         return res.status(500).send("Couldn't load category page")
     }
 }
@@ -1381,7 +1494,7 @@ const addBrandOrCategory = async (req, res) => {
 
         } catch (error) {
 
-            console.error('Error while adding new Brand\n',error.stack);
+            console.error('Error while adding new Brand\n', error.stack);
             return res.status(500).send("Error while adding new Brand");
 
         }
@@ -1430,12 +1543,12 @@ const softDeleteCategory = async (req, res) => {
         if (category.isActive) {
 
             const categoryDetails = await Category.findOneAndUpdate({ _id: itemID }, { $set: { isActive: 0 } }, { new: true }).exec();
-            
+
             return res.status(200).json({ status: false, message: `${categoryDetails.name} Successfully deactivated.` });
         } else {
 
             const categoryDetails = await Category.findOneAndUpdate({ _id: itemID }, { $set: { isActive: 1 } }, { new: true }).exec();
-            
+
             return res.status(200).json({ status: true, message: `${categoryDetails.name} Successfully Activated.` });
         }
 
@@ -1462,7 +1575,7 @@ const updateCategory = async (req, res) => {
             return res.status(200).json({ status: true });
         } else {
 
-            console.error("Could not update category.",error.stack)
+            console.error("Could not update category.", error.stack)
             return res.status(200).json({ status: false, message: "Couldnt update category." });
         }
 
@@ -1868,14 +1981,14 @@ const updateOrderStatus = async (req, res) => {
                 ).exec()
             })
             await Promise.all(promeOfProductStatus);
-  
+
 
         }
 
         return res.status(200).json({ status: true, message: `Successfully set the status to ${orderStatus}`, orderstatus: orderStatus })
 
     } catch (error) {
-        console.error("Internal Error while trying to update the status of order.",error.stack);
+        console.error("Internal Error while trying to update the status of order.", error.stack);
     }
 }
 
@@ -2078,7 +2191,7 @@ const logoutAdmin = async (req, res) => {
                 return res.status(302).redirect('/admin/login');
             });
         } else {
-            console.error("Unknown Error while logging out",error.stack)
+            console.error("Unknown Error while logging out", error.stack)
         }
 
     } catch (error) {
