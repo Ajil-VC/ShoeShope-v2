@@ -1121,14 +1121,15 @@ async function addOfferToProducts(newOfferData) {
 
     try {
 
-        if (newOfferData.applicableOn === 'product') {
+        const discountValue = newOfferData.discountValue;
+        const discountType = newOfferData.discountType;
+        let products = [];
 
+        if ((newOfferData.applicableOn === 'product') && (newOfferData.isActive === true)) {
 
+            products = await Product.find({ _id: { $in: newOfferData.products } });
 
         } else if ((newOfferData.applicableOn === 'category') && (newOfferData.isActive === true)) {
-
-            const discountValue = newOfferData.discountValue;
-            const discountType = newOfferData.discountType;
 
             const fetchedCategories = newOfferData.categories.map(async catId => {
 
@@ -1136,50 +1137,51 @@ async function addOfferToProducts(newOfferData) {
             })
             const categoryDocuments = await Promise.all(fetchedCategories);
             const categoryNames = categoryDocuments.map(category => category.name);
-            const products = await Product.find({ Category: { $in: categoryNames } });
-
-            const categoryOfferUpdation = products.map(async item => {
-
-                let newDiscount = 0;
-                if (discountType == 'percentage') {
-
-                    newDiscount = (item.regularPrice * discountValue) / 100;
-
-                } else if (discountType == 'fixed') {
-
-                    newDiscount = discountValue;
-                }
-
-                if (item.isOnOffer) {
-
-                    const oldItemDiscount = item.regularPrice - item.salePrice;
-                    if (oldItemDiscount < newDiscount) {
-                        item.salePrice = item.regularPrice - newDiscount;
-                        item.appliedOffer = newOfferData._id;
-                        return await item.save();
-                    }
-
-                } else {
-
-                    item.salePrice = item.regularPrice - newDiscount;
-                    item.appliedOffer = newOfferData._id;
-                    item.isOnOffer = true;
-                    return await item.save();
-
-                }
-
-                return item;
-            })
-
-            const categoryOfferPromise = await Promise.all(categoryOfferUpdation);
-            if (categoryOfferPromise) {
-
-                return true;
-            }
-
-            return false;
+            products = await Product.find({ Category: { $in: categoryNames } });
 
         }
+
+
+        const offerUpdation = products.map(async item => {
+
+            let newDiscount = 0;
+            if (discountType == 'percentage') {
+
+                newDiscount = (item.regularPrice * discountValue) / 100;
+
+            } else if (discountType == 'fixed') {
+
+                newDiscount = discountValue;
+            }
+
+            if (item.isOnOffer) {
+
+                const oldItemDiscount = item.regularPrice - item.salePrice;
+                if (oldItemDiscount < newDiscount) {
+                    item.salePrice = item.regularPrice - newDiscount;
+                    item.appliedOffer = newOfferData._id;
+                    return await item.save();
+                }
+
+            } else {
+
+                item.salePrice = item.regularPrice - newDiscount;
+                item.appliedOffer = newOfferData._id;
+                item.isOnOffer = true;
+                return await item.save();
+
+            }
+
+            return item;
+        })
+
+        const categoryOfferPromise = await Promise.all(offerUpdation);
+        if (categoryOfferPromise) {
+
+            return true;
+        }
+
+        return false;
 
 
     } catch (error) {
@@ -1243,14 +1245,15 @@ const addNewOffer = async (req, res) => {
         if (newOfferData) {
 
             if (req.body.applicableOn !== 'cart') {
+
                 const result = await addOfferToProducts(newOfferData);
-                console.log(result)
                 if (result) {
 
                     return res.status(201).redirect('/admin/offers');
                 } else {
                     console.error("Something went wrong while trying to add offer to the products.");
                 }
+
             }
 
         }
