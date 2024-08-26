@@ -1375,17 +1375,7 @@ const getOfferDetails = async (req, res) => {
     }
 }
 
-const getProductsWithOffer = async(req,res) => {
 
-    try{
-
-        const offerId = ''
-
-    }catch(error){
-
-        console.error("Internal error occured while trying to fetch products with offer.",error);
-    }
-}
 
 const updateOffer = async(req,res) => {
 
@@ -2333,7 +2323,6 @@ module.exports = {
     addNewOffer,
     getCategoriesOrProductsForOffer,
     getOfferDetails,
-    getProductsWithOffer,
     updateOffer,
 
     loadCustomerList,

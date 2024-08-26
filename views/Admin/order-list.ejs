@@ -7,8 +7,7 @@
 <%- include("../layouts/adminHead.ejs")  %>
     <!-- <div class="screen-overlay"></div> -->
 
-    
-     
+
         <section class="content-main">
             <div class="content-header">
                 <div>
@@ -66,29 +65,33 @@
                                 </tr>
                             </thead>
                             <tbody>
-
+                               
                                 <% for(let i = 0 ; i < orderlist.length ; i++){ %>
-
+                                 
+                    
                                     <tr style="cursor: pointer;" onclick="getOrderDetails('<%=orderlist[i]._id%>')" >
                                         <td><%=orderlist[i]._id%></td>
-                                      
+  
                                         <td>
-                                            <b><%=orderlist[i].customer.firstName%></b><br>
-                                            <span><%=orderlist[i].customer.email%></span> 
+                                            <b><%=orderlist[i]?.customer?.firstName%></b><br>
+                                            <span><%=orderlist[i]?.customer?.email%></span> 
                                         </td>
+
                                         <td>₹ <%=orderlist[i].totalAmount%></td>
                                         <td><span class="badge rounded-pill alert-warning"><%=orderlist[i].status%></span></td>
                                         <td><%=orderlist[i].paymentMethod%></td>
+
                                         <td>
                                             <%= new Date(orderlist[i]?.orderDate).toLocaleDateString('en-US', { 
                                                 year: 'numeric', month: 'long', day: 'numeric' }) %>
                                         </td>
-                                      
+
                                     </tr>
+                                    
                                     
                                 <% } %>
 
-                               
+                                
                               
                             </tbody>
                         </table>
