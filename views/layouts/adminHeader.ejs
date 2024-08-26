@@ -36,6 +36,98 @@
   min-width: 11rem !important;
 } */
 
+
+/*edit offer modal form styles*/
+@media (min-width: 768px) {
+    .modal-dialog {
+        max-width: 700px;
+    }
+}
+
+@media (max-width: 767px) {
+    .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .modal-content {
+        height: 100vh;
+        border-radius: 0;
+    }
+    
+    .modal-body {
+        overflow-y: auto;
+    }
+}
+
+#ed-ofr-form .row {
+    margin-bottom: 15px;
+}
+
+#ed-ofr-delete {
+    width: 100%;
+}
+
+#ed-ofr-activate {
+    margin-top: 8px;
+}
+/*newly added styles of edit offer */
+/* Add these styles to your existing CSS */
+
+#ed-ofr-product-list {
+    margin-top: 15px;
+}
+
+#product-search {
+    margin-bottom: 15px;
+}
+
+#product-list .form-check {
+    margin-bottom: 10px;
+}
+#productListModal .modal-dialog {
+    max-width: 400px; /* Adjust this value as needed */
+    width: 90%; /* This ensures it's not too wide on very large screens */
+    margin: 1.75rem auto;
+}
+@media (max-width: 767px) {
+    #productListModal .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+        height: 100%;
+    }
+
+    #productListModal .modal-content {
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    #productListModal .modal-body {
+        overflow-y: auto;
+    }
+}
+
+.modal-blur {
+  position: relative;
+}
+
+.modal-blur::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);  /* Black overlay with 50% opacity */
+  z-index: 1050;  /* Ensure it's above the modal content but below the new modal */
+}
+
+.modal-blur .modal-content {
+  filter: blur(5px);
+  transition: filter 0.3s ease;
+}
+
+
 /*Here is the styles for add product image*/
 
 

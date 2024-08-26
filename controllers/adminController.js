@@ -1125,11 +1125,11 @@ async function addOfferToProducts(newOfferData) {
         const discountType = newOfferData.discountType;
         let products = [];
 
-        if ((newOfferData.applicableOn === 'product') && (newOfferData.isActive === true)) {
+        if (newOfferData.applicableOn === 'product') {
 
             products = await Product.find({ _id: { $in: newOfferData.products } });
 
-        } else if ((newOfferData.applicableOn === 'category') && (newOfferData.isActive === true)) {
+        } else if (newOfferData.applicableOn === 'category') {
 
             const fetchedCategories = newOfferData.categories.map(async catId => {
 
@@ -1156,19 +1156,44 @@ async function addOfferToProducts(newOfferData) {
 
             if (item.isOnOffer) {
 
-                const oldItemDiscount = item.regularPrice - item.salePrice;
-                if (oldItemDiscount < newDiscount) {
-                    item.salePrice = item.regularPrice - newDiscount;
-                    item.appliedOffer = newOfferData._id;
-                    return await item.save();
+                const existingOffer = item.appliedOffer;
+                const updatingOffer = newOfferData._id;
+                if(existingOffer.equals(updatingOffer)){
+                    //This block offer updation
+                    if(newOfferData.isActive){
+
+                        item.salePrice = item.regularPrice - newDiscount;
+                        return await item.save();
+                    }else {
+
+                        item.salePrice = item.regularPrice;
+                        item.isOnOffer = false;
+                        item.appliedOffer = null;
+                        return await item.save();
+                    }
+
+                }else {
+                    //This block offer addition
+                    if(newOfferData.isActive){
+
+                        const oldItemDiscount = item.regularPrice - item.salePrice;
+                        if (oldItemDiscount < newDiscount) {
+                            item.salePrice = item.regularPrice - newDiscount;
+                            item.appliedOffer = newOfferData._id;
+                            return await item.save();
+                        }
+                    }
                 }
 
             } else {
 
-                item.salePrice = item.regularPrice - newDiscount;
-                item.appliedOffer = newOfferData._id;
-                item.isOnOffer = true;
-                return await item.save();
+                if(newOfferData.isActive){
+
+                    item.salePrice = item.regularPrice - newDiscount;
+                    item.appliedOffer = newOfferData._id;
+                    item.isOnOffer = true;
+                    return await item.save();
+                }
 
             }
 
@@ -1197,7 +1222,7 @@ const addNewOffer = async (req, res) => {
     try {
 
         const isOfferActive = (req.body.isActive == 'on') ? true : false;
-        console.log(req.body)
+
         let productIds = [];
         let categoryIds = [];
         let minPurchaseAmount = 0;
@@ -1322,6 +1347,86 @@ const getCategoriesOrProductsForOffer = async (req, res) => {
 
         console.error('Internal Error occured while trying to fetch the categories for offers.', error);
         return res.status(500).send(`Internal Error occured while trying to fetch the categories for offers\n${error}`);
+    }
+}
+
+
+const getOfferDetails = async (req, res) => {
+
+    try {
+
+        const offerId = new mongoose.Types.ObjectId(req.params.offerid);
+        const offerType = req.query.applicable_on;
+
+        if (offerType === 'product') {
+
+            const offerDetails = await Offer.findOne({ _id: offerId }).populate('products');
+            return res.status(200).json({ status: true, offerDetails });
+
+        } else if (offerType === 'category') {
+
+        }
+
+        return res.status(404).json({status : false})
+
+    } catch (error) {
+
+        console.error("Internal error occured while trying to get offer details.", error);
+    }
+}
+
+const getProductsWithOffer = async(req,res) => {
+
+    try{
+
+        const offerId = ''
+
+    }catch(error){
+
+        console.error("Internal error occured while trying to fetch products with offer.",error);
+    }
+}
+
+const updateOffer = async(req,res) => {
+
+    try{
+
+        console.log(req.body,"This is the form data.");
+        const isActive = req?.body?.isActive === 'on';
+        
+        const offerId = new mongoose.Types.ObjectId(req.body.offerId);
+
+        const offerData = await Offer.findOne({_id : offerId});
+        if(offerData){
+
+            const startDate = new Date(req.body.startDate);
+            const endDate = new Date(req.body.endDate);
+
+            offerData.title = req.body.title;
+            offerData.discountType = req.body.discountType;
+            offerData.discountValue = +req.body.discountValue;
+            offerData.minPurchaseAmount = +req.body.minPurchaseAmount;
+            offerData.startDate = startDate;
+            offerData.endDate = endDate;
+            offerData.isActive = isActive;
+            
+            const updatedOffer = await offerData.save();
+            if(updatedOffer){
+
+                const result = addOfferToProducts(updatedOffer);
+                if(result){
+                    
+                    return res.status(201).redirect('/admin/offers');
+                }else{
+                    
+                    console.error("Something went wrong while trying to add offer to the products.");
+                }
+            }
+
+        }
+
+    }catch(error){
+        console.error("Internal error while trying to update Offer.",error);
     }
 }
 
@@ -2227,6 +2332,9 @@ module.exports = {
     loadOffers,
     addNewOffer,
     getCategoriesOrProductsForOffer,
+    getOfferDetails,
+    getProductsWithOffer,
+    updateOffer,
 
     loadCustomerList,
     blockOrUnblockUser,

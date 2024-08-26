@@ -8,6 +8,126 @@
     <!-- <div class="screen-overlay"></div> -->
 
 
+    	<!-- Modal Start here -->
+        <div class="modal fade" id="editOfferModal" tabindex="-1" role="dialog" aria-labelledby="editOfferModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editOfferModalLongTitle"></h5>
+                        <button type="button" id="modal-close-button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="ed-ofr-form" method="post" action="/admin/offers?_method=PUT" >
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="ed-ofr-title">Title</label>
+                                    <input type="text" name="title" class="form-control" id="ed-ofr-title">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="ed-ofr-discountType">Discount Type</label>
+                                    <select class="form-control" name="discountType" id="ed-ofr-discountType">
+                                        
+                                        <option value="percentage">Percentage</option>
+                                        <option value="fixed">Fixed Amount</option>
+
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="ed-ofr-discountValue">Discount Value</label>
+                                    <input type="number" name="discountValue" class="form-control" id="ed-ofr-discountValue">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="ed-ofr-minPurchase">Minimum Amount</label>
+                                    <input type="number" name="minPurchaseAmount" class="form-control" id="ed-ofr-minPurchase">
+                                </div>
+                            </div>
+
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="ed-ofr-startDate">Start Date</label>
+                                    <input type="date" name="startDate" class="form-control" id="ed-ofr-startDate" >
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="ed-ofr-endDate">End Date</label>
+                                    <input type="date" name="endDate" class="form-control" id="ed-ofr-endDate" >
+                                </div>
+                            </div>
+
+
+                            <!--Hidden input Fields-->
+                            <input type="hidden" name="offerId" class="form-control" id="ed-ofr-offerid" >
+                            <input type="hidden" name="offerType" class="form-control" id="ed-ofr-offerType" >
+                            <!--Hidden input Fields-->
+
+
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <button type="button" class="btn btn-info w-100" id="ed-ofr-product-list" data-toggle="modal" data-target="#productListModal">
+                                        <!-- Select Products -->
+                                         click to see products
+                                    </button>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <!-- <button type="button" class="btn btn-danger" id="ed-ofr-delete">Delete</button> -->
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="isActive" class="form-check-input" id="ed-ofr-activate">
+                                        <label class="form-check-label" for="ed-ofr-activate">Activate</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" form="ed-ofr-form" data-index="" id="save-offer">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="productListModal" tabindex="-1" role="dialog" aria-labelledby="productListModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productListModalTitle">Select Products</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <!-- <input type="text" class="form-control" id="product-search" placeholder="Search products..."> -->
+                        </div>
+                        <div id="offer-product-list" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Product list will be dynamically populated here -->
+             
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <!-- <button type="button" class="btn btn-primary" id="save-products">Save Products</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
 
     <section class="content-main">
         <div class="content-header">
@@ -86,6 +206,7 @@
                     </select>
                     <span  class="text-danger" style="font-size: smaller;" id="offer-discount-error"></span>
                 </div>
+                
                 <div class="col-md-4">
                     <label for="off-discount-value" class="form-label">Discount Value</label>
                     <input type="number" class="form-control bg-white" name="discountValue" id="off-discount-value" >
@@ -126,9 +247,12 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Create Offer</button>
                 </div>
-            </div>
+            </div>  
         </form>
     </section>
+
+    <button type="button" class="btn btn-primary" hidden id="openEditOffer" style="width: 100%;" data-toggle="modal" data-target="#editOfferModal"></button>
+
     
     <section class="content-main">
         <div class="content-header">
@@ -161,7 +285,7 @@
 
                             <%for(let i = 0 ; i < offers.length ; i++){%>
 
-                                <tr style="cursor: pointer;" >
+                                <tr style="cursor: pointer;" onclick="editOfferDetails('<%=offers[i]._id%>','<%=offers[i].applicableOn%>')" >
                                     <td><%=offers[i].title%></td>
                                     <td><%=offers[i].description%></td>
                                     <td>
