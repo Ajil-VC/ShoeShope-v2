@@ -21,17 +21,17 @@ async function setupSheduledTask() {
                 console.log(offers, "This is offers");
 
                 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
-                const expiredOffers = offers;// Should Remove this line after.This is not actual expiredOffers.
+                // const expiredOffers = offers;// Should Remove this line after.This is not actual expiredOffers.
                 //Commented snippet below is the actual expired offers.
 
                 const currentDate = new Date();
-                // const expiredOffers = offers.filter(offer => {
-                //     return currentDate >= offer.endDate;
-                // })
+                const expiredOffers = offers.filter(offer => {
+                    return currentDate >= offer.endDate;
+                })
                 // console.log(expiredOffers,'Expired.');
                 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::://
 
-                await Promise.all(offers.map(async (offer) => {
+                await Promise.all(expiredOffers.map(async (offer) => {
 
                     let products = [];
 
