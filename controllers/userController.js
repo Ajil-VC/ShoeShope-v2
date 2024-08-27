@@ -337,10 +337,20 @@ const loadHomePage = async (req, res) => {
 
     try {
 
-        const [products, { bestSellingProducts, bestSellingCategories }] = await Promise.all([
-            Product.find({ isActive: 1 }).sort({ _id: -1 }).limit(8),
+        const [activeCategory, allActiveProducts, { bestSellingProducts, bestSellingCategories }] = await Promise.all([
+
+            Category.find({isActive: 1}),
+            Product.find({ isActive: 1 }).sort({ _id: -1 }),
             getTopProducts()
         ])
+
+        const categoryNames = activeCategory.map(cat => cat.name) ;
+        const products = allActiveProducts.filter(product => {
+
+            if(categoryNames.includes(product.Category)){
+                return product;
+            }
+        })
 
         return res.status(200).render('home', {
             products,
@@ -367,13 +377,40 @@ const loadShowcase = async (req, res) => {
 
         try {
 
-            const [category, brand, groupProducts, totalDocuments] = await Promise.all([
+            const [category, brand, productsData] = await Promise.all([
+
                 Category.find({ isActive: 1 }).exec(),
                 Brand.find().exec(),
-                Product.find({ isActive: 1 }).skip(skip).limit(limit).exec(),
-                Product.countDocuments({ isActive: 1 }).exec()
+                Product.aggregate([
+                    {$match:{isActive: 1}},
+                    {
+                        '$lookup': {
+                          from: 'categories',
+                          localField: 'Category',
+                          foreignField: 'name',
+                          as: 'categoryDetails'
+                        }
+                    },
+                    { '$unwind': '$categoryDetails' },
+                    { '$match': { 'categoryDetails.isActive': 1 } },
+                    {
+                        '$facet': {
+                            'products': [
+                                { '$skip': skip },
+                                { '$limit': limit }
+                            ],
+                            'totalCount': [
+                                { '$count': 'count' }
+                            ]
+                        }
+                    }
+
+                ])
+                
             ]);
 
+            const groupProducts = productsData[0].products;
+            const totalDocuments = productsData[0].totalCount[0]?.count || 0;
             const totalPages = Math.ceil(totalDocuments / limit);
 
             return res.status(200).render('showcase', {
@@ -396,8 +433,6 @@ const loadShowcase = async (req, res) => {
             const page = parseInt(req.query.page) || 1;
             const limit = 6;
             const skip = (page - 1) * limit;
-
-            const activeCategories = await Category.find({ isActive: 1 });
 
             let query = { isActive: 1 };
             const queryArray = []
