@@ -1159,13 +1159,13 @@ async function addOfferToProducts(newOfferData) {
 
                 const existingOffer = item.appliedOffer;
                 const updatingOffer = newOfferData._id;
-                if(existingOffer.equals(updatingOffer)){
+                if (existingOffer.equals(updatingOffer)) {
                     //This block offer updation
-                    if(newOfferData.isActive){
+                    if (newOfferData.isActive) {
 
                         item.salePrice = item.regularPrice - newDiscount;
                         return await item.save();
-                    }else {
+                    } else {
 
                         item.salePrice = item.regularPrice;
                         item.isOnOffer = false;
@@ -1173,9 +1173,9 @@ async function addOfferToProducts(newOfferData) {
                         return await item.save();
                     }
 
-                }else {
+                } else {
                     //This block offer addition
-                    if(newOfferData.isActive){
+                    if (newOfferData.isActive) {
 
                         const oldItemDiscount = item.regularPrice - item.salePrice;
                         if (oldItemDiscount < newDiscount) {
@@ -1188,7 +1188,7 @@ async function addOfferToProducts(newOfferData) {
 
             } else {
 
-                if(newOfferData.isActive){
+                if (newOfferData.isActive) {
 
                     item.salePrice = item.regularPrice - newDiscount;
                     item.appliedOffer = newOfferData._id;
@@ -1366,9 +1366,23 @@ const getOfferDetails = async (req, res) => {
 
         } else if (offerType === 'category') {
 
+            const offerDetails = await Offer.findOne({ _id: offerId }).populate('categories');
+            const categoryNames = offerDetails.categories.map(item => item.name);
+            
+            const productsInOffer = await Promise.all(categoryNames.map(async category => {
+
+                const products = await Product.find({Category : category, appliedOffer : offerId});
+                return products;
+            }))
+
+            const flattenedProducts = productsInOffer.flat();
+            offerDetails.products = flattenedProducts;
+
+            return res.status(200).json({ status: true, offerDetails });
+
         }
 
-        return res.status(404).json({status : false})
+        return res.status(404).json({ status: false })
 
     } catch (error) {
 
@@ -1378,17 +1392,17 @@ const getOfferDetails = async (req, res) => {
 
 
 
-const updateOffer = async(req,res) => {
+const updateOffer = async (req, res) => {
 
-    try{
+    try {
 
-        console.log(req.body,"This is the form data.");
+        console.log(req.body, "This is the form data.");
         const isActive = req?.body?.isActive === 'on';
-        
+
         const offerId = new mongoose.Types.ObjectId(req.body.offerId);
 
-        const offerData = await Offer.findOne({_id : offerId});
-        if(offerData){
+        const offerData = await Offer.findOne({ _id: offerId });
+        if (offerData) {
 
             const startDate = new Date(req.body.startDate);
             const endDate = new Date(req.body.endDate);
@@ -1400,24 +1414,24 @@ const updateOffer = async(req,res) => {
             offerData.startDate = startDate;
             offerData.endDate = endDate;
             offerData.isActive = isActive;
-            
+
             const updatedOffer = await offerData.save();
-            if(updatedOffer){
+            if (updatedOffer) {
 
                 const result = addOfferToProducts(updatedOffer);
-                if(result){
-                    
+                if (result) {
+
                     return res.status(201).redirect('/admin/offers');
-                }else{
-                    
+                } else {
+
                     console.error("Something went wrong while trying to add offer to the products.");
                 }
             }
 
         }
 
-    }catch(error){
-        console.error("Internal error while trying to update Offer.",error);
+    } catch (error) {
+        console.error("Internal error while trying to update Offer.", error);
     }
 }
 
@@ -1904,29 +1918,29 @@ const updateProduct = async (req, res) => {
 }
 
 
-const removeImageFromProduct = async(req,res) => {
+const removeImageFromProduct = async (req, res) => {
 
-    try{
+    try {
 
         const productId = new mongoose.Types.ObjectId(req.query.productid);
         const imageName = req.query.image;
 
         const productDetails = await Product.updateOne(
-            {_id : productId },
-            {$pull:{image : imageName}}
+            { _id: productId },
+            { $pull: { image: imageName } }
         );
 
-        if(productDetails){
+        if (productDetails) {
 
             const htmlPreviewElemId = `imPreview-${imageName}`;
-            return res.status(200).json({status : true, htmlPreviewElemId});
-        }else{
-            return res.status(200).json({status : false});
+            return res.status(200).json({ status: true, htmlPreviewElemId });
+        } else {
+            return res.status(200).json({ status: false });
         }
-        
 
-    }catch(error){
-        console.error('Internal error occured while trying to remove the image from product.',error);
+
+    } catch (error) {
+        console.error('Internal error occured while trying to remove the image from product.', error);
     }
 
 }
