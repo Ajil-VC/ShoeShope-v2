@@ -62,10 +62,10 @@ document.addEventListener('DOMContentLoaded',function() {
 
         let price = '';
         if(product.isOnOffer){
-            price = `<span>₹ ${product.salePrice} </span>
+            price = `<span>₹ ${product.salePrice.toFixed(2)} </span>
                     <span class="old-price" style="color: rgb(255, 123, 0);" >₹ ${product.regularPrice}</span>`;
         }else{
-            price = `<span>₹ ${product.regularPrice} </span>`;
+            price = `<span>₹ ${product.regularPrice.toFixed(2)} </span>`;
         }
         
         return `
@@ -162,6 +162,7 @@ document.addEventListener('DOMContentLoaded',function() {
 
     function updateSearch(selections){
       
+        const searchQuery = selections.searchQuery;
         const selectedBrands = selections.brands;
         const selectedCategories = selections.category;
         const selectedGroups = selections.groups;
@@ -186,7 +187,7 @@ document.addEventListener('DOMContentLoaded',function() {
       
         const target_products_parent = document.getElementById('target-products');
 
-        fetch(`/showcase?groups=${encodeURIComponent(groupQuerypara)}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}`,{
+        fetch(`/showcase?groups=${encodeURIComponent(groupQuerypara)}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}&searchquery=${searchQuery}`,{
             headers:{  'Accept': 'application/json' }
         })
         .then(response => {
@@ -324,6 +325,18 @@ document.addEventListener('DOMContentLoaded',function() {
             updateSearch(selections);
     
        })
+   }
+
+   const searchProduct = document.getElementById('searchProduct');
+   if(searchProduct){
+
+    searchProduct.addEventListener('input',function(e){
+
+        const searchQuery = e.target.value;
+        selections.searchQuery = searchQuery;
+        updateSearch(selections);
+
+    })
    }
 
    const showcase_page_number = document.querySelectorAll('.showcase-page-number');

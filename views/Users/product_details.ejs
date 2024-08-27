@@ -70,11 +70,11 @@
                                             <div class="product-price primary-color float-left">
                                                 <%if(product_details.isOnOffer){%>
 
-                                                    <ins><span class="text-brand">₹ <%=product_details.salePrice%></span></ins>
-                                                    <ins><span class="old-price font-md ml-15">₹ <%=product_details.regularPrice%></span></ins>
+                                                    <ins><span class="text-brand">₹ <%=product_details.salePrice.toFixed(2)%></span></ins>
+                                                    <ins><span class="old-price font-md ml-15">₹ <%=product_details.regularPrice.toFixed(2)%></span></ins>
                                                     <!-- <span class="save-price  font-md color3 ml-15">15% Off</span> -->
                                                 <%}else{%>
-                                                    <ins><span class="text-brand">₹ <%=product_details.regularPrice%></span></ins>
+                                                    <ins><span class="text-brand">₹ <%=product_details.regularPrice.toFixed(2)%></span></ins>
                                                 <%}%>
                                             </div>
                                         </div>

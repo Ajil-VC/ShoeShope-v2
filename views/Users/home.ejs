@@ -205,10 +205,10 @@
                                                     <div class="product-price">
                                                         <%if(products[i]?.isOnOffer){%>
                                                             
-                                                            <span>₹ <%=products[i].salePrice%> </span>
-                                                            <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=products[i].regularPrice%></span>
+                                                            <span>₹ <%=products[i].salePrice.toFixed(2)%> </span>
+                                                            <span class="old-price" style="color: rgb(255, 123, 0);" >₹ <%=products[i].regularPrice.toFixed(2)%></span>
                                                         <%}else{%>
-                                                            <span>₹ <%=products[i].regularPrice%> </span>
+                                                            <span>₹ <%=products[i].regularPrice.toFixed(2)%> </span>
                                                         <%}%>
                                                     </div>
 

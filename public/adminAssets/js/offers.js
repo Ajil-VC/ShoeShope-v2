@@ -19,10 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Apply blur when opening the product list modal
-    openProductListBtn.addEventListener('click', applyBlur);
+    if(openProductListBtn){
+
+        openProductListBtn.addEventListener('click', applyBlur);
+    }
 
     // Remove blur when closing the product list modal
-    productListModal.addEventListener('hidden.bs.modal', removeBlur);
+    if(productListModal){
+
+        productListModal.addEventListener('hidden.bs.modal', removeBlur);
+    }
 
 
     $(document).ready(function () {
@@ -149,12 +155,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Show prodOffpopup when the search input is focused
-    prodOffSearchInput.addEventListener('focus', function () {
-        prodOffpopup.style.display = 'block';
-        if (!prodOffSearchInput.value) {
-            prodSearchProducts('');
-        }
-    });
+    if(prodOffSearchInput){
+
+        prodOffSearchInput.addEventListener('focus', function () {
+            prodOffpopup.style.display = 'block';
+            if (!prodOffSearchInput.value) {
+                prodSearchProducts('');
+            }
+        });
+    }
 
     // Hide prodOffpopup when clicking outside
     document.addEventListener('click', function (event) {
@@ -164,13 +173,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add search functionality
-    prodOffSearchInput.addEventListener('input', function () {
-        if (this.value.trim() === '') {
-            prodSearchProducts('');
-        } else {
-            prodSearchProducts(this.value);
-        }
-    });
+    if(prodOffSearchInput){
+
+        prodOffSearchInput.addEventListener('input', function () {
+            if (this.value.trim() === '') {
+                prodSearchProducts('');
+            } else {
+                prodSearchProducts(this.value);
+            }
+        });
+    }
 
     // Function to search products
     async function prodSearchProducts(query) {
@@ -247,12 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Show catOffpopup when the search input is focused
-    catOffSearchInput.addEventListener('focus', function () {
-        catOffpopup.style.display = 'block';
-        if (!catOffSearchInput.value) {
-            catSearchProducts('');
-        }
-    });
+    if(catOffSearchInput){
+
+        catOffSearchInput.addEventListener('focus', function () {
+            catOffpopup.style.display = 'block';
+            if (!catOffSearchInput.value) {
+                catSearchProducts('');
+            }
+        });
+    }
 
     // Hide catOffpopup when clicking outside
     document.addEventListener('click', function (event) {
@@ -262,13 +277,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add search functionality
-    catOffSearchInput.addEventListener('input', function () {
-        if (this.value.trim() === '') {
-            catSearchProducts('');
-        } else {
-            catSearchProducts(this.value.trim());
-        }
-    });
+    if(catOffSearchInput){
+
+        catOffSearchInput.addEventListener('input', function () {
+            if (this.value.trim() === '') {
+                catSearchProducts('');
+            } else {
+                catSearchProducts(this.value.trim());
+            }
+        });
+    }
 
     // Function to search products
     async function catSearchProducts(query) {

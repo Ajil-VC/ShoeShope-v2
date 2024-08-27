@@ -397,6 +397,8 @@ const loadShowcase = async (req, res) => {
             const limit = 6;
             const skip = (page - 1) * limit;
 
+            const activeCategories = await Category.find({ isActive: 1 });
+
             let query = { isActive: 1 };
             const queryArray = []
             const matchQuery = { $match: null };
@@ -411,12 +413,32 @@ const loadShowcase = async (req, res) => {
                     ]
                 }
             };
+            const lookupTOCategory = {
+                '$lookup': {
+                  from: 'categories', 
+                  localField: 'Category',
+                  foreignField: 'name', 
+                  as: 'categoryDetails'
+                }
+            };
+            const unwindCategory = {
+                '$unwind': '$categoryDetails'
+            }
+            const matchCategory = {
+                '$match': {
+                  'categoryDetails.isActive': 1 // Assuming isActive field is in your categories schema
+                }
+            };
 
-            const groups = (req.query.groups === "undefined" || req.query.groups === '') ? [] : req.query.groups.split(',');
-            const brands = (req.query.brands === "undefined" || req.query.brands === '') ? [] : req.query.brands.split(',');
-            const categories = req.query.categories === "undefined" || req.query.categories === '' ? [] : req.query.categories.split(',');
+            const searchText = req.query.searchquery && req.query.searchquery !== "undefined" ? req.query.searchquery : '';
+            const groups = req.query.groups && req.query.groups !== "undefined" ? req.query.groups.split(',') : [];
+            const brands = req.query.brands && req.query.brands !== "undefined" ? req.query.brands.split(',') : [];
+            const categories = req.query.categories && req.query.categories !== "undefined" ? req.query.categories.split(',') : [];
             const sortvalue = parseInt(req.query.sortValue);
 
+
+            const searchquery = { $regex: `^${searchText}`, $options: 'i' };
+            query.ProductName = searchquery;
             if (groups.length > 0) {
                 query.targetGroup = { $in: groups };
             }
@@ -429,6 +451,9 @@ const loadShowcase = async (req, res) => {
 
             matchQuery.$match = query;
             queryArray.push(matchQuery);
+            queryArray.push(lookupTOCategory);
+            queryArray.push(unwindCategory);
+            queryArray.push(matchCategory);
 
             if (sortvalue && (sortvalue !== 'undefined')) {
                 const sortQuery = { '$sort': { salePrice: sortvalue } }
