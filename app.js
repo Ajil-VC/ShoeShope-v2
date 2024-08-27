@@ -61,8 +61,8 @@ app.use((req, res, next) => {
 });
 app.use((err, req, res, next) => {
 
-    console.error(error.stack);
-    return res.status(404).render('error', { code: '500', title: 'Oops!', message: "We couldn't find the page you were looking for." });
+    console.error(err.stack);
+    return res.status(500).render('error', { code: '500', title: 'Oops!', message: "An unexpected error occurred on our end. Please try again later." });
 })
 
 app.listen(PORT, () => {
