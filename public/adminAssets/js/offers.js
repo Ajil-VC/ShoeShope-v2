@@ -594,7 +594,6 @@ async function editOfferDetails(offerId, offerType) {
     const offerActivate = document.getElementById('ed-ofr-activate');
     const editOfferModalLongTitle = document.getElementById('editOfferModalLongTitle');
 
-    const offerProductList = document.getElementById('ed-ofr-product-list');
 
     document.getElementById('ed-ofr-offerid').value = offerId;
     document.getElementById('ed-ofr-offerType').value = offerType;
