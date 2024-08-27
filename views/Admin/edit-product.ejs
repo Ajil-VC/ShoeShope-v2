@@ -218,10 +218,12 @@
                   <h3 class="mb-3">Product Preview</h3>
                   <div class="editim-product-preview-container">
                     
-                    <% for(let i = 0 ; i < product.image.length ; i++){ %>
+                    <%let length = (product.image.length < 4) ? product.image.length : 4 %>
+                    <% for(let i = 0 ; i < length ; i++){ %>
 
-                        <div class="editim-product-preview-item">
-                          <img src="/ProductImage/<%=product.image[i]%>" alt="Product 2" class="editim-product-preview-image">
+                        <div class="editim-product-preview-item adImPreviewImageContainer" id="imPreview-<%=product.image[i]%>" >
+                            <button class="adImRemoveBtn" onclick="rmImageFromEditPage('<%=product._id%>','<%=product.image[i]%>')" style="background-color: brown; color: white;" >Remove</button>
+                          <img src="/ProductImage/<%=product.image[i]%>" alt="Product 2" class="editim-product-preview-image adImPreviewImage">
                         </div>
                     <% } %>
                     

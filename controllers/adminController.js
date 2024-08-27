@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { format, setDate, endOfWeek } = require('date-fns');
 const exceljs = require('exceljs');
 const pdfDocument = require('pdfkit');
+const fs = require('fs')
 
 const securePassword = async (password) => {
 
@@ -1903,6 +1904,34 @@ const updateProduct = async (req, res) => {
 }
 
 
+const removeImageFromProduct = async(req,res) => {
+
+    try{
+
+        const productId = new mongoose.Types.ObjectId(req.query.productid);
+        const imageName = req.query.image;
+
+        const productDetails = await Product.updateOne(
+            {_id : productId },
+            {$pull:{image : imageName}}
+        );
+
+        if(productDetails){
+
+            const htmlPreviewElemId = `imPreview-${imageName}`;
+            return res.status(200).json({status : true, htmlPreviewElemId});
+        }else{
+            return res.status(200).json({status : false});
+        }
+        
+
+    }catch(error){
+        console.error('Internal error occured while trying to remove the image from product.',error);
+    }
+
+}
+
+
 const loadOrderList = async (req, res) => {
 
     const page = parseInt(req.query.page) || 1;
@@ -2340,6 +2369,7 @@ module.exports = {
     loadEditProduct,
     updateProduct,
     softDeleteProducts,
+    removeImageFromProduct,
 
     loadOrderList,
     loadOrderDetails,

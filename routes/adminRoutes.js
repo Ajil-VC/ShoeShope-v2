@@ -17,7 +17,7 @@ adminRouter.get('/login', authenticate.isLoggedOut, adminController.loadLogin);
 adminRouter.post('/login', authenticate.isLoggedOut, adminController.loginAdmin);
 adminRouter.get('/dashboard', authenticate.isLoggedIn, adminController.loadDashboard);
 adminRouter.get('/api/sales-data', authenticate.isLoggedIn, adminController.getSaleData);
-adminRouter.get('/api/doughnut-data', authenticate.isLoggedIn, adminController.getCategoryData)
+adminRouter.get('/api/doughnut-data', authenticate.isLoggedIn, adminController.getCategoryData);
 adminRouter.get('/dashboard/sales-report', authenticate.isLoggedIn, adminController.salesReport);
 adminRouter.get('/dashboard/export', authenticate.isLoggedIn, adminController.exportAndDownload);
 adminRouter.get('/logout', authenticate.isLoggedIn, adminController.logoutAdmin);
@@ -49,6 +49,7 @@ adminRouter.get('/productslist/add_new_product', authenticate.isLoggedIn, adminC
 adminRouter.post('/productslist/add_new_product', authenticate.isLoggedIn, upload.array('image', 4), adminController.addNewProduct);
 adminRouter.get('/productslist/edit_product', authenticate.isLoggedIn, adminController.loadEditProduct);
 adminRouter.put('/productslist/edit_product', authenticate.isLoggedIn, upload.array('image', 3), adminController.updateProduct);
+adminRouter.delete('/productslist/edit_product', authenticate.isLoggedIn, adminController.removeImageFromProduct);
 
 adminRouter.get('/order-list', authenticate.isLoggedIn, adminController.loadOrderList);
 adminRouter.get('/order-list/order-details', authenticate.isLoggedIn, adminController.loadOrderDetails);

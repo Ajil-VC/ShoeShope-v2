@@ -195,7 +195,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
 
-
- 
-
 }) //DOMContentLoaded
+
+
+async function rmImageFromEditPage(productId, image){
+
+    try{
+
+        if(confirm('Are you sure you want to remove this image from product?')){
+
+            const response = await fetch(`/admin/productslist/edit_product?productid=${productId}&image=${image}`,{method : 'delete'});
+            if(!response.ok){
+                throw new Error("Network response was not ok while trying to remove the image");
+            }
+    
+            const data = await response.json();
+            if(!data.status){
+                console.log('Something went wrong while trying to remove the image element.');
+            }else{
+    
+                console.log(data);
+                const removeImage = document.getElementById(data.htmlPreviewElemId);
+                removeImage.remove();
+            }
+        }
+        return;
+
+    }catch(error){
+        console.error("Error occured while trying to remove the image .",error);
+    }
+}
