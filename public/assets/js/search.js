@@ -112,14 +112,13 @@ document.addEventListener('DOMContentLoaded',function() {
     }
 
 
-    function createPagination(i, curPage, ulElement,targetGroup){
+    function createPagination(i, curPage, ulElement){
 
         const li = document.createElement('li');
         li.classList.add('page-item', 'showcase-page-number');
         if(i == curPage){
             li.classList.add('active');
         }else{
-            li.setAttribute('data-group',targetGroup);
             li.setAttribute('data-page_num',`${i}`);
         }
 
@@ -131,12 +130,10 @@ document.addEventListener('DOMContentLoaded',function() {
         li.addEventListener('click',function() {
 
             const pageNum = this.getAttribute('data-page_num');
-            const targetGroup = this.getAttribute('data-group');
-
             if(pageNum){
 
                 selections.pageNumber = pageNum;
-                updateSearch(targetGroup,selections);
+                updateSearch(selections);
             }
             
         });
@@ -146,7 +143,7 @@ document.addEventListener('DOMContentLoaded',function() {
     
   
 
-    function updateShowcase(target_products_parent,products,totalPages,currentPage,targetGroup){
+    function updateShowcase(target_products_parent,products,totalPages,currentPage){
 
         const showcase_ul = document.getElementById('showcase-ul');
         const showcase_page_number = document.querySelectorAll('.showcase-page-number');
@@ -159,19 +156,25 @@ document.addEventListener('DOMContentLoaded',function() {
 
         for(let i = 1 ; i <= totalPages; i++){
 
-            createPagination(i,currentPage,showcase_ul,targetGroup);
+            createPagination(i,currentPage,showcase_ul);
         }
     }
 
-    function updateSearch(targetGroup,selections){
+    function updateSearch(selections){
       
         const selectedBrands = selections.brands;
         const selectedCategories = selections.category;
+        const selectedGroups = selections.groups;
         const sortValue = selections.sortvalue;
         const pageNumber = selections.pageNumber;
     
+        let groups = [];
         let brands = [];
         let categories = [];
+        if(selectedGroups){
+            groups = Object.keys(selectedGroups);
+            var groupQuerypara = groups.join(',');
+        }
         if(selectedBrands){
             brands = Object.keys(selectedBrands);
             var brandQuerypara = brands.join(',');
@@ -183,7 +186,7 @@ document.addEventListener('DOMContentLoaded',function() {
       
         const target_products_parent = document.getElementById('target-products');
 
-        fetch(`/showcase?group=${targetGroup}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}`,{
+        fetch(`/showcase?groups=${encodeURIComponent(groupQuerypara)}&brands=${encodeURIComponent(brandQuerypara)}&categories=${encodeURIComponent(categoryQuerypara)}&sortValue=${sortValue}&page=${pageNumber}`,{
             headers:{  'Accept': 'application/json' }
         })
         .then(response => {
@@ -198,7 +201,7 @@ document.addEventListener('DOMContentLoaded',function() {
             if(data.status){
 
                 target_products_parent.innerHTML = ""; 
-                updateShowcase(target_products_parent,data.products,data.totalPages,data.currentPage, targetGroup);
+                updateShowcase(target_products_parent,data.products,data.totalPages,data.currentPage);
             }else{
 
                 target_products_parent.innerHTML = "";
@@ -221,16 +224,36 @@ document.addEventListener('DOMContentLoaded',function() {
     const checkedBrands = {};
     const checkedCategory = {};
     const selections = {};
-    let targetGroup = '';
+    const checkedGroup = {};
     const brandCheckBox = document.querySelectorAll('.showcase-brand');
     const categoryCheckBox = document.querySelectorAll('.showcase-category');
+    const groupCheckBox = document.querySelectorAll('.showcase-group');
+
+    groupCheckBox.forEach(checkbox => {
+
+        checkbox.addEventListener('change',function() {
+
+            const group = this.getAttribute('data-group');
+            const isChecked = this.checked;
+
+            if(isChecked){
+                checkedGroup[group] = true;
+            }else{
+                delete checkedGroup[group];
+            }
+
+            selections.groups = checkedGroup;
+            selections.pageNumber = 1;
+            updateSearch(selections);
+        })
+   })
+
     brandCheckBox.forEach(checkbox => {
 
         checkbox.addEventListener('change',function() {
 
             const brand = this.getAttribute('data-brand');
-            const isChecked = this.checked;
-            targetGroup = this.getAttribute('data-group');                
+            const isChecked = this.checked;              
 
             if(isChecked){
                 checkedBrands[brand] = true;
@@ -240,7 +263,7 @@ document.addEventListener('DOMContentLoaded',function() {
 
             selections.brands = checkedBrands;
             selections.pageNumber = 1;
-            updateSearch(targetGroup,selections);
+            updateSearch(selections);
         })
    })
 
@@ -250,7 +273,6 @@ document.addEventListener('DOMContentLoaded',function() {
 
             const category = this.getAttribute('data-category');
             const isChecked = this.checked;
-            targetGroup = this.getAttribute('data-group');
 
             if(isChecked){
                 checkedCategory[category] = true;
@@ -260,7 +282,7 @@ document.addEventListener('DOMContentLoaded',function() {
 
             selections.category = checkedCategory;
             selections.pageNumber = 1;
-            updateSearch(targetGroup,selections);
+            updateSearch(selections);
         })
    })
 
@@ -278,9 +300,9 @@ document.addEventListener('DOMContentLoaded',function() {
                 selections.sortvalue = 0;
     
             }
-            targetGroup = this.getAttribute('data-group');
+            
             selections.pageNumber = 1;
-            updateSearch(targetGroup,selections);
+            updateSearch(selections);
             
        })
    }
@@ -289,14 +311,17 @@ document.addEventListener('DOMContentLoaded',function() {
        sortHtoL.addEventListener('change',function() {
     
             if(sortHtoL.checked){
+
                 sortLtoH.checked = false;
                 selections.sortvalue = -1;
+
             }else{
+
                 selections.sortvalue = 0;
             }
-            targetGroup = this.getAttribute('data-group');
+
             selections.pageNumber = 1;
-            updateSearch(targetGroup,selections);
+            updateSearch(selections);
     
        })
    }
@@ -309,12 +334,11 @@ document.addEventListener('DOMContentLoaded',function() {
             element.addEventListener('click',function() {
 
                 const pageNum = this.getAttribute('data-page_num');
-                const targetGroup = this.getAttribute('data-group');
 
                 if(pageNum){
 
                     selections.pageNumber = pageNum;
-                    updateSearch(targetGroup,selections);
+                    updateSearch(selections);
                 }
                 
             })

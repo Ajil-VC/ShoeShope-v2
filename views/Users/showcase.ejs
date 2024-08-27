@@ -7,21 +7,42 @@
 
     <main class="main">
 
-        <div class="page-header breadcrumb-wrap">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="/" rel="nofollow">Home</a>
-                    <span></span> <a href=""><%=targetGroup%></a>
-                  
-                </div>
-            </div>
-        </div>
-
         <section class="product-tabs pt-25 pb-20 wow fadeIn animated">
             <div class="container">
                 <div class="row">
                     <!--Sorting panel-->
                     <div class="col-lg-3">
+
+
+                        <div class="widget-category mb-30">
+                            <h5 class="section-title style-1 mb-30 wow fadeIn animated">Group</h5>
+                            <ul class="categories" >
+
+                    
+                                <li>
+                                    <label for="checkboxForCatMen">
+                                        <input class="form-check-input showcase-group checkbox mx-1" data-group ="Men" type="checkbox" value="" id="checkboxForCatMen" >   
+                                        <span>Men</span>
+                                    </label>
+                                </li>
+                                
+                                <li>
+                                    <label for="checkboxForCatWomen">
+                                        <input class="form-check-input showcase-group checkbox mx-1" data-group ="Women" type="checkbox" value="" id="checkboxForCatWomen" >   
+                                        <span>Women</span>
+                                    </label>
+                                </li>
+
+                                <li>
+                                    <label for="checkboxForCatKids">
+                                        <input class="form-check-input showcase-group checkbox mx-1" data-group ="Kids" type="checkbox" value="" id="checkboxForCatKids" >   
+                                        <span>Kids</span>
+                                    </label>
+                                </li>
+                            
+                            </ul>
+                        </div>
+
 
                         <div class="widget-category mb-30">
                             <h5 class="section-title style-1 mb-30 wow fadeIn animated">Brand</h5>
@@ -30,7 +51,7 @@
                                 <% for(let i = 0 ; i < brand.length ; i++){ %>
                                 <li>
                                     <label for="checkboxForBrand<%=i%>">
-                                        <input class="form-check-input showcase-brand checkbox mx-1" data-group="<%=targetGroup%>" data-brand ="<%=brand[i].name%>" type="checkbox" value="" id="checkboxForBrand<%=i%>" >
+                                        <input class="form-check-input showcase-brand checkbox mx-1" data-brand ="<%=brand[i].name%>" type="checkbox" value="" id="checkboxForBrand<%=i%>" >
                                         
                                         <span><%=brand[i].name%></span>
                                     </label>
@@ -49,7 +70,7 @@
                                 
 
                                 <label for="checkboxForCategory<%=i%>">
-                                    <input class="form-check-input showcase-category checkbox mx-1" data-group="<%=targetGroup%>" data-category ="<%=category[i].name%>" type="checkbox" value="" id="checkboxForCategory<%=i%>" >
+                                    <input class="form-check-input showcase-category checkbox mx-1" data-category ="<%=category[i].name%>" type="checkbox" value="" id="checkboxForCategory<%=i%>" >
                                     
                                     <span><%=category[i].name%></span>
                                 </label> <br>
@@ -65,13 +86,13 @@
                             <ul class="categories">
 
                                 <label for="sortLtoH" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" type="checkbox" value="1" id="sortLtoH" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" type="checkbox" value="1" id="sortLtoH" >
                                     
                                     <span>₹ Price Low to High </span>
                                 </label>
 
                                 <label for="sortHtoL" class="d-flex align-items-center" >
-                                    <input class="form-check-input showcase-price checkbox mx-1" data-group="<%=targetGroup%>" type="checkbox" value="-1" id="sortHtoL" >
+                                    <input class="form-check-input showcase-price checkbox mx-1" type="checkbox" value="-1" id="sortHtoL" >
                                     
                                     <span>₹ Price High to Low</span>
                                 </label>
@@ -850,7 +871,7 @@
                                             <li class="page-item showcase-page-number active"><a class="page-link" ><%=i%></a></li>
                                         <% }else{ %>
             
-                                            <li class="page-item showcase-page-number " data-group="<%=targetGroup%>" data-page_num="<%=i%>" ><a class="page-link"><%=i%></a></li>
+                                            <li class="page-item showcase-page-number" data-page_num="<%=i%>" ><a class="page-link"><%=i%></a></li>
                                             
                                     <% }} %>
                                     

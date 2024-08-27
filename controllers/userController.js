@@ -367,12 +367,11 @@ const loadShowcase = async (req, res) => {
 
         try {
 
-            const targetGroup = req.query.group;
             const [category, brand, groupProducts, totalDocuments] = await Promise.all([
                 Category.find({ isActive: 1 }).exec(),
                 Brand.find().exec(),
-                Product.find({ targetGroup: targetGroup, isActive: 1 }).skip(skip).limit(limit).exec(),
-                Product.countDocuments({ targetGroup: targetGroup, isActive: 1 }).exec()
+                Product.find({ isActive: 1 }).skip(skip).limit(limit).exec(),
+                Product.countDocuments({ isActive: 1 }).exec()
             ]);
 
             const totalPages = Math.ceil(totalDocuments / limit);
@@ -381,7 +380,6 @@ const loadShowcase = async (req, res) => {
                 category,
                 brand,
                 groupProducts,
-                targetGroup,
                 totalPages: totalPages,
                 currentPage: page
             });
@@ -399,7 +397,7 @@ const loadShowcase = async (req, res) => {
             const limit = 6;
             const skip = (page - 1) * limit;
 
-            let query = { targetGroup: req.query.group, isActive: 1 };
+            let query = { isActive: 1 };
             const queryArray = []
             const matchQuery = { $match: null };
             const facetQuery = {
@@ -414,10 +412,14 @@ const loadShowcase = async (req, res) => {
                 }
             };
 
+            const groups = (req.query.groups === "undefined" || req.query.groups === '') ? [] : req.query.groups.split(',');
             const brands = (req.query.brands === "undefined" || req.query.brands === '') ? [] : req.query.brands.split(',');
             const categories = req.query.categories === "undefined" || req.query.categories === '' ? [] : req.query.categories.split(',');
             const sortvalue = parseInt(req.query.sortValue);
 
+            if (groups.length > 0) {
+                query.targetGroup = { $in: groups };
+            }
             if (brands.length > 0) {
                 query.Brand = { $in: brands }
             }
@@ -435,7 +437,7 @@ const loadShowcase = async (req, res) => {
 
             queryArray.push(facetQuery);
 
-            const productsData = await Product.aggregate(queryArray)
+            const productsData = await Product.aggregate(queryArray);
             const products = productsData[0].products;
             const totalDocuments = productsData[0].totalCount[0]?.count || 0;
             const totalPages = Math.ceil(totalDocuments / limit);
