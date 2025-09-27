@@ -572,16 +572,16 @@ const loadDashboard = async (req, res) => {
 
 
         const categoryCount = categories.length;
-        const deliveredOrderCount = orderStatics.filter(ob => ob._id == 'Delivered')[0].count;
-        const totalDeliveredAmount = orderStatics.filter(ob => ob._id == 'Delivered')[0].totalAmnt;
-        const totalReturnCount = returnOrders.filter(elem => (elem._id == 'approved'))[0].count;
-        const totalReturnedAmnt = returnOrders.filter(elem => (elem._id == 'approved'))[0].totalAmnt;
+        const deliveredOrderCount = orderStatics.filter(ob => ob._id == 'Delivered')[0]?.count;
+        const totalDeliveredAmount = orderStatics.filter(ob => ob._id == 'Delivered')[0]?.totalAmnt;
+        const totalReturnCount = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.count;
+        const totalReturnedAmnt = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.totalAmnt;
 
         const purchasedCount = deliveredOrderCount - totalReturnCount;
         const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2);
         const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2);
 
-        const initiatedReturnCount = returnOrders.filter(elem => (elem._id == 'initiated'))[0].count;
+        const initiatedReturnCount = returnOrders.filter(elem => (elem._id == 'initiated'))[0]?.count;
 
         return res.status(200).render('dashboard', {
             productsCount,
@@ -1368,10 +1368,10 @@ const getOfferDetails = async (req, res) => {
 
             const offerDetails = await Offer.findOne({ _id: offerId }).populate('categories');
             const categoryNames = offerDetails.categories.map(item => item.name);
-            
+
             const productsInOffer = await Promise.all(categoryNames.map(async category => {
 
-                const products = await Product.find({Category : category, appliedOffer : offerId});
+                const products = await Product.find({ Category: category, appliedOffer: offerId });
                 return products;
             }))
 
