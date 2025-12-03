@@ -191,13 +191,13 @@ const getSaleData = async (req, res) => {
 
             const month = monthlyNetDeliveredProducts[i]._id.split('-')[1];
             const monthInt = parseInt(month);
-            products[monthInt - 1] = monthlyNetDeliveredProducts[i].orderCount;
+            products[monthInt - 1] = monthlyNetDeliveredProducts[i]?.orderCount || 0;
         }
         const sales = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         for (let i = 0; i < monthlyOrderCount.length; i++) {
 
-            const month = monthlyOrderCount[i].month;
-            sales[month - 1] = monthlyOrderCount[i].totalOrders;
+            const month = monthlyOrderCount[i]?.month || 0;
+            sales[month - 1] = monthlyOrderCount[i]?.totalOrders || 0;
         }
 
         return res.status(200).json({
@@ -1074,7 +1074,7 @@ const loadCoupons = async (req, res) => {
                 { $count: 'total' }
             ])
         ]);
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
         return res.status(200).render('coupons', { coupons, initiatedReturnCount });
 
     } catch (error) {
@@ -1101,7 +1101,7 @@ const loadOffers = async (req, res) => {
 
 
         ]);
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
         return res.status(200).render('offers', { initiatedReturnCount, offers })
 
@@ -1472,7 +1472,7 @@ const loadCustomerList = async (req, res) => {
                 { $count: 'total' }
             ])
         ]);
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
         const totalPages = Math.ceil(totalDocuments / limit);
         return res.status(200).render('customerList', { user: userData, totalPages: totalPages, currentPage: page, initiatedReturnCount });
         // return res.status(200).json({user : userData, totalPages : totalPages, currentPage : page})
@@ -1580,7 +1580,7 @@ const loadCategory = async (req, res) => {
                 { $count: 'total' }
             ])
         ])
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
         return res.status(200).render('categories', { brands, categoryDetails, initiatedReturnCount });
 
     } catch (error) {
@@ -1723,7 +1723,7 @@ const loadAllProducts = async (req, res) => {
             ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
         return res.render('productslist', { products, totalPages: totalPages, currentPage: page, initiatedReturnCount })
 
@@ -1775,7 +1775,7 @@ const loadAddNewProduct = async (req, res) => {
                 { $count: 'total' }
             ])
         ]);
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
         return res.status(200).render('add-new-product', { categories, brand, initiatedReturnCount })
 
@@ -1859,7 +1859,7 @@ const loadEditProduct = async (req, res) => {
                 redirect: '/admin/productslist'
             });
         }
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
         return res.status(200).render('edit-product', { categories, brand, product, initiatedReturnCount })
 
@@ -1966,7 +1966,7 @@ const loadOrderList = async (req, res) => {
             ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
         return res.status(200).render('order-list', { orderlist: orders, totalPages: totalPages, currentPage: page, initiatedReturnCount });
 
@@ -1989,7 +1989,7 @@ const loadOrderDetails = async (req, res) => {
             ])
         ])
 
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
         let grandSubTotal = 0;
         let grandGST = 0;
@@ -2152,7 +2152,7 @@ const loadReturnedOrders = async (req, res) => {
             ])
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
-        const initiatedReturnCount = initiatedReturns[0].total;
+        const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
         return res.render('returned-order', { returnedProducts, totalPages: totalPages, currentPage: page, initiatedReturnCount });
 
