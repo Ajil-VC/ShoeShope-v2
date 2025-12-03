@@ -979,7 +979,7 @@ const loadBestSellers = async (req, res) => {
                 { $match: { status: 'initiated' } },
                 { $count: 'total' }
             ]);
-            const initiatedReturnCount = initiatedReturns[0].total;
+            const initiatedReturnCount = initiatedReturns[0]?.total || 0;
 
             const { bestSellers } = await getTopProducts('Products');
             return res.status(200).render('best-sellers', { bestSellers, initiatedReturnCount });
