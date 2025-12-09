@@ -1779,7 +1779,7 @@ const makeRazorpayment = async (razorpay, amountToPay, orderId) => {
         return order;
     } catch (error) {
 
-        console.error("Internal error while trying to perform razorpayment", error.stack);
+        console.error("Internal error while trying to perform razorpayment", error);
         return false;
     }
 
