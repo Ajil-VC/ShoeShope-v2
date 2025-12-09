@@ -339,15 +339,15 @@ const loadHomePage = async (req, res) => {
 
         const [activeCategory, allActiveProducts, { bestSellingProducts, bestSellingCategories }] = await Promise.all([
 
-            Category.find({isActive: 1}),
+            Category.find({ isActive: 1 }),
             Product.find({ isActive: 1 }).sort({ _id: -1 }),
             getTopProducts()
         ])
 
-        const categoryNames = activeCategory.map(cat => cat.name) ;
+        const categoryNames = activeCategory.map(cat => cat.name);
         const products = allActiveProducts.filter(product => {
 
-            if(categoryNames.includes(product.Category)){
+            if (categoryNames.includes(product.Category)) {
                 return product;
             }
         })
@@ -382,13 +382,13 @@ const loadShowcase = async (req, res) => {
                 Category.find({ isActive: 1 }).exec(),
                 Brand.find().exec(),
                 Product.aggregate([
-                    {$match:{isActive: 1}},
+                    { $match: { isActive: 1 } },
                     {
                         '$lookup': {
-                          from: 'categories',
-                          localField: 'Category',
-                          foreignField: 'name',
-                          as: 'categoryDetails'
+                            from: 'categories',
+                            localField: 'Category',
+                            foreignField: 'name',
+                            as: 'categoryDetails'
                         }
                     },
                     { '$unwind': '$categoryDetails' },
@@ -406,7 +406,7 @@ const loadShowcase = async (req, res) => {
                     }
 
                 ])
-                
+
             ]);
 
             const groupProducts = productsData[0].products;
@@ -450,10 +450,10 @@ const loadShowcase = async (req, res) => {
             };
             const lookupTOCategory = {
                 '$lookup': {
-                  from: 'categories', 
-                  localField: 'Category',
-                  foreignField: 'name', 
-                  as: 'categoryDetails'
+                    from: 'categories',
+                    localField: 'Category',
+                    foreignField: 'name',
+                    as: 'categoryDetails'
                 }
             };
             const unwindCategory = {
@@ -461,7 +461,7 @@ const loadShowcase = async (req, res) => {
             }
             const matchCategory = {
                 '$match': {
-                  'categoryDetails.isActive': 1 // Assuming isActive field is in your categories schema
+                    'categoryDetails.isActive': 1 // Assuming isActive field is in your categories schema
                 }
             };
 
@@ -1764,14 +1764,16 @@ const getItemsAndReserve = async (cartItemsArray) => {
 
 const makeRazorpayment = async (razorpay, amountToPay, orderId) => {
 
-    const options = {
-
-        amount: Math.round(amountToPay * 100),
-        currency: 'INR',
-        receipt: orderId
-    };
 
     try {
+        const options = {
+
+            amount: Math.round(amountToPay * 100),
+            currency: 'INR',
+            receipt: orderId
+        };
+
+        console.log(options, 'From make Razor payment');
 
         const order = await razorpay.orders.create(options);
         return order;
