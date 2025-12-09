@@ -1773,7 +1773,7 @@ const makeRazorpayment = async (razorpay, amountToPay, orderId) => {
             receipt: orderId
         };
 
-        console.log('process.env.RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET, 'KyeId:', RazorPay_Key_Id);
+        console.log('process.env.RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET, 'KyeId:', process.env.RazorPay_Key_Id);
 
         const order = await razorpay.orders.create(options);
         return order;
