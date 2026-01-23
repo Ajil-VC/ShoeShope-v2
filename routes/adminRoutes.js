@@ -8,21 +8,25 @@ adminRouter.use(express.urlencoded({ extended: true }));
 //requiring multer logic here
 const upload = require('../middleware/admin_upload');
 adminRouter.use(authenticate.setViews);
-const adminController = require('../controllers/adminController')
+
+const adminController = require('../controllers/adminController');
+const authController = require('../controllers/admin/auth.controller');
+const dashBoardController = require('../controllers/admin/dashboard.controller');
+const categoryController = require('../controllers/admin/category.controller');
 
 // Admin Signup done by postman
-adminRouter.post('/signup', adminController.adminRegistration);
+adminRouter.post('/signup', authController.adminRegistration);
+adminRouter.get('/login', authenticate.isLoggedOut, authController.loadLogin);
+adminRouter.post('/login', authenticate.isLoggedOut, authController.loginAdmin);
+adminRouter.get('/logout', authenticate.isLoggedIn, authController.logoutAdmin);
 
-adminRouter.get('/login', authenticate.isLoggedOut, adminController.loadLogin);
-adminRouter.post('/login', authenticate.isLoggedOut, adminController.loginAdmin);
-adminRouter.get('/dashboard', authenticate.isLoggedIn, adminController.loadDashboard);
-adminRouter.get('/api/sales-data', authenticate.isLoggedIn, adminController.getSaleData);
-adminRouter.get('/api/doughnut-data', authenticate.isLoggedIn, adminController.getCategoryData);
-adminRouter.get('/dashboard/sales-report', authenticate.isLoggedIn, adminController.salesReport);
-adminRouter.get('/dashboard/export', authenticate.isLoggedIn, adminController.exportAndDownload);
-adminRouter.get('/logout', authenticate.isLoggedIn, adminController.logoutAdmin);
+adminRouter.get('/dashboard', authenticate.isLoggedIn, dashBoardController.loadDashboard);
+adminRouter.get('/api/sales-data', authenticate.isLoggedIn, dashBoardController.getSaleData);
+adminRouter.get('/dashboard/sales-report', authenticate.isLoggedIn, dashBoardController.salesReport);
+adminRouter.get('/dashboard/export', authenticate.isLoggedIn, dashBoardController.exportAndDownload);
+adminRouter.get('/best_sellers', authenticate.isLoggedIn, dashBoardController.loadBestSellers);
 
-adminRouter.get('/best_sellers', authenticate.isLoggedIn, adminController.loadBestSellers);
+adminRouter.get('/api/doughnut-data', authenticate.isLoggedIn, categoryController.getCategoryData);
 
 adminRouter.get('/coupons', authenticate.isLoggedIn, adminController.loadCoupons);
 adminRouter.post('/coupons', authenticate.isLoggedIn, adminController.addNewCoupon);

@@ -13,7 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const Handlebars = require('handlebars');
 const puppeteer = require('puppeteer');
-
+const RESPONSE_MESSAGES = require('../config/response.messages');
+const HttpStatusCode = require('../config/http_status_enum');
 
 
 const securePassword = async (password) => {
@@ -25,7 +26,7 @@ const securePassword = async (password) => {
 
     } catch (error) {
         console.error(error.stack)
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "Internal Error Occured. Please try again." });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: RESPONSE_MESSAGES.COMMON.SERVER_ERROR });
     }
 
 }
@@ -39,7 +40,7 @@ const loadRegister = async (req, res) => {
     } catch (error) {
 
         console.error(error.stack)
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "We couldn't find the page you were looking for." });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: "We couldn't find the page you were looking for." });
     }
 }
 
@@ -71,11 +72,11 @@ const gen_otp = async (req, res) => {
             text: `Your OTP for verification is " ${otp} "`
         });
 
-        return res.status(200).render('otpVerification');
+        return res.status(HttpStatusCode.OK).render('otpVerification');
 
     } catch (error) {
         console.error(error.stack)
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "Error while sending otp. Please try again" });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: "Error while sending otp. Please try again" });
     }
 }
 //resend otp here
@@ -109,7 +110,7 @@ const resend_otp = async (req, res) => {
     } catch (error) {
 
         console.error(error.stack)
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "Error While sending otp; Please try again." });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: "Error While sending otp; Please try again." });
     }
 
 }
@@ -153,7 +154,7 @@ const verifyOTP = async (req, res) => {
                     res.send('Something went wrong while registering')
                 }
             } catch (error) {
-                res.status(500).send('Internal server error while registering\nLooks like the email is already used.')
+                res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send('Internal server error while registering\nLooks like the email is already used.')
             }
 
         } else {
@@ -162,7 +163,7 @@ const verifyOTP = async (req, res) => {
 
     } catch (error) {
         console.error("Errory while verifying otp.", error.stack)
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "Errory while verifying otp." });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: "Errory while verifying otp." });
         //This might need to change into json response. JSON ERROR
     }
 }
@@ -170,11 +171,11 @@ const verifyOTP = async (req, res) => {
 const loadLogin = (req, res) => {
 
     try {
-        return res.status(200).render('login')
+        return res.status(HttpStatusCode.OK).render('login')
     } catch (error) {
 
         console.error("Error while loading login page", error.stack)
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "Error while loading login page" });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: "Error while loading login page" });
     }
 }
 
@@ -186,10 +187,10 @@ const loginUser = async (req, res) => {
 
         const userData = await User.findOne({ email }).exec();
         if (userData.google_id) {
-            return res.status(200).redirect('/auth/google')
+            return res.status(HttpStatusCode.OK).redirect('/auth/google')
         } else
             if (!userData.isBlocked) {//False means user is blocked.
-                return res.status(401).render('error', { title: 'Unauthorized', message: 'Unauthorized. You cannot enter into this page!', code: '401' });
+                return res.status(HttpStatusCode.UNAUTHORIZED).render('error', { title: 'Unauthorized', message: RESPONSE_MESSAGES.AUTH.UNAUTHORIZED, code: '401' });
             }
             else if (userData) {
                 const passwordMatch = await bcrypt.compare(password, userData.password)
@@ -200,18 +201,18 @@ const loginUser = async (req, res) => {
                     req.session.isAuthorised = userData.isAuthorised;
                     req.session.isBlocked = userData.isBlocked;
 
-                    return res.status(200).redirect('/')
+                    return res.status(HttpStatusCode.OK).redirect('/')
                 } else {
-                    return res.status(401).render('error', { code: '401', title: 'Not Found!', message: "Email or Password Incorrect." });
+                    return res.status(RESPONSE_MESSAGES.AUTH.UNAUTHORIZED).render('error', { code: '401', title: 'Not Found!', message: RESPONSE_MESSAGES.AUTH.INVALID_CREDENTIALS });
                 }
             } else {
-                return res.status(404).render('error', { code: '404', title: 'Oops!', message: "User Not Found." });
+                return res.status(HttpStatusCode.NOT_FOUND).render('error', { code: '404', title: 'Oops!', message: "User Not Found." });
             }
 
     } catch (error) {
 
         console.error('Internal Error while login', error.stack);
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "Internal error while login." });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: "Internal error while login." });
     }
 }
 
@@ -253,9 +254,9 @@ const searchProduct = async (req, res) => {
         if (products.length > 0) {
 
             // return res.status(200).json({status:true, products});
-            return res.status(200).render('product_search', { products });
+            return res.status(HttpStatusCode.OK).render('product_search', { products });
         } else {
-            return res.status(404).send('No products found');
+            return res.status(HttpStatusCode.NOT_FOUND).send('No products found');
             // return res.status(404).render('error',{code : '404',title : 'Oops!', message : "No Products Found." });
             // return res.status(200).json({status:false, message : 'No products found'});
         }
@@ -263,7 +264,7 @@ const searchProduct = async (req, res) => {
     } catch (error) {
 
         console.error('Internal error while fetching products from mongodb.', error.stack);
-        return res.status(500).render('error', { code: '500', title: 'Oops!', message: "Internal error while fetching products." });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render('error', { code: '500', title: 'Oops!', message: "Internal error while fetching products." });
     }
 }
 
