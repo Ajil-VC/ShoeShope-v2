@@ -68,7 +68,7 @@
                                                     <ins><span class="old-price font-md ml-15">₹ <%=product_details.regularPrice.toFixed(2)%></span></ins>
                                                     <!-- <span class="save-price  font-md color3 ml-15">15% Off</span> -->
                                                 <%}else{%>
-                                                    <ins><span class="text-brand">₹ <%=product_details.regularPrice.toFixed(2)%></span></ins>
+                                                    <ins><span class="text-brand">₹ <%=product_details.salePrice.toFixed(2)%></span></ins>
                                                 <%}%>
                                             </div>
                                         </div>
@@ -231,7 +231,7 @@
                                                                 <span class="old-price">₹ <%=related_products[i].regularPrice%>  </span>
                                                             <%}else{%>
 
-                                                                <span>₹ <%=related_products[i].regularPrice%></span>
+                                                                <span>₹ <%=related_products[i].salePrice%></span>
 
                                                             <%}%>
                                                         </div>

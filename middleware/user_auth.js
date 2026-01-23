@@ -20,6 +20,7 @@ const isLoggedIn = async (req, res, next) => {
 
         // Check if user is blocked
         const isBlocked = req.session.isBlocked || (req.user && req.user.isBlocked);
+
         if (!isAuthenticated || !isBlocked) {
 
             // User is not authenticated or is blocked
@@ -90,29 +91,29 @@ const badgeCount = async (req, res, next) => {
                 var userId = new mongoose.Types.ObjectId(req.user.user_id);
             }
             const [wishlistData, cartData] = await Promise.all([
-                User.aggregate([ 
-                    { $match: { _id:userId }}, 
+                User.aggregate([
+                    { $match: { _id: userId } },
                     { $project: { wishlistCount: { $size: "$wishlist" } } }
                 ]),
                 Cart.aggregate([
-                    {$match:{userId: userId}},
-                    {$project:{cartCount:{$size:"$items"}}}
+                    { $match: { userId: userId } },
+                    { $project: { cartCount: { $size: "$items" } } }
                 ])
             ]);
 
             const wishlistCount = wishlistData[0]?.wishlistCount;
-            const cartCount     = cartData[0]?.cartCount;
+            const cartCount = cartData[0]?.cartCount;
 
             res.locals.wishlistCount = wishlistCount;
-            res.locals.cartCount    = cartCount ?? 0;
+            res.locals.cartCount = cartCount ?? 0;
 
         } catch (error) {
             console.error("Inernal error occured while trying to get badge count in middleware.", error.stack);
         }
-    }else{
+    } else {
 
         res.locals.wishlistCount = 0;
-        res.locals.cartCount    = 0;
+        res.locals.cartCount = 0;
     }
     next();
 }

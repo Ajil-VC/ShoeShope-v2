@@ -20,6 +20,7 @@ adminRouter.get('/login', authenticate.isLoggedOut, authController.loadLogin);
 adminRouter.post('/login', authenticate.isLoggedOut, authController.loginAdmin);
 adminRouter.get('/logout', authenticate.isLoggedIn, authController.logoutAdmin);
 
+adminRouter.get('/', authenticate.isLoggedIn, dashBoardController.loadDashboard);
 adminRouter.get('/dashboard', authenticate.isLoggedIn, dashBoardController.loadDashboard);
 adminRouter.get('/api/sales-data', authenticate.isLoggedIn, dashBoardController.getSaleData);
 adminRouter.get('/dashboard/sales-report', authenticate.isLoggedIn, dashBoardController.salesReport);

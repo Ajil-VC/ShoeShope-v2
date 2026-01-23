@@ -587,9 +587,9 @@ const loadUserProfile = async (req, res) => {
 
     let userID = '';
     try {
-        if (req?.user?.google_id) {
-            userID = req.user.user_id;
 
+        if (req?.user?.user_id) {
+            userID = req.user.user_id;
         } else if (req.session.user_id) {
             userID = req.session.user_id;
         }
@@ -781,7 +781,7 @@ const logoutUser = async (req, res) => {
 
     try {
 
-        if (req?.user?.google_id) {
+        if (req?.user?.user_id) {
 
             req.logout((err) => {
 
