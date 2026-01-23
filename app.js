@@ -40,7 +40,6 @@ app.use(passport.session());
 
 const userRouter = require('./routes/userRoutes')
 const adminRouter = require('./routes/adminRoutes')
-const path = require('path')
 
 //Connect To mongodb here.
 connectDB();
