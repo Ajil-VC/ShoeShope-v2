@@ -1774,7 +1774,7 @@ const makeRazorpayment = async (razorpay, amountToPay, orderId) => {
             receipt: orderId
         };
 
-        console.log('process.env.RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET, 'KyeId:', process.env.RazorPay_Key_Id);
+        console.log('process.env.RAZORPAY_KEY_SECRET:', process.env.RazorPay_Key_Secret, 'KyeId:', process.env.RazorPay_Key_Id);
 
         const order = await razorpay.orders.create(options);
         return order;
@@ -2050,7 +2050,7 @@ const paymentVerification = async (req, res) => {
 
     try {
         const { orderId, paymentId, signature, amount } = req.body;
-        console.log(process.env.RAZORPAY_KEY_SECRET, 'This is the raxorpay key secret.');
+
         const expectedSignature = await crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
             .update(`${orderId}|${paymentId}`)
