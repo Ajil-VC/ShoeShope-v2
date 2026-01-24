@@ -2052,7 +2052,7 @@ const paymentVerification = async (req, res) => {
         const { orderId, paymentId, signature, amount } = req.body;
 
         const expectedSignature = await crypto
-            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .createHmac('sha256', process.env.RazorPay_Key_Secret)
             .update(`${orderId}|${paymentId}`)
             .digest('hex');
 
