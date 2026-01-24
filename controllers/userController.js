@@ -2050,7 +2050,7 @@ const paymentVerification = async (req, res) => {
 
     try {
         const { orderId, paymentId, signature, amount } = req.body;
-
+        console.log(process.env.RAZORPAY_KEY_SECRET, 'This is the raxorpay key secret.');
         const expectedSignature = await crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
             .update(`${orderId}|${paymentId}`)
