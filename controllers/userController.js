@@ -186,10 +186,10 @@ const loginUser = async (req, res) => {
         const { email, password } = req.body;
 
         const userData = await User.findOne({ email }).exec();
-        if (userData.google_id) {
+        if (userData?.google_id) {
             return res.status(HttpStatusCode.OK).redirect('/auth/google')
         } else
-            if (!userData.isBlocked) {//False means user is blocked.
+            if (!userData?.isBlocked) {//False means user is blocked.
                 return res.status(HttpStatusCode.UNAUTHORIZED).render('error', { title: 'Unauthorized', message: RESPONSE_MESSAGES.AUTH.UNAUTHORIZED, code: '401' });
             }
             else if (userData) {
@@ -565,13 +565,16 @@ const loadProductDetails = async (req, res) => {
         const target = product_details.targetGroup;
 
         const related_products = await Product.find({ $and: [{ Category: category }, { targetGroup: target }] });
-
+        const isVariants = product_details?.sizes ? product_details.sizes.reduce((acc, curr) => {
+            return acc + curr.quantity;
+        }, 0) : 0;
         return res.render('product_details', {
             product_details,
             related_products,
             target,
             elemMatch,
-            isInWishlist
+            isInWishlist,
+            isVariants
         });
 
     } catch (error) {
@@ -1300,75 +1303,55 @@ const changeQuantity = async (req, res) => {
     }
     const productId = req.query.productId;
     const productID = new mongoose.Types.ObjectId(productId);
-    const newQuantity = req.query.newQuantity;
-    const shoeSize = req.query.shoeSize;
+    const newQuantity = Number(req.query.newQuantity);
+    const shoeSize = req.query.size;
     const couponCode = req.query.coupon;
 
-    if (newQuantity) {
+    try {
+        const product = await Product.findOne({ _id: productID }).exec();
+        const productStock = product.stockQuantity;
 
-        try {
-            const product = await Product.findOne({ _id: productID }).exec();
-            const productStock = product.stockQuantity;
-
-            if (newQuantity > productStock) {
-                return res.json({ status: false, message: `Only ${productStock} is available`, stock: productStock });
-            } else if (newQuantity > 4) {
-                return res.json({ status: false, message: "Max 4 items per product" });
-            } else if (newQuantity < 1) {
-                return res.json({ status: false, message: "Item quantity cannot be less than 1" })
-            }
-
-            await Cart.findOneAndUpdate(
-                { userId: userID, 'items.productId': productId },
-                { $set: { 'items.$.quantity': newQuantity } },
-            );
-
-            const { subTotal,
-                totalAmount,
-                gst,
-                totalSelectedItems,
-                couponDiscount,
-                offerAmount,
-                minimumAmount,
-                maximumAmount } = await cartItemsFindFn(userID, couponCode);
-
-            return res.status(200).json({
-                status: true,
-                productId: productId,
-                subTotal: subTotal,
-                totalAmount: totalAmount,
-                gst: gst,
-                totalSelectedItems: totalSelectedItems,
-                discount: couponDiscount,
-                discountAmount: offerAmount,
-                minimumAmount: minimumAmount,
-                maximumAmount: maximumAmount
-
-            })
-
-        } catch (error) {
-            console.error("Internal Error while changing product quantity", error.stack);
-            return res.status(500).send("Internal Error while changing product quantity", error);
+        if (newQuantity > productStock) {
+            return res.json({ status: false, message: `Only ${productStock} is available`, stock: productStock });
+        } else if (newQuantity > 4) {
+            return res.json({ status: false, message: "Max 4 items per product" });
         }
+   
+
+        await Cart.findOneAndUpdate(
+            { userId: userID, 'items.productId': productId },
+            { $set: { 'items.$.quantity': newQuantity, 'items.$.size': shoeSize } },
+        );
+
+        const { subTotal,
+            totalAmount,
+            gst,
+            totalSelectedItems,
+            couponDiscount,
+            offerAmount,
+            minimumAmount,
+            maximumAmount } = await cartItemsFindFn(userID, couponCode);
+
+        return res.status(200).json({
+            status: true,
+            productId: productId,
+            subTotal: subTotal,
+            totalAmount: totalAmount,
+            gst: gst,
+            totalSelectedItems: totalSelectedItems,
+            discount: couponDiscount,
+            discountAmount: offerAmount,
+            minimumAmount: minimumAmount,
+            maximumAmount: maximumAmount
+
+        })
+
+    } catch (error) {
+        console.error("Internal Error while changing product quantity", error.stack);
+        return res.status(500).send("Internal Error while changing product quantity", error);
     }
-
-    if (shoeSize) {
-
-        try {
-
-            await Cart.findOneAndUpdate(
-                { userId: userID, 'items.productId': productId },
-                { $set: { 'items.$.size': shoeSize } },
-            );
-
-        } catch (error) {
-            console.error("Internal Error while trying to change the size.", error.stack);
-            return res.status(500).send("Internal Error while trying to change the size.", error);
-        }
-
-    }
-
 }
+
 
 
 const addCoupon = async (req, res) => {

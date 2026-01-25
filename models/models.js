@@ -194,10 +194,21 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    stockQuantity: {
-        type: Number,
-        required: true
-    },
+    sizes: [
+        {
+            size: {
+                type: String,
+                enum: ["S", "M", "L", "XL"],
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true,
+                min: 0,
+                default: 0
+            }
+        }
+    ],
     reserved: {
         type: Number,
         required: true,
@@ -214,13 +225,13 @@ const productSchema = new mongoose.Schema({
     targetGroup: {
         type: String
     },
-    isOnOffer : {
-        type : Boolean,
-        default : false
+    isOnOffer: {
+        type: Boolean,
+        default: false
     },
-    appliedOffer: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Offer' 
+    appliedOffer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Offer'
     }
 
 }, { timestamps: true });

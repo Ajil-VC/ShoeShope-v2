@@ -735,7 +735,7 @@ const loadAllProducts = async (req, res) => {
         ])
         const totalPages = Math.ceil(totalDocuments / limit);
         const initiatedReturnCount = initiatedReturns[0]?.total || 0;
-
+ 
         return res.render('productslist', { products, totalPages: totalPages, currentPage: page, initiatedReturnCount })
 
     } catch (error) {
@@ -805,14 +805,14 @@ const addNewProduct = async (req, res) => {
         description,
         regularPrice,
         salePrice,
-        stockQuantity,
         category,
         brand,
-        targetGroup } = req.body;
+        targetGroup,
+        sizes } = req.body;
 
     const product_name = req.query.product_name;
-
     try {
+
 
         if (req.query.product_name) {
 
@@ -823,17 +823,23 @@ const addNewProduct = async (req, res) => {
             }
             return res.json({ status: true })
         }
+        const variants = sizes.map((item) => {
+            return {
+                size: item.size,
+                quantity: Number(item.quantity)
+            }
+        });
 
         const newProduct = new Product({
             ProductName: productName,
             Description: description,
             regularPrice: regularPrice,
             salePrice: salePrice,
-            stockQuantity: stockQuantity,
             Category: category,
             Brand: brand,
             image: req.files.map(file => file.filename),
-            targetGroup: targetGroup
+            targetGroup: targetGroup,
+            sizes: variants
         });
 
         await newProduct.save();
@@ -906,7 +912,14 @@ const updateProduct = async (req, res) => {
             }
         })
 
-
+        const variants = req.body.sizes.map((item) => {
+            return {
+                size: item.size,
+                quantity: Number(item.quantity)
+            }
+        });
+        product.sizes = variants;
+        
         let newImages = null;
         if (req.files && req.files.length > 0) {
             newImages = req.files.map(file => file.filename)

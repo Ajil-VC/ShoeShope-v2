@@ -19,13 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Apply blur when opening the product list modal
-    if(openProductListBtn){
+    if (openProductListBtn) {
 
         openProductListBtn.addEventListener('click', applyBlur);
     }
 
     // Remove blur when closing the product list modal
-    if(productListModal){
+    if (productListModal) {
 
         productListModal.addEventListener('hidden.bs.modal', removeBlur);
     }
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Show prodOffpopup when the search input is focused
-    if(prodOffSearchInput){
+    if (prodOffSearchInput) {
 
         prodOffSearchInput.addEventListener('focus', function () {
             prodOffpopup.style.display = 'block';
@@ -167,13 +167,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hide prodOffpopup when clicking outside
     document.addEventListener('click', function (event) {
-        if (!prodOffSearchInput.contains(event.target) && !prodOffpopup.contains(event.target)) {
-            prodOffpopup.style.display = 'none';
+        if (!prodOffSearchInput?.contains(event.target) && !prodOffpopup?.contains(event.target)) {
+
+            if (prodOffpopup?.style.display) {
+
+                prodOffpopup.style.display = 'none';
+            }
         }
     });
 
     // Add search functionality
-    if(prodOffSearchInput){
+    if (prodOffSearchInput) {
 
         prodOffSearchInput.addEventListener('input', function () {
             if (this.value.trim() === '') {
@@ -259,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Show catOffpopup when the search input is focused
-    if(catOffSearchInput){
+    if (catOffSearchInput) {
 
         catOffSearchInput.addEventListener('focus', function () {
             catOffpopup.style.display = 'block';
@@ -271,13 +275,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hide catOffpopup when clicking outside
     document.addEventListener('click', function (event) {
-        if (!catOffSearchInput.contains(event.target) && !catOffpopup.contains(event.target)) {
-            catOffpopup.style.display = 'none';
+        if (!catOffSearchInput?.contains(event.target) && !catOffpopup?.contains(event.target)) {
+            if (catOffpopup?.style.display) {
+
+                catOffpopup.style.display = 'none';
+            }
         }
     });
 
     // Add search functionality
-    if(catOffSearchInput){
+    if (catOffSearchInput) {
 
         catOffSearchInput.addEventListener('input', function () {
             if (this.value.trim() === '') {
@@ -550,9 +557,9 @@ document.addEventListener('DOMContentLoaded', () => {
 //Edit offer
 //:::::::::::::::::::::::::::::::::::::::::::::://
 
-function listProductsWithOffer(products){
+function listProductsWithOffer(products) {
 
-    try{
+    try {
 
         const offerProductListContainer = document.getElementById('offer-product-list');
 
@@ -575,9 +582,9 @@ function listProductsWithOffer(products){
 
 
 
-    }catch(error){
+    } catch (error) {
 
-        console.error('Error occured while trying to fetch the products.',error);
+        console.error('Error occured while trying to fetch the products.', error);
     }
 }
 
@@ -611,9 +618,9 @@ async function editOfferDetails(offerId, offerType) {
         } else {
 
             openEditOffer.click();
-           
+
             // offerProductList.setAttribute('onclick',`listProductsWithOffer('${offerId}')`);
-            
+
             const startDate = new Date(data.offerDetails.startDate);
             const foramatedStartDate = startDate.toISOString().split('T')[0];
             const endDate = new Date(data.offerDetails.endDate);
@@ -634,7 +641,7 @@ async function editOfferDetails(offerId, offerType) {
                 offerActivate.checked = false;
             }
 
-        
+
             listProductsWithOffer(data.offerDetails.products);
 
         }

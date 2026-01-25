@@ -1,263 +1,345 @@
-<%- include("../layouts/header.ejs")  %>
-<body>
-<%- include("../layouts/navigation.ejs")  %>
+<%- include("../layouts/header.ejs") %>
+
+    <body>
+        <%- include("../layouts/navigation.ejs") %>
 
 
 
-    <main class="main">
+            <main class="main">
 
-        <div class="page-header breadcrumb-wrap">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="/" rel="nofollow">Home</a>
-                    <span></span> <a href="#"><%=target%></a>
-                    <span></span> <a href="#">Product Details</a>
-                </div>
-            </div>
-        </div>
-
-
-        <section class="mt-50 mb-50">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="product-detail accordion-detail">
-                            <div class="row mb-50">
-                              
-                                <!--Product Images-->
-                                <div class="col-md-6 col-sm-12 col-xs-12" style="flex: 1;">
-                                    <div class="detail-gallery" style="position: relative;">
-                                       
-                                        <!-- MAIN SLIDES -->
-                                        <div class="images" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-
-                                            <%let length = (product_details.image.length < 4) ? product_details.image.length : 4 %>
-
-                                            <% for(let i = 0 ; i < length ; i++){ %>
-
-                                                <figure class="border-radius-10" style="border-radius: 10px; overflow: hidden;">
-                                                    <img src="/ProductImage/<%=product_details.image[i]%>" alt="product image" style="width: 100%; height: auto;" data-zoom-image="/ProductImage/<%=product_details.image[i]%>" class="zoom_image" >
-                                                    
-                                                </figure>                  
-
-                                            <% } %>
-
-                                        </div>
-                                  
-                                    </div>
-                                    <!-- End Gallery -->
-                                </div>
-                                
-                                <!--Product Details-->
-                                <div class="col-md-6 col-sm-12 col-xs-12">
-                                    <div class="detail-info">
-                                        <h2 class="title-detail"><%=product_details.ProductName%></h2>
-                                        <h4 class="my-2 d-inline-block px-2 py-1 " style="background-color: yellowgreen;border-radius: 5px;color: white; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; " >
-                                            <%= product_details.targetGroup %></h4>
-                                        <div class="product-detail-rating">
-                                            <div class="pro-details-brand">
-                                                <span> Brand: <a href="shop-grid-right.html"><%=product_details.Brand%></a></span>
-                                            </div>
-                                     
-                                        </div>
-                                        <div class="clearfix product-price-cover">
-                                            <div class="product-price primary-color float-left">
-                                                <%if(product_details.isOnOffer){%>
-
-                                                    <ins><span class="text-brand">₹ <%=product_details.salePrice.toFixed(2)%></span></ins>
-                                                    <ins><span class="old-price font-md ml-15">₹ <%=product_details.regularPrice.toFixed(2)%></span></ins>
-                                                    <!-- <span class="save-price  font-md color3 ml-15">15% Off</span> -->
-                                                <%}else{%>
-                                                    <ins><span class="text-brand">₹ <%=product_details.salePrice.toFixed(2)%></span></ins>
-                                                <%}%>
-                                            </div>
-                                        </div>
-                                        <div class="bt-1 border-color-1 mt-15 mb-15"></div>
-
-                                        <!--Product Details-->
-                                        <div class="short-desc mb-30">
-                                            <p> <%= product_details.Description %> </p>
-                                        </div>
-
-                                        <div class="product_sort_info font-xs mb-30">
-                                            <ul>
-                                                
-                                                <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return Policy</li>
-                                                <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
-                                            </ul>
-                                        </div>
-                                   
-                                        <!-- <div class="attr-detail attr-size">
-                                            <strong class="mr-10">Size</strong>
-                                            <ul class="list-filter size-filter font-small">
-                                                <li class="active" ><a >S</a></li> 
-                                                <li><a >M</a></li>
-                                                <li><a >L</a></li>
-                                                <li><a >XL</a></li>
-                                                <li><a >XXL</a></li>
-                                            </ul>
-                                        </div> -->
-                                        <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                        
-                                        <div class="detail-extralink"  >
-                                            
-                                            <div class="product-extra-link2"  >
-                                             
-                                                <% if(elemMatch === null){ %>
-                                                    
-                                                    <button type="submit" id="IdForaddToCartFn" onclick="addProductToCart('<%=product_details._id%>')" href="/profile" class="button button-add-to-cart d-flex justify-content-between align-items-center " style="width: 215px;" >
-                                                        <span style="margin-right: 10px;" >Add to cart</span>
-                                                        <img src="/assets/imgs/theme/icons/icon-white-cart.svg" alt="" style="width: 15px;" >
-                                                    </button>
-                                                    <% }else{ %>
-                                                        <button type="submit" onclick="goToCart()" id="IdForGoToCartFn" href="/profile" class="button button-add-to-cart d-flex justify-content-between align-items-center " style="width: 215px;" >
-                                                            <span style="margin-right: 10px;" >Go to cart</span>
-                                                            <img src="/assets/imgs/theme/icons/icon-white-cart.svg" alt="" style="width: 15px;" >
-                                                        </button>
-                                                    
-                                                <% } %>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="detail-extralink mt-2">
-                                            
-                                            <div class="product-extra-link2">
-                                                <% const addClass = isInWishlist ? 'd-none' : ''; %>
-                                                <% const goClass = isInWishlist ? '' : 'd-none'; %>
-
-                                                <button type="submit" id="product-to-wishlist" data-productid="<%=product_details._id%>" 
-                                                    class="button button-add-to-cart d-flex justify-content-between align-items-center <%= addClass %>" 
-                                                    style="width: 215px;">
-                                                    <span style="margin-right: 10px;">Add to Wishlist</span>
-                                                    <img src="/assets/imgs/theme/icons/icon-white-heart.svg" alt="" style="width: 15px;">
-                                                </button>
-
-                                                <button type="submit" id="go-to-wishlist"
-                                                    class="button button-add-to-cart d-flex justify-content-between align-items-center <%= goClass %>" 
-                                                    style="width: 215px;">
-                                                    <span style="margin-right: 10px;">Go to Wishlist</span>
-                                                    <img src="/assets/imgs/theme/icons/icon-white-heart.svg" alt="" style="width: 15px;">
-                                                </button>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="detail-extralink mt-2">
-                                            
-                                            <!-- <div class="product-extra-link2">
-                                                <button type="submit" class="button button-add-to-cart" style="width: 215px;" >Buy now</button>
-                                            </div> -->
-
-                                        </div>
-                                        
-
-                                        <ul class="product-meta font-xs color-grey mt-50">
-                                            <!-- <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
-                                            <li class="mb-5">Tags: <a href="#" rel="tag">Cloth</a>, <a href="#" rel="tag">Women</a>, <a href="#" rel="tag">Dress</a> </li> -->
-                                            <li>Availability:
-                                                <% if(product_details.isActive ==0){ %>
-                                                    <span class="in-stock text-danger ml-5">Unavailable</span>
-                                                <% }else if(product_details.stockQuantity < 1){ %>
-                                                    <span class="in-stock text-danger ml-5">Out of Stock</span>
-                                                <% } else{%> 
-                                                    <span class="in-stock text-success ml-5"><%=product_details.stockQuantity%> Items In Stock</span>
-                                                <% } %>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <!-- Detail Info -->
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-10 m-auto entry-main-content">
-                                  
-                                    <div class="social-icons single-share">
-                                        <ul class="text-grey-5 d-inline-block">
-                                            
-                                            <li class="social-facebook"><a href="#"><img src="/assets/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
-                                            <li class="social-twitter"> <a href="#"><img src="/assets/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
-                                            <li class="social-instagram"><a href="#"><img src="/assets/imgs/theme/icons/icon-instagram.svg" alt=""></a></li>
-                                            <li class="social-linkedin"><a href="#"><img src="/assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a></li>
-                                        </ul>
-                                    </div>
-
-                                    <!--Review Should Come here-->
-
-                                </div>
-                            </div>
-                            <div class="row mt-60">
-
-                                <!--Give condtion if no products available-->
-                                <div class="col-12">
-                                    <h3 class="section-title style-1 mb-30">You may also like</h3>
-                                </div>
-                                <div class="col-12">
-                                    <div class="row related-products">
-
-                                        <% for(let i = 0 ; (i < related_products.length && i < 4) ; i++){ %>
-
-                                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                                <div class="product-cart-wrap small hover-up">
-                                                    <div class="product-img-action-wrap">
-                                                        <div class="product-img product-img-zoom">
-                                                            <a href="/product_details/?product_id=<%=related_products[i]._id%>" tabindex="0">
-                                                                <img class="default-img" src="/ProductImage/<%=related_products[i].image[0]%>" alt="">
-                                                                <img class="hover-img" src="/ProductImage/<%=related_products[i].image[1]%>" alt="">
-                                                            </a>
-                                                        </div>
-
-                                                        <div class="heart-icon" data-id="<%=related_products[i]?._id%>">
-                                                 
-                                                            <div class="wishlist-toggle" aria-label="Add to Wishlist">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                                                </svg>
-                                                            </div>
-            
-            
-                                                        </div>
-        
-        
-
-                                                    </div>
-                                                    <div class="product-content-wrap">
-                                                        <h2><a href="/product_details/?product_id=<%=related_products[i]._id%>" tabindex="0"> <%=related_products[i].ProductName%> </a></h2>
-                                                        
-                                                        <div class="product-price">
-                                                            <%if(related_products[i].isOnOffer){%>
-
-                                                                <span>₹ <%=related_products[i].salePrice%></span>
-                                                                <span class="old-price">₹ <%=related_products[i].regularPrice%>  </span>
-                                                            <%}else{%>
-
-                                                                <span>₹ <%=related_products[i].salePrice%></span>
-
-                                                            <%}%>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                        <% } %>
-
-                                      
-                                    </div>
-                                </div>
-
-
-                            </div>
-                          
+                <div class="page-header breadcrumb-wrap">
+                    <div class="container">
+                        <div class="breadcrumb">
+                            <a href="/" rel="nofollow">Home</a>
+                            <span></span> <a href="#">
+                                <%=target%>
+                            </a>
+                            <span></span> <a href="#">Product Details</a>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </main>
-    
-
- 
 
 
-<%- include("../layouts/footer.ejs")  %> 
+                <section class="mt-50 mb-50">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="product-detail accordion-detail">
+                                    <div class="row mb-50">
 
+                                        <!--Product Images-->
+                                        <div class="col-md-6 col-sm-12 col-xs-12" style="flex: 1;">
+                                            <div class="detail-gallery" style="position: relative;">
+
+                                                <!-- MAIN SLIDES -->
+                                                <div class="images"
+                                                    style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+
+                                                    <%let length=(product_details.image.length < 4) ?
+                                                        product_details.image.length : 4 %>
+
+                                                        <% for(let i=0 ; i < length ; i++){ %>
+
+                                                            <figure class="border-radius-10"
+                                                                style="border-radius: 10px; overflow: hidden;">
+                                                                <img src="/ProductImage/<%=product_details.image[i]%>"
+                                                                    alt="product image"
+                                                                    style="width: 100%; height: auto;"
+                                                                    data-zoom-image="/ProductImage/<%=product_details.image[i]%>"
+                                                                    class="zoom_image">
+
+                                                            </figure>
+
+                                                            <% } %>
+
+                                                </div>
+
+                                            </div>
+                                            <!-- End Gallery -->
+                                        </div>
+
+                                        <!--Product Details-->
+                                        <div class="col-md-6 col-sm-12 col-xs-12">
+                                            <div class="detail-info">
+                                                <h2 class="title-detail">
+                                                    <%=product_details.ProductName%>
+                                                </h2>
+                                                <h4 class="my-2 d-inline-block px-2 py-1 "
+                                                    style="background-color: yellowgreen;border-radius: 5px;color: white; font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; ">
+                                                    <%= product_details.targetGroup %>
+                                                </h4>
+                                                <div class="product-detail-rating">
+                                                    <div class="pro-details-brand"
+                                                        style="display: flex;flex-direction: column;">
+                                                        <span> Brand: <a href="shop-grid-right.html">
+                                                                <%=product_details.Brand%>
+                                                            </a></span>
+                                                        <span>Category : <%=product_details?.Category%></span>
+                                                    </div>
+
+                                                </div>
+                                                <div class="clearfix product-price-cover">
+                                                    <div class="product-price primary-color float-left">
+                                                        <%if(product_details.isOnOffer){%>
+
+                                                            <ins><span class="text-brand">₹
+                                                                    <%=product_details.salePrice.toFixed(2)%>
+                                                                </span></ins>
+                                                            <ins><span class="old-price font-md ml-15">₹
+                                                                    <%=product_details.regularPrice.toFixed(2)%>
+                                                                </span></ins>
+                                                            <!-- <span class="save-price  font-md color3 ml-15">15% Off</span> -->
+                                                            <%}else{%>
+                                                                <ins><span class="text-brand">₹
+                                                                        <%=product_details.salePrice.toFixed(2)%>
+                                                                    </span></ins>
+                                                                <%}%>
+                                                    </div>
+                                                </div>
+                                                <div class="bt-1 border-color-1 mt-15 mb-15"></div>
+
+                                                <!--Product Details-->
+                                                <div class="short-desc mb-30">
+                                                    <p>
+                                                        <%= product_details.Description %>
+                                                    </p>
+                                                </div>
+
+                                                <div class="product_sort_info font-xs mb-30">
+                                                    <ul>
+
+                                                        <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day
+                                                            Return Policy</li>
+                                                        <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery
+                                                            available</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div class="attr-detail attr-size">
+                                                    <strong class="mr-10">Size</strong>
+                                                    <ul class="list-filter size-filter font-small">
+                                                        <%if(isVariants){%>
+                                                            <%for(let v of product_details.sizes){%>
+
+                                                                <%if(v.quantity){%>
+                                                                    <li><a>
+                                                                            <%=v.size%>
+                                                                        </a></li>
+                                                                    <%}%>
+                                                                        <%}%>
+
+                                                                            <%}else{%>
+                                                                                <li><a>Not Available</a></li>
+                                                                                <%}%>
+                                                                                    <!-- <li class="active"><a>S</a></li> -->
+                                                    </ul>
+                                                </div>
+                                                <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+
+                                                <div class="detail-extralink">
+
+                                                    <div class="product-extra-link2">
+
+                                                        <% if(elemMatch===null){ %>
+
+                                                            <button type="submit" id="IdForaddToCartFn"
+                                                                onclick="addProductToCart('<%=product_details._id%>')"
+                                                                href="/profile"
+                                                                class="button button-add-to-cart d-flex justify-content-between align-items-center "
+                                                                style="width: 215px;">
+                                                                <span style="margin-right: 10px;">Add to cart</span>
+                                                                <img src="/assets/imgs/theme/icons/icon-white-cart.svg"
+                                                                    alt="" style="width: 15px;">
+                                                            </button>
+                                                            <% }else{ %>
+                                                                <button type="submit" onclick="goToCart()"
+                                                                    id="IdForGoToCartFn" href="/profile"
+                                                                    class="button button-add-to-cart d-flex justify-content-between align-items-center "
+                                                                    style="width: 215px;">
+                                                                    <span style="margin-right: 10px;">Go to cart</span>
+                                                                    <img src="/assets/imgs/theme/icons/icon-white-cart.svg"
+                                                                        alt="" style="width: 15px;">
+                                                                </button>
+
+                                                                <% } %>
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="detail-extralink mt-2">
+
+                                                    <div class="product-extra-link2">
+                                                        <% const addClass=isInWishlist ? 'd-none' : '' ; %>
+                                                            <% const goClass=isInWishlist ? '' : 'd-none' ; %>
+
+                                                                <button type="submit" id="product-to-wishlist"
+                                                                    data-productid="<%=product_details._id%>"
+                                                                    class="button button-add-to-cart d-flex justify-content-between align-items-center <%= addClass %>"
+                                                                    style="width: 215px;">
+                                                                    <span style="margin-right: 10px;">Add to
+                                                                        Wishlist</span>
+                                                                    <img src="/assets/imgs/theme/icons/icon-white-heart.svg"
+                                                                        alt="" style="width: 15px;">
+                                                                </button>
+
+                                                                <button type="submit" id="go-to-wishlist"
+                                                                    class="button button-add-to-cart d-flex justify-content-between align-items-center <%= goClass %>"
+                                                                    style="width: 215px;">
+                                                                    <span style="margin-right: 10px;">Go to
+                                                                        Wishlist</span>
+                                                                    <img src="/assets/imgs/theme/icons/icon-white-heart.svg"
+                                                                        alt="" style="width: 15px;">
+                                                                </button>
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="detail-extralink mt-2">
+
+                                                    <!-- <div class="product-extra-link2">
+                                                <button type="submit" class="button button-add-to-cart" style="width: 215px;" >Buy now</button>
+                                            </div> -->
+
+                                                </div>
+
+
+                                                <ul class="product-meta font-xs color-grey mt-50">
+                                                    <!-- <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
+                                            <li class="mb-5">Tags: <a href="#" rel="tag">Cloth</a>, <a href="#" rel="tag">Women</a>, <a href="#" rel="tag">Dress</a> </li> -->
+                                                    <li>Availability:
+                                                        <% if(product_details.isActive==0){ %>
+                                                            <span class="in-stock text-danger ml-5">Unavailable</span>
+                                                            <% }else if(product_details.stockQuantity < 1){ %>
+                                                                <span class="in-stock text-danger ml-5">Out of
+                                                                    Stock</span>
+                                                                <% } else{%>
+                                                                    <span class="in-stock text-success ml-5">
+                                                                        <%=product_details.stockQuantity%> Items In
+                                                                            Stock
+                                                                    </span>
+                                                                    <% } %>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <!-- Detail Info -->
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-10 m-auto entry-main-content">
+
+                                            <div class="social-icons single-share">
+                                                <ul class="text-grey-5 d-inline-block">
+
+                                                    <li class="social-facebook"><a href="#"><img
+                                                                src="/assets/imgs/theme/icons/icon-facebook.svg"
+                                                                alt=""></a></li>
+                                                    <li class="social-twitter"> <a href="#"><img
+                                                                src="/assets/imgs/theme/icons/icon-twitter.svg"
+                                                                alt=""></a></li>
+                                                    <li class="social-instagram"><a href="#"><img
+                                                                src="/assets/imgs/theme/icons/icon-instagram.svg"
+                                                                alt=""></a></li>
+                                                    <li class="social-linkedin"><a href="#"><img
+                                                                src="/assets/imgs/theme/icons/icon-pinterest.svg"
+                                                                alt=""></a></li>
+                                                </ul>
+                                            </div>
+
+                                            <!--Review Should Come here-->
+
+                                        </div>
+                                    </div>
+                                    <div class="row mt-60">
+
+                                        <!--Give condtion if no products available-->
+                                        <div class="col-12">
+                                            <h3 class="section-title style-1 mb-30">You may also like</h3>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="row related-products">
+
+                                                <% for(let i=0 ; (i < related_products.length && i < 4) ; i++){ %>
+
+                                                    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                                        <div class="product-cart-wrap small hover-up">
+                                                            <div class="product-img-action-wrap">
+                                                                <div class="product-img product-img-zoom">
+                                                                    <a href="/product_details/?product_id=<%=related_products[i]._id%>"
+                                                                        tabindex="0">
+                                                                        <img class="default-img"
+                                                                            src="/ProductImage/<%=related_products[i].image[0]%>"
+                                                                            alt="">
+                                                                        <img class="hover-img"
+                                                                            src="/ProductImage/<%=related_products[i].image[1]%>"
+                                                                            alt="">
+                                                                    </a>
+                                                                </div>
+
+                                                                <div class="heart-icon"
+                                                                    data-id="<%=related_products[i]?._id%>">
+
+                                                                    <div class="wishlist-toggle"
+                                                                        aria-label="Add to Wishlist">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="20" height="20" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <path
+                                                                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                                                            </path>
+                                                                        </svg>
+                                                                    </div>
+
+
+                                                                </div>
+
+
+
+                                                            </div>
+                                                            <div class="product-content-wrap">
+                                                                <h2><a href="/product_details/?product_id=<%=related_products[i]._id%>"
+                                                                        tabindex="0">
+                                                                        <%=related_products[i].ProductName%>
+                                                                    </a></h2>
+
+                                                                <div class="product-price">
+                                                                    <%if(related_products[i].isOnOffer){%>
+
+                                                                        <span>₹ <%=related_products[i].salePrice%>
+                                                                        </span>
+                                                                        <span class="old-price">₹
+                                                                            <%=related_products[i].regularPrice%>
+                                                                        </span>
+                                                                        <%}else{%>
+
+                                                                            <span>₹ <%=related_products[i].salePrice%>
+                                                                            </span>
+
+                                                                            <%}%>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <% } %>
+
+
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+
+
+
+
+            <%- include("../layouts/footer.ejs") %>

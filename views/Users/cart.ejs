@@ -85,12 +85,15 @@
                                     <h4>₹ <%=cartItemsArray[i].productId.salePrice%></h4>
                                 <%}%>
 
-                                <div class="cart-item-options">
+                                <div class="cart-item-options" data-product-id="<%= cartItemsArray[i].productId._id %>">
                                     <select class="form-select-cart cart-item-size" data-product-id="<%=cartItemsArray[i].productId._id%>" >
-                                        <option value="S" <%= cartItemsArray[i].size === 'S' ? 'selected' : '' %> >Size: S</option>
-                                        <option value="M" <%= cartItemsArray[i].size === 'M' ? 'selected' : '' %> >Size: M</option>
-                                        <option value="L" <%= cartItemsArray[i].size === 'L' ? 'selected' : '' %>  >Size: L</option>
-                                        <option value="XL" <%= cartItemsArray[i].size === 'XL' ? 'selected' : '' %>  >Size: XL</option>
+
+                                        <%if(cartItemsArray[i].productId.sizes){%>
+                                            <%for(let v of cartItemsArray[i].productId.sizes){%>
+                                                <option data-stock="<%= v.quantity %>" value="<%=v.size%>" <%= cartItemsArray[i]?.size === v.size ? 'selected' : '' %> >Size : <%=v.size%></option>
+                                            <%}%>
+                                        <%}%>
+                                      
                                     </select>
                                     <div class="d-flex ml-5 justify-content-center " >
                                         <div>Qty: </div>

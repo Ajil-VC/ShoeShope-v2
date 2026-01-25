@@ -75,7 +75,7 @@ if (resend_otp) {
 
         fetch('/resend_otp')
             .then(response => {
-              
+
                 if (!response.ok) {
                     throw new Error('Network Response was not ok while sending otp');
                 }
@@ -118,16 +118,16 @@ if (otp_submit_btn) {
         for (let i = 1; i <= 5; i++) {
             otp += document.getElementById('otp' + i).value;
         }
-       
+
         let intOTP = parseInt(otp);
-      
+
         let hidden_otp = document.createElement('input');
         hidden_otp.type = 'hidden';
         hidden_otp.name = 'otp';
         hidden_otp.value = intOTP;
-   
+
         const otpformData = new FormData(otp_form);
-       
+
         otp_form.appendChild(hidden_otp);
         let urlEncodedData = new URLSearchParams(otpformData);
 
@@ -151,7 +151,7 @@ if (otp_submit_btn) {
             })
             .then(data => {
 
-               
+
                 if (!data.status) {
 
                     otp_success_msg.classList.remove('text-success')
@@ -325,7 +325,7 @@ if (registrationForm) {
 async function makeDefaultAddress(AddressId) {
 
     if (!AddressId) {
-      
+
         return;
     }
 
@@ -344,7 +344,7 @@ async function makeDefaultAddress(AddressId) {
         }
 
         const data = await response.json();
-   
+
         let currentUrl = window.location.href;
         let currentFragment = window.location.hash;
 
@@ -638,7 +638,7 @@ async function updateAddress(addressID) {
             editAddressPlace.value = data.addressDetails.place;
             editAddressMobile.value = data.addressDetails.mobile_no;
             editAddressLandmark.value = data.addressDetails.landmark;
-        } 
+        }
 
     } catch (error) {
         console.error("Error occured while editing address", error.stack)
@@ -827,7 +827,7 @@ async function removeProductFromCart(productId) {
 
     } catch (error) {
 
-        console.error("Error while fetching operation of remove product from cart",error.stack);
+        console.error("Error while fetching operation of remove product from cart", error.stack);
     }
 }
 
@@ -859,7 +859,7 @@ async function addCoupon(selectedCoupon) {
         }
 
         const data = await response.json();
-       
+
         if (data.status && data.discountAmount == 0) {
             Swal.fire(
                 'Oops',
@@ -901,34 +901,6 @@ if (btn_addCoupon_save) {
 
 }
 
-async function loadCheckout() {
-
-    try {
-        const selectedCoupon = document.getElementById('addedCoupon').value;
-        const response = await fetch(`/checkout?coupon=${selectedCoupon}`, { redirect: 'manual' });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok while removing product from cart');
-        }
-        const responseClone = response.clone();
-        const data = await response.json();
-        const textData = await responseClone.text();
-        if (!data.status) {
-            Swal.fire(
-                'Oops',
-                `${data.message}`,
-                'error'
-            )
-        } else if (data.redirect) {
-
-            window.location.href = data.redirect;
-        }
-
-    } catch (error) {
-        console.error("Error while going to checkout page",error.stack)
-        Swal.fire('Error', 'There was a problem loading the checkout page', 'error');
-    }
-}
 
 
 const cancelProduct = async (productOrderId, orderId, itemOrderId) => {
@@ -1121,8 +1093,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //Add to wishlist from product details.
     const product_to_wishlist = document.getElementById('product-to-wishlist');
     const go_to_wishlist = document.getElementById('go-to-wishlist');
-    if(product_to_wishlist){
-        product_to_wishlist.addEventListener('click',function() {
+    if (product_to_wishlist) {
+        product_to_wishlist.addEventListener('click', function () {
 
             const productId = this.dataset.productid;
 
@@ -1154,174 +1126,23 @@ document.addEventListener('DOMContentLoaded', function () {
                         //Need to set from here.
                         product_to_wishlist.classList.add('d-none');
                         go_to_wishlist.classList.remove('d-none');
-                    } 
+                    }
 
                 })
                 .catch(error => {
                     console.error("Error while trying add product to wishlist", error.stack)
                 })
-            
+
         })
     }
 
-    if(go_to_wishlist){
-        go_to_wishlist.addEventListener('click',function(){
-            
+    if (go_to_wishlist) {
+        go_to_wishlist.addEventListener('click', function () {
+
             window.location.href = `/wishlist`;
         })
     }
 
-
-    // Checkboxes
-    document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function () {
-            const productId = this.dataset.productId;
-            selectedCoupon = document.getElementById('addedCoupon').value;
-
-            // const isChecked = this.checked;
-
-            fetch(`/cart?productId=${productId}&coupon=${selectedCoupon}`, { method: "PUT" })
-                .then(response => {
-
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok while selecting product.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-
-                    if ((data.status && data.discountAmount == 0) && selectedCoupon) {
-                        Swal.fire(
-                            'Oops',
-                            `Selected offer available only on ₹${data.minimumAmount}+ purchase`,
-                            'error'
-                        )
-                        totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
-                        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
-                        orderSummary_GST.textContent = `₹ ${data.gst}`;
-                        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-                        orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
-                        orderSummary_discount.textContent = `Discount 0%`;
-                        orderSummary_discountOffer.textContent = `₹ 0`
-                    } else if (data.status) {
-
-                        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
-                        orderSummary_GST.textContent = `₹ ${data.gst}`;
-                        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-                        orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
-                        orderSummary_discount.textContent = `Discount ${data.discount}%`
-                        orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`
-                    }
-
-                })
-
-                .catch(error => {
-                    console.error("Error while trying select the product", error.stack)
-                })
-
-        });
-    });
-
-
-    //Quantity inputs
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        input.addEventListener('change', function () {
-            const productId = this.dataset.productId;
-            const newQuantity = this.value;
-            selectedCoupon = document.getElementById('addedCoupon').value;
-
-            fetch(`/cart?productId=${productId}&newQuantity=${newQuantity}&coupon=${selectedCoupon}`, { method: "PATCH" })
-                .then(response => {
-
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok while selecting product.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-
-                    if ((data.status && data.discountAmount == 0) && selectedCoupon) {
-                        Swal.fire(
-                            'Oops',
-                            `Selected offer available only on ₹${data.minimumAmount}+ purchase`,
-                            'error'
-                        )
-                        totalItemsInCart.textContent = `Total ${data.totalCartItems} inyour cart`;
-                        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
-                        orderSummary_GST.textContent = `₹ ${data.gst}`;
-                        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-                        orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
-                        orderSummary_discount.textContent = `Discount 0%`;
-                        orderSummary_discountOffer.textContent = `₹ 0`
-                    } else if (data.status) {
-
-                        orderSummary_subTotal.textContent = `₹ ${data.subTotal}`;
-                        orderSummary_GST.textContent = `₹ ${data.gst}`;
-                        orderSummary_totalAmount.textContent = `₹ ${data.totalAmount}`;
-                        orderSummary_quantity.textContent = `${data.totalSelectedItems} item added`;
-                        orderSummary_discount.textContent = `Discount ${data.discount}%`
-                        orderSummary_discountOffer.textContent = `₹ ${data.discountAmount}`
-                    } else {
-
-                        if (data.message == "Max 4 items per product") {
-                            Swal.fire(
-                                'Oops',
-                                `${data.message}`,
-                                'error'
-                            )
-                            this.value = 4
-
-                        } else if (data.message == "Item quantity cannot be less than 1") {
-
-                            this.value = 1
-                            Swal.fire(
-                                'Oops',
-                                `${data.message}`,
-                                'error'
-                            )
-
-                        } else {
-
-                            this.value = data.stock
-                            Swal.fire(
-                                'Oops',
-                                `${data.message}`,
-                                'error'
-                            )
-
-                        }
-                      
-
-                    }
-
-                })
-                .catch(error => {
-                    console.error("Error while trying change item quantity", error.stack)
-                })
-
-        });
-    });
-
-
-    //Size inputs
-    document.querySelectorAll('.cart-item-size').forEach(input => {
-        input.addEventListener('change', function () {
-            const productId = this.dataset.productId;
-            const shoeSize = this.value;
-
-            fetch(`/cart?productId=${productId}&shoeSize=${shoeSize}`, { method: "PATCH" })
-                .then(response => {
-
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok while changing the size.');
-                    }
-                })
-                .catch(error => {
-                    console.error("Error while trying change item size", error.stack)
-                })
-
-        })
-    })
 
 
 
@@ -1376,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return response.json();
                     })
                     .then(data => {
-                  
+
                         dAddress_adType.textContent = data.address.addressType;
                         dAddress_ldMark.textContent = `LandMark: ${data.address.landmark},`;
                         dAddress_place.textContent = `Place: ${data.address.place},`;
@@ -1523,7 +1344,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
         } catch (error) {
-            console.error("Error occured while trying to check address is selected.",error.stack)
+            console.error("Error occured while trying to check address is selected.", error.stack)
         }
 
         try {
@@ -1572,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 placeOrderByCheckingAddress();
 
             } else {
-          
+
                 Swal.fire({
                     title: "Payment Method Required",
                     text: "Please select a payment method to proceed.s",
@@ -1701,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 invoiceBtn.disabled = false;
             } else {
                 invoiceBtn.disabled = false;
-          
+
             }
 
 
@@ -1757,7 +1578,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 makePaymentForFailed(paymentMethod, orderId);
 
             } else {
-           
+
                 Swal.fire({
                     title: "Payment Method Required",
                     text: "Please select a payment method to proceed.s",
@@ -1805,7 +1626,7 @@ document.addEventListener('DOMContentLoaded', function () {
         order_address_landmark_pincode.innerText = `${addres.landmark}, Pin: ${addres.pinCode}`;
 
         invoiceBtn.dataset.orderId = orderId;
-      
+
         if ((orderPaymentStatus == 'FAILED') || ((orderPaymentStatus == 'PENDING') && (paymentMethod == 'UPI Method'))) {
             retryPaymentBtn.classList.remove('display-order-details')
         } else {

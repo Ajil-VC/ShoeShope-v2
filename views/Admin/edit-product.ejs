@@ -1,280 +1,347 @@
-<%- include("../layouts/adminHeader.ejs")  %>
-    
-<!--Aside Here-->
-<%- include("../layouts/adminAside.ejs")  %>
+<%- include("../layouts/adminHeader.ejs") %>
 
-<!--Head with search bar and other options Here-->
-<%- include("../layouts/adminHead.ejs")  %>
+    <!--Aside Here-->
+    <%- include("../layouts/adminAside.ejs") %>
 
-
-
-  
-  <!-- Modal Start here -->
-  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Crop the Image</h5>
-          <button type="button" id="modal-close-button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          
-            <!--Here is the cropper-->
-            <!--===================-->
-
-            <div class="main-container">
-                <div class="img-container" id="imageCroperContainer" >
-                    <img id="imageCroper" src=""  style="width: 600px;" >
-                </div>
-                <!-- <button id="btn-crop">Crop</button> -->
-                <div class="cropped-container">
-                    <img src="" id="output">
-                </div>
-            </div>
-
-            <!--Cropper ends here-->
-            <!--===================-->
+        <!--Head with search bar and other options Here-->
+        <%- include("../layouts/adminHead.ejs") %>
 
 
 
 
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary " id="btn-crop" >Save changes</button>
-        </div>
-      </div>
-    </div>
-  </div> <!-- Modal Ends here -->
+            <!-- Modal Start here -->
+            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Crop the Image</h5>
+                            <button type="button" id="modal-close-button" class="close" data-dismiss="modal"
+                                aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+
+                            <!--Here is the cropper-->
+                            <!--===================-->
+
+                            <div class="main-container">
+                                <div class="img-container" id="imageCroperContainer">
+                                    <img id="imageCroper" src="" style="width: 600px;">
+                                </div>
+                                <!-- <button id="btn-crop">Crop</button> -->
+                                <div class="cropped-container">
+                                    <img src="" id="output">
+                                </div>
+                            </div>
+
+                            <!--Cropper ends here-->
+                            <!--===================-->
 
 
-        <section class="content-main container">
-            <div class="row">
 
-                <div class="col-9">
-                    <div class="content-header">
-                        <h2 class="content-title">Edit Product</h2>
-                        <div>
-                          
-                            <a href="/admin/productslist" class="btn btn-light rounded font-sm mr-5 text-body hover-up" >Cancel</a>
-                            <button class="btn btn-md rounded font-sm hover-up" data-id="<%=product._id%>" id="publishBtnForAddProduct" >Publish</button>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary " id="btn-crop">Save changes</button>
                         </div>
                     </div>
                 </div>
+            </div> <!-- Modal Ends here -->
 
-                <div class="col-lg-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Basic</h4>
-                            <span style="font-weight: lighter;" >Product Id:</span> <span><%=product._id%></span>
+
+            <section class="content-main container">
+                <div class="row">
+
+                    <div class="col-9">
+                        <div class="content-header">
+                            <h2 class="content-title">Edit Product</h2>
+                            <div>
+
+                                <a href="/admin/productslist"
+                                    class="btn btn-light rounded font-sm mr-5 text-body hover-up">Cancel</a>
+                                <button class="btn btn-md rounded font-sm hover-up" data-id="<%=product._id%>"
+                                    id="publishBtnForAddProduct">Publish</button>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            
-                            <form id="formForAddNewProduct" action="/admin/productslist/edit_product" enctype='multipart/form-data' >
-                                <div class="mb-4">
-                                    <label for="product_name" class="form-label">Product Name</label>
-                                    <input type="text" value="<%=product?.ProductName%>" placeholder="Type here" class="form-control" id="product_name" name="productName" >
-                                    <span  class="d-none text-danger" style="font-size: smaller;" id="product_name-error"></span>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="form-label">Description</label>
-                                    <textarea placeholder="Type here" class="form-control" rows="4" id="descriptionOfProduct" name="description" ></textarea>
-                                    <span  class="text-danger" style="font-size: smaller;" id="descriptionOfProduct-error"></span>
-                                </div>
+                    </div>
 
-                                
-                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn btn-primary" hidden id="openModalBtn" style="width: 100%;" data-toggle="modal" data-target="#exampleModalCenter">Launch demo modal</button>
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Basic</h4>
+                                <span style="font-weight: lighter;">Product Id:</span> <span>
+                                    <%=product._id%>
+                                </span>
+                            </div>
+                            <div class="card-body">
 
-                                
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="mb-4">
-                                            <label class="form-label">Regular price</label>
-                                            <div class="row gx-2">
-                                                <input placeholder="₹" value="<%=product?.regularPrice%>" name="regularPrice" id="regularPrice" type="text" class="form-control">
-                                                <span  class="text-danger" style="font-size: smaller;" id="regularPrice-error"></span>
+                                <form id="formForAddNewProduct" action="/admin/productslist/edit_product"
+                                    enctype='multipart/form-data'>
+                                    <div class="mb-4">
+                                        <label for="product_name" class="form-label">Product Name</label>
+                                        <input type="text" value="<%=product?.ProductName%>" placeholder="Type here"
+                                            class="form-control" id="product_name" name="productName">
+                                        <span class="d-none text-danger" style="font-size: smaller;"
+                                            id="product_name-error"></span>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Description</label>
+                                        <textarea placeholder="Type here" class="form-control" rows="4"
+                                            id="descriptionOfProduct" name="description"></textarea>
+                                        <span class="text-danger" style="font-size: smaller;"
+                                            id="descriptionOfProduct-error"></span>
+                                    </div>
+
+
+                                    <!-- Button trigger modal -->
+                                    <button type="button" class="btn btn-primary" hidden id="openModalBtn"
+                                        style="width: 100%;" data-toggle="modal"
+                                        data-target="#exampleModalCenter">Launch demo modal</button>
+
+
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="mb-4">
+                                                <label class="form-label">Regular price</label>
+                                                <div class="row gx-2">
+                                                    <input placeholder="₹" value="<%=product?.regularPrice%>"
+                                                        name="regularPrice" id="regularPrice" type="text"
+                                                        class="form-control">
+                                                    <span class="text-danger" style="font-size: smaller;"
+                                                        id="regularPrice-error"></span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="mb-4">
-                                            <label class="form-label">Sale price</label>
-                                            <input placeholder="₹" value="<%=product?.salePrice%>" name="salePrice" id="salePrice" type="text" class="form-control">
-                                            <span  class="text-danger" style="font-size: smaller;" id="salePrice-error"></span>
+                                        <div class="col-lg-6">
+                                            <div class="mb-4">
+                                                <label class="form-label">Sale price</label>
+                                                <input placeholder="₹" value="<%=product?.salePrice%>" name="salePrice"
+                                                    id="salePrice" type="text" class="form-control">
+                                                <span class="text-danger" style="font-size: smaller;"
+                                                    id="salePrice-error"></span>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                
 
-                                    <div class="col-lg-6">
-                                        <div class="mb-4">
-                                            <label class="form-label">Stock Quantity</label>
-                                            <input placeholder="Enter the Quantity" value="<%=product?.stockQuantity%>" name="stockQuantity" id="stockQuantity" type="text" class="form-control">
-                                            <span  class="text-danger" style="font-size: smaller;" id="stockQuantity-error"></span>
+                                        <div class="col-lg-6">
+                                            <label class="form-label">Target Group</label>
+                                            <select class="form-select" name="targetGroup" id="targetGroup">
+
+                                                <option <%=product?.targetGroup==='Men' ? 'selected' : '' %> > Men
+                                                </option>
+                                                <option <%=product?.targetGroup==='Women' ? 'selected' : '' %> > Women
+                                                </option>
+                                                <option <%=product?.targetGroup==='Kids' ? 'selected' : '' %> > Kids
+                                                </option>
+
+                                            </select>
                                         </div>
+
+
+                                        <div class="row mt-3 mb-3">
+                                            <h6 class="mb-2">Sizes & Stock</h6>
+
+                                            <!-- S -->
+                                            <div class="col-lg-3 col-md-6 mb-2 d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">S</span>
+                                                <input type="hidden" name="sizes[0][size]" value="S" />
+                                                <input type="number" class="form-control form-control-sm"
+                                                    name="sizes[0][quantity]"
+                                                    value="<%=product?.sizes[0]?.quantity || 0%>" placeholder="Qty"
+                                                    min="0" />
+                                            </div>
+
+                                            <!-- M -->
+                                            <div class="col-lg-3 col-md-6 mb-2 d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">M</span>
+                                                <input type="hidden" name="sizes[1][size]" value="M" />
+                                                <input type="number" class="form-control form-control-sm"
+                                                    value="<%=product?.sizes[1]?.quantity || 0%>"
+                                                    name="sizes[1][quantity]" placeholder="Qty" min="0" />
+                                            </div>
+
+                                            <!-- L -->
+                                            <div class="col-lg-3 col-md-6 mb-2 d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">L</span>
+                                                <input type="hidden" name="sizes[2][size]" value="L" />
+                                                <input type="number" class="form-control form-control-sm"
+                                                    value="<%=product?.sizes[2]?.quantity || 0%>"
+                                                    name="sizes[2][quantity]" placeholder="Qty" min="0" />
+                                            </div>
+
+                                            <!-- XL -->
+                                            <div class="col-lg-3 col-md-6 mb-2 d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">XL</span>
+                                                <input type="hidden" name="sizes[3][size]" value="XL" />
+                                                <input type="number" class="form-control form-control-sm"
+                                                    value="<%=product?.sizes[3]?.quantity || 0%>"
+                                                    name="sizes[3][quantity]" placeholder="Qty" min="0" />
+                                            </div>
+                                        </div>
+
+
+
                                     </div>
 
-                                    <div class="col-lg-6">
-                                        <label class="form-label">Target Group</label> 
-                                        <select class="form-select" name="targetGroup" id="targetGroup" >
-                           
-                                            <option <%= product?.targetGroup === 'Men' ? 'selected' : '' %> > Men </option>
-                                            <option <%= product?.targetGroup === 'Women' ? 'selected' : '' %> > Women </option>
-                                            <option <%= product?.targetGroup === 'Kids' ? 'selected' : '' %> > Kids </option>
-                                            
-                                        </select>
-                                    </div>
-                                    
-                                </div>
-                               
-                            </form>
+                                </form>
 
 
-
-                        </div>
-                    </div> <!-- card end// -->
-                    
-                </div>
-
-                <div class="col-lg-3">
-
-                    <!-- Media Starts here-->
-                    <!-- ============================-->
-                    <!-- ============================-->
-                    <!-- ============================-->
-                            
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Media</h4>
-                        </div>
-
-                        
-
-                        <div class="card-body">
-                            <div class="input-upload">
-                                
-                                <input class="form-control addProduct-image-input" type="file" id="addFirstProductImage" name="image" data-field="firstImage">
-                                <input class="form-control addProduct-image-input" type="file" id="addSecondProductImage" name="image" data-field="secondImage">
-                                <input class="form-control addProduct-image-input" type="file" id="addThirdProductImage" name="image" data-field="thirdImage">
 
                             </div>
-                           
+                        </div> <!-- card end// -->
+
+                    </div>
+
+                    <div class="col-lg-3">
+
+                        <!-- Media Starts here-->
+                        <!-- ============================-->
+                        <!-- ============================-->
+                        <!-- ============================-->
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Media</h4>
+                            </div>
+
+
+
+                            <div class="card-body">
+                                <div class="input-upload">
+
+                                    <input class="form-control addProduct-image-input" type="file"
+                                        id="addFirstProductImage" name="image" data-field="firstImage">
+                                    <input class="form-control addProduct-image-input" type="file"
+                                        id="addSecondProductImage" name="image" data-field="secondImage">
+                                    <input class="form-control addProduct-image-input" type="file"
+                                        id="addThirdProductImage" name="image" data-field="thirdImage">
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- card end// -->
+
+                        <!--Media ends here ============================-->
+                        <!-- ============================-->
+                        <!-- ============================-->
+
+
+
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Organization</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row gx-2">
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Category</label>
+                                        <select class="form-select" name="category" id="category">
+
+                                            <% for(let i=0 ; i < categories.length ; i++){ %>
+
+                                                <option <%=product?.Category===categories[i].name ? 'selected' : '' %> >
+                                                    <%=categories[i].name %>
+                                                </option>
+
+                                                <% } %>
+
+
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Brand</label>
+                                        <select class="form-select" name="brand" id="brand">
+
+                                            <% for(let i=0 ; i < brand.length ; i++){ %>
+
+                                                <option <%=product?.Brand===brand[i].name ? 'selected' : '' %> > <%=
+                                                        brand[i].name %>
+                                                </option>
+
+                                                <% } %>
+
+                                        </select>
+                                    </div>
+
+                                </div> <!-- row.// -->
+                            </div>
+                        </div> <!-- card end// -->
+
+                    </div>
+
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h3 class="mb-3">Product Preview</h3>
+                        <div class="editim-product-preview-container">
+
+                            <%let length=(product.image.length < 4) ? product.image.length : 4 %>
+                                <% for(let i=0 ; i < length ; i++){ %>
+
+                                    <div class="editim-product-preview-item adImPreviewImageContainer"
+                                        id="imPreview-<%=product.image[i]%>">
+                                        <button class="adImRemoveBtn"
+                                            onclick="rmImageFromEditPage('<%=product._id%>','<%=product.image[i]%>')"
+                                            style="background-color: brown; color: white;">Remove</button>
+                                        <img src="/ProductImage/<%=product.image[i]%>" alt="Product 2"
+                                            class="editim-product-preview-image adImPreviewImage">
+                                    </div>
+                                    <% } %>
+
+
+                                        <!-- Add more product preview items as needed -->
                         </div>
                     </div>
-                    <!-- card end// -->
-
-                    <!--Media ends here ============================-->
-                    <!-- ============================-->
-                    <!-- ============================-->
-
-
-
-                    
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Organization</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row gx-2">
-                                <div class="col-sm-6 mb-3">
-                                    <label class="form-label">Category</label> 
-                                    <select class="form-select" name="category" id="category" >
-                                        
-                                        <% for(let i = 0 ; i < categories.length ; i++){ %>
-                                      
-                                            <option <%= product?.Category === categories[i].name ? 'selected' : '' %> > <%=categories[i].name %> </option>
-
-                                        <% } %>
-
-                                        
-                                    </select>
-                                </div>
-                                <div class="col-sm-6 mb-3">
-                                    <label class="form-label">Brand</label>
-                                    <select class="form-select" name="brand" id="brand" >
-
-                                        <% for(let i = 0 ; i < brand.length ; i++){ %>
-                                       
-                                            <option <%= product?.Brand === brand[i].name ? 'selected' : '' %> > <%= brand[i].name %> </option>
-
-                                        <% } %>
-                                   
-                                    </select>
-                                </div>
-                            
-                            </div> <!-- row.// -->
-                        </div>
-                    </div> <!-- card end// -->
-
                 </div>
 
-            </div>
+            </section> <!-- content-main end// -->
 
-            <div class="row mt-4">
-                <div class="col-12">
-                  <h3 class="mb-3">Product Preview</h3>
-                  <div class="editim-product-preview-container">
-                    
-                    <%let length = (product.image.length < 4) ? product.image.length : 4 %>
-                    <% for(let i = 0 ; i < length ; i++){ %>
 
-                        <div class="editim-product-preview-item adImPreviewImageContainer" id="imPreview-<%=product.image[i]%>" >
-                            <button class="adImRemoveBtn" onclick="rmImageFromEditPage('<%=product._id%>','<%=product.image[i]%>')" style="background-color: brown; color: white;" >Remove</button>
-                          <img src="/ProductImage/<%=product.image[i]%>" alt="Product 2" class="editim-product-preview-image adImPreviewImage">
+
+
+
+            <footer class="main-footer font-xs">
+                <div class="row pb-30 pt-15">
+                    <div class="col-sm-6">
+                        <script>
+                            document.write(new Date().getFullYear())
+                        </script> ©, ShoeShope
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-sm-end">
+                            All rights reserved
                         </div>
-                    <% } %>
-                    
-                    
-                    <!-- Add more product preview items as needed -->
-                  </div>
-                </div>
-              </div>
-
-        </section> <!-- content-main end// -->
-
-
-
-
-
-        <footer class="main-footer font-xs">
-            <div class="row pb-30 pt-15">
-                <div class="col-sm-6">
-                    <script>
-                    document.write(new Date().getFullYear())
-                    </script> ©, ShoeShope
-                </div>
-                <div class="col-sm-6">
-                    <div class="text-sm-end">
-                        All rights reserved
                     </div>
                 </div>
-            </div>
-        </footer>
-        </main>
-        <script src="/adminAssets/js/vendors/jquery-3.6.0.min.js"></script>
-        <script src="/adminAssets/js/vendors/bootstrap.bundle.min.js"></script>
-        <script src="/adminAssets/js/vendors/select2.min.js"></script>
-        <script src="/adminAssets/js/vendors/perfect-scrollbar.js"></script>
-        <script src="/adminAssets/js/vendors/jquery.fullscreen.min.js"></script>
-        <script src="/adminAssets/js/vendors/chart.js"></script>
-        <!-- Main Script -->
-        <script src="/adminAssets/js/main.js" type="text/javascript"></script>
-        <script src="/adminAssets/js/custom-chart.js" type="text/javascript"></script>
-        
-        <!--New Bootstrap dependancies 4 below-->
-        <!-- CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-        <!-- JS, Popper.js, and jQuery -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-        
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
-        <script src="/adminAssets/js/edit_product.js"></script>
-        
-        </body>
-        
-        </html>
+            </footer>
+            </main>
+            <script src="/adminAssets/js/vendors/jquery-3.6.0.min.js"></script>
+            <script src="/adminAssets/js/vendors/bootstrap.bundle.min.js"></script>
+            <script src="/adminAssets/js/vendors/select2.min.js"></script>
+            <script src="/adminAssets/js/vendors/perfect-scrollbar.js"></script>
+            <script src="/adminAssets/js/vendors/jquery.fullscreen.min.js"></script>
+            <script src="/adminAssets/js/vendors/chart.js"></script>
+            <!-- Main Script -->
+            <script src="/adminAssets/js/main.js" type="text/javascript"></script>
+            <script src="/adminAssets/js/custom-chart.js" type="text/javascript"></script>
+
+            <!--New Bootstrap dependancies 4 below-->
+            <!-- CSS -->
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+            <!-- JS, Popper.js, and jQuery -->
+            <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+            <script src="/adminAssets/js/edit_product.js"></script>
+
+            </body>
+
+            </html>

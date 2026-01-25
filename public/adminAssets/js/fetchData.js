@@ -411,7 +411,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const regularPrice_error = document.getElementById('regularPrice-error');
     const salePrice_error = document.getElementById('salePrice-error');
-    const stockQuantity_error = document.getElementById('stockQuantity-error');
     const descriptionOfProduct_error = document.getElementById('descriptionOfProduct-error');
     const targetGroup_error = document.getElementById('targetGroup-error');
     const category_error = document.getElementById('category-error');
@@ -421,13 +420,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const publishNewProduct = async()=>{
         
             const isProduct = await isProductExist(1);
-            
             if(!isProduct){
                 
                 let formValidation = true;
                 regularPrice_error.textContent = "";
                 salePrice_error.textContent = "";
-                stockQuantity_error.textContent = "";
                 product_name_error.textContent = "";
                 descriptionOfProduct_error.textContent = "";
                 targetGroup_error.textContent = "";
@@ -441,7 +438,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
                 let regularPrice = document.getElementById('regularPrice').value.trim();
                 let salePrice = document.getElementById('salePrice').value.trim();
-                let stockQuantity = document.getElementById('stockQuantity').value.trim();
                 let productName = product_name.value.trim();
                 let descriptionOfProduct = document.getElementById('descriptionOfProduct').value.trim();
                 let targetGroup = document.getElementById('targetGroup').value;
@@ -483,11 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     salePrice_error.textContent = "Must be a positive number.";
                     formValidation = false;
                 }
-                if(!/^[1-9]\d*$/.test(stockQuantity)){
-    
-                    stockQuantity_error.textContent = "Must be a positive number.";
-                    formValidation = false;
-                }
+         
                 if(productName === ""){
                     
                     product_name_error.textContent = "This field should not be empty.";
@@ -505,7 +497,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     formValidation = false;
                 }
                 
-    
               
                 if(validation && formValidation && !alreadyExistName){
     
@@ -542,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                    
                     try{
-
+                        
                         const response = await fetch(`/admin/productslist/add_new_product`,{
                             method : 'post',
                             body : formDataForAddNewProduct
@@ -598,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('formForAddNewProduct');
 
         publishBtnForAddProduct.addEventListener('click',() => {
-            
+ 
             publishNewProduct();
 
         })

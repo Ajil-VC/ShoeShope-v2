@@ -96,11 +96,11 @@ document.addEventListener('DOMContentLoaded', function() {
             let formValidation = true;
             regularPrice_error.textContent = "";
             salePrice_error.textContent = "";
-            stockQuantity_error.textContent = "";
+            
 
             let regularPrice = document.getElementById('regularPrice').value.trim();
             let salePrice = document.getElementById('salePrice').value.trim();
-            let stockQuantity = document.getElementById('stockQuantity').value.trim();
+            
 
             if(!/^[1-9]\d*$/.test(regularPrice)){
                 
@@ -112,11 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 salePrice_error.textContent = "Must be a positive number.";
                 formValidation = false;
             }
-            if(!/^[1-9]\d*$/.test(stockQuantity)){
-
-                stockQuantity_error.textContent = "Must be a positive number.";
-                formValidation = false;
-            }
+           
+            
             
             if(formValidation){
                 const category = document.getElementById('category').value;
