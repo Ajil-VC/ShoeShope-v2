@@ -55,7 +55,7 @@ function updateCartItem(select) {
         qtyInput.disabled = false;
 
         if (Number(qtyInput.value) < 1) {
-            qtyInput.value = 1;
+            qtyInput.value = 0;
         }
 
         if (Number(qtyInput.value) > maxQty) {

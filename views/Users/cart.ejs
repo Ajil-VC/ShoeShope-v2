@@ -98,7 +98,7 @@
                                     <div class="d-flex ml-5 justify-content-center " >
                                         <div>Qty: </div>
 
-                                        <input class="form-select-cart quantity-input ml-2 " value="<%=cartItemsArray[i].quantity%>" style="height: 30px; width: 70px;" type="number" max="<%=cartItemsArray[i].productId.stockQuantity < 4 ? cartItemsArray[i].productId.stockQuantity : 4%>"  data-product-id="<%=cartItemsArray[i].productId._id%>">
+                                        <input class="form-select-cart quantity-input ml-2 " value="<%=cartItemsArray[i].quantity%>" style="height: 30px; width: 70px;" type="number" max="<%=cartItemsArray[i].productId.stockQuantity < 4 ? cartItemsArray[i].productId.stockQuantity : 4%>" min="0" data-product-id="<%=cartItemsArray[i].productId._id%>">
                                     
                                     </div>
                                     <% if(cartItemsArray[i].productId.isActive === 0){ %>
