@@ -574,24 +574,26 @@ const loadDashboard = async (req, res) => {
 
 
         const categoryCount = categories.length;
-        const deliveredOrderCountRawData = orderStatics.filter(ob => ob._id == 'Delivered')[0]?.count;
-        const deliveredOrderCount = Number.isNaN(deliveredOrderCountRawData) ? 0 : deliveredOrderCountRawData;
+        const deliveredStats = orderStatics.find(o => o._id === 'Delivered') || {};
+        const approvedReturns = returnOrders.find(r => r._id === 'approved') || {};
+        const initiatedReturns = returnOrders.find(r => r._id === 'initiated') || {};
 
-        const totalDeliveredAmountRawdata = orderStatics.filter(ob => ob._id == 'Delivered')[0]?.totalAmnt;
-        const totalDeliveredAmount = Number.isNaN(totalDeliveredAmountRawdata) ? 0 : totalDeliveredAmountRawdata;
+        const deliveredOrderCount = Number(deliveredStats.count) || 0;
+        const totalDeliveredAmount = Number(deliveredStats.totalAmnt) || 0;
 
-        const totalReturnCountRawData = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.count || 0;
-        const totalReturnCount = Number.isNaN(totalReturnCountRawData) ? 0 : totalReturnCountRawData;
-        const totalReturnedAmntRawData = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.totalAmnt;
-        const totalReturnedAmnt = Number.isNaN(totalReturnedAmntRawData) ? 0 : totalReturnedAmntRawData;
+        const totalReturnCount = Number(approvedReturns.count) || 0;
+        const totalReturnedAmnt = Number(approvedReturns.totalAmnt) || 0;
 
         const purchasedCount = deliveredOrderCount - totalReturnCount;
-        const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2);
-        const avgMonthlyEarningRawData = (purchasedAmount / 7).toFixed(2);
-        const avgMonthlyEarning = Number.isNaN(avgMonthlyEarningRawData) ? 0 : avgMonthlyEarningRawData;
 
-        const initiatedReturnCountRawData = returnOrders.filter(elem => (elem._id == 'initiated'))[0]?.count;
-        const initiatedReturnCount = Number.isNaN(initiatedReturnCountRawData) ? 0 : initiatedReturnCountRawData;
+        const purchasedAmount = totalDeliveredAmount - totalReturnedAmnt;
+
+        const avgMonthlyEarning =
+            purchasedAmount > 0
+                ? Number((purchasedAmount / 7).toFixed(2))
+                : 0;
+
+        const initiatedReturnCount = Number(initiatedReturns.count) || 0;
 
         return res.status(200).render('dashboard', {
             productsCount,
