@@ -579,9 +579,9 @@ const loadDashboard = async (req, res) => {
         const totalReturnCount = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.count;
         const totalReturnedAmnt = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.totalAmnt;
 
-        const purchasedCount = deliveredOrderCount - totalReturnCount;
-        const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2);
-        const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2);
+        const purchasedCount = deliveredOrderCount - totalReturnCount || 0;
+        const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2) || 0;
+        const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2) || 0;
 
         const initiatedReturnCount = returnOrders.filter(elem => (elem._id == 'initiated'))[0]?.count;
 
