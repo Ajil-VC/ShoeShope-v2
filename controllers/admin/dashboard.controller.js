@@ -578,11 +578,11 @@ const loadDashboard = async (req, res) => {
         const totalDeliveredAmount = orderStatics.filter(ob => ob._id == 'Delivered')[0]?.totalAmnt;
         const totalReturnCount = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.count;
         const totalReturnedAmnt = returnOrders.filter(elem => (elem._id == 'approved'))[0]?.totalAmnt;
-
+console.log(deliveredOrderCount , totalReturnCount)
         const purchasedCount = deliveredOrderCount - totalReturnCount || 0;
         const purchasedAmount = (totalDeliveredAmount - totalReturnedAmnt).toFixed(2) || 0;
         const avgMonthlyEarning = (purchasedAmount / 7).toFixed(2) || 0;
-
+            console.log(purchasedCount, purchasedAmount, avgMonthlyEarning)
         const initiatedReturnCount = returnOrders.filter(elem => (elem._id == 'initiated'))[0]?.count;
 
         return res.status(200).render('dashboard', {
