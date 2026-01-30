@@ -591,7 +591,7 @@ const loadDashboard = async (req, res) => {
         const avgMonthlyEarning = Number.isNaN(avgMonthlyEarningRawData) ? 0 : avgMonthlyEarningRawData;
 
         const initiatedReturnCountRawData = returnOrders.filter(elem => (elem._id == 'initiated'))[0]?.count;
-        const initiatedReturnCount = Number.isNaN(initiatedReturnCount) ? 0 : initiatedReturnCountRawData;
+        const initiatedReturnCount = Number.isNaN(initiatedReturnCountRawData) ? 0 : initiatedReturnCountRawData;
 
         return res.status(200).render('dashboard', {
             productsCount,
