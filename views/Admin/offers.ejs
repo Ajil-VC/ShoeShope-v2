@@ -1,341 +1,383 @@
-<%- include("../layouts/adminHeader.ejs")  %>
-    
-<!--Aside Here-->
-<%- include("../layouts/adminAside.ejs")  %>
+<%- include("../layouts/adminHeader.ejs") %>
 
-<!--Head with search bar and other options Here-->
-<%- include("../layouts/adminHead.ejs")  %>
-    <!-- <div class="screen-overlay"></div> -->
+    <!--Aside Here-->
+    <%- include("../layouts/adminAside.ejs") %>
 
-
-    	<!-- Modal Start here -->
-        <div class="modal fade" id="editOfferModal" tabindex="-1" role="dialog" aria-labelledby="editOfferModalTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editOfferModalLongTitle"></h5>
-                        <button type="button" id="modal-close-button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="ed-ofr-form" method="post" action="/admin/offers?_method=PUT" >
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="ed-ofr-title">Title</label>
-                                    <input type="text" name="title" class="form-control" id="ed-ofr-title">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="ed-ofr-discountType">Discount Type</label>
-                                    <select class="form-control" name="discountType" id="ed-ofr-discountType">
-                                        
-                                        <option value="percentage">Percentage</option>
-                                        <option value="fixed">Fixed Amount</option>
-
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="ed-ofr-discountValue">Discount Value</label>
-                                    <input type="number" name="discountValue" class="form-control" id="ed-ofr-discountValue">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="ed-ofr-minPurchase">Minimum Amount</label>
-                                    <input type="number" name="minPurchaseAmount" class="form-control" id="ed-ofr-minPurchase">
-                                </div>
-                            </div>
-
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="ed-ofr-startDate">Start Date</label>
-                                    <input type="date" name="startDate" class="form-control" id="ed-ofr-startDate" >
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="ed-ofr-endDate">End Date</label>
-                                    <input type="date" name="endDate" class="form-control" id="ed-ofr-endDate" >
-                                </div>
-                            </div>
+        <!--Head with search bar and other options Here-->
+        <%- include("../layouts/adminHead.ejs") %>
+            <!-- <div class="screen-overlay"></div> -->
 
 
-                            <!--Hidden input Fields-->
-                            <input type="hidden" name="offerId" class="form-control" id="ed-ofr-offerid" >
-                            <input type="hidden" name="offerType" class="form-control" id="ed-ofr-offerType" >
-                            <!--Hidden input Fields-->
+            <!-- Modal Start here -->
+            <div class="modal fade" id="editOfferModal" tabindex="-1" role="dialog"
+                aria-labelledby="editOfferModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editOfferModalLongTitle"></h5>
+                            <button type="button" id="modal-close-button" class="close" data-dismiss="modal"
+                                aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="ed-ofr-form" method="post" action="/admin/offers?_method=PUT">
 
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ed-ofr-title">Title</label>
+                                        <input type="text" name="title" class="form-control" id="ed-ofr-title">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ed-ofr-discountType">Discount Type</label>
+                                        <select class="form-control" name="discountType" id="ed-ofr-discountType">
 
-                            <div class="row">
-                                <div class="col-12 mb-3">
-                                    <button type="button" class="btn btn-info w-100" id="ed-ofr-product-list" data-toggle="modal" data-target="#productListModal">
-                                        <!-- Select Products -->
-                                         click to see products
-                                    </button>
-                                </div>
-                            </div>
+                                            <option value="percentage">Percentage</option>
+                                            <option value="fixed">Fixed Amount</option>
 
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <!-- <button type="button" class="btn btn-danger" id="ed-ofr-delete">Delete</button> -->
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" name="isActive" class="form-check-input" id="ed-ofr-activate">
-                                        <label class="form-check-label" for="ed-ofr-activate">Activate/Deactivate</label>
+                                        </select>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ed-ofr-discountValue">Discount Value</label>
+                                        <input type="number" name="discountValue" class="form-control"
+                                            id="ed-ofr-discountValue">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ed-ofr-minPurchase">Minimum Amount</label>
+                                        <input type="number" name="minPurchaseAmount" class="form-control"
+                                            id="ed-ofr-minPurchase">
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ed-ofr-startDate">Start Date</label>
+                                        <input type="date" name="startDate" class="form-control" id="ed-ofr-startDate">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ed-ofr-endDate">End Date</label>
+                                        <input type="date" name="endDate" class="form-control" id="ed-ofr-endDate">
+                                    </div>
+                                </div>
+
+
+                                <!--Hidden input Fields-->
+                                <input type="hidden" name="offerId" class="form-control" id="ed-ofr-offerid">
+                                <input type="hidden" name="offerType" class="form-control" id="ed-ofr-offerType">
+                                <!--Hidden input Fields-->
+
+
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <button type="button" class="btn btn-info w-100" id="ed-ofr-product-list"
+                                            data-toggle="modal" data-target="#productListModal">
+                                            <!-- Select Products -->
+                                            click to see products
+                                        </button>
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <!-- <button type="button" class="btn btn-danger" id="ed-ofr-delete">Delete</button> -->
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="isActive" class="form-check-input"
+                                                id="ed-ofr-activate">
+                                            <label class="form-check-label"
+                                                for="ed-ofr-activate">Activate/Deactivate</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" form="ed-ofr-form" data-index=""
+                                id="save-offer">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="productListModal" tabindex="-1" role="dialog"
+                aria-labelledby="productListModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productListModalTitle">Select Products</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <!-- <input type="text" class="form-control" id="product-search" placeholder="Search products..."> -->
                             </div>
+                            <div id="offer-product-list" style="max-height: 300px; overflow-y: auto;">
+                                <!-- Product list will be dynamically populated here -->
 
-                            
-
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" form="ed-ofr-form" data-index="" id="save-offer">Save changes</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <!-- <button type="button" class="btn btn-primary" id="save-products">Save Products</button> -->
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="modal fade" id="productListModal" tabindex="-1" role="dialog" aria-labelledby="productListModalTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="productListModalTitle">Select Products</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+
+
+
+            <section class="content-main">
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-title card-title">Offers</h2>
+                        <p>Manage offers.</p>
                     </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <!-- <input type="text" class="form-control" id="product-search" placeholder="Search products..."> -->
+                </div>
+
+                <form id="off-create-form" method="post" action="/admin/offers">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="off-title" class="form-label">Title</label>
+                            <input type="text" name="title" class="form-control bg-white" id="off-title">
+                            <span class="text-danger" style="font-size: smaller;" id="offer-title-error"></span>
                         </div>
-                        <div id="offer-product-list" style="max-height: 300px; overflow-y: auto;">
-                            <!-- Product list will be dynamically populated here -->
-             
+                        <div class="col-md-6">
+                            <label for="off-description" class="form-label">Description</label>
+                            <textarea class="form-control bg-white" name="description" id="off-description"
+                                rows="1"></textarea>
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <label for="off-applicable-on" class="form-label ">Applicable On</label>
+                            <select class="form-select bg-white border border-danger " name="applicableOn"
+                                id="off-applicable-on">
+                                <option disabled selected value="">Choose...</option>
+                                <option value="product">Product</option>
+                                <option value="category">Category</option>
+                                <option value="cart" disabled>Cart</option>
+                            </select>
+                            <span class="text-danger" style="font-size: smaller;" id="offer-applicable-error"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="off-discount-type" class="form-label">Discount Type</label>
+                            <select class="form-select bg-white" name="discountType" id="off-discount-type">
+                                <option disabled selected value="">Choose...</option>
+                                <option value="percentage">Percentage</option>
+                                <option value="fixed" disabled>Fixed (Under development)</option>
+                            </select>
+                            <span class="text-danger" style="font-size: smaller;" id="offer-discount-error"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="off-discount-value" class="form-label">Discount Value</label>
+                            <input type="number" class="form-control bg-white" name="discountValue"
+                                id="off-discount-value">
+                            <span class="text-danger" style="font-size: smaller;" id="offer-disvalue-error"></span>
+                        </div>
+
+
+
+                        <div class="col-md-6" hidden>
+                            <label for="off-products" class="form-label">Products (if applicable)</label>
+                            <select class="form-select bg-white" name="products" id="off-products" multiple>
+
+                                <!-- Add product options dynamically -->
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 position-relative">
+                            <label for="offStProductSearch" class="form-label">Add Products (if applicable)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-white border " id="offStProductSearch"
+                                    placeholder="Search products..." disabled>
+                                <!-- <button class="btn btn-outline-secondary" type="button" id="offStProductAddBtn">Add</button> -->
+                            </div>
+                            <div id="offStProductPopup" class="position-absolute bg-white border rounded p-2 mt-1 w-100"
+                                style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                                <div id="offStProdRecentProducts">
+                                    <!-- Recent products will be dynamically added here -->
+                                </div>
+                            </div>
+                            <span class="text-danger" style="font-size: smaller;" id="offer-add-product-error"></span>
+                        </div>
+
+
+
+
+                        <div class="col-md-6" hidden>
+                            <label for="off-categories" class="form-label">Categories (if applicable)</label>
+                            <select class="form-select bg-white" name="categories" id="off-categories" multiple>
+                                <!-- Add category options dynamically -->
+                            </select>
+                        </div>
+
+
+                        <div class="col-md-6 position-relative">
+                            <label for="offStCategorySearch" class="form-label">Add Categories (if applicable)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-white border " id="offStCategorySearch"
+                                    placeholder="Search categories..." disabled>
+                                <!-- <button class="btn btn-outline-secondary" type="button" id="offStCategoryAddBtn">Add</button> -->
+                            </div>
+                            <div id="offStCategoryPopup"
+                                class="position-absolute bg-white border rounded p-2 mt-1 w-100"
+                                style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                                <div id="offStCatRecentProducts">
+                                    <!-- Recent products will be dynamically added here -->
+
+                                </div>
+                            </div>
+                            <span class="text-danger" style="font-size: smaller;" id="offer-add-category-error"></span>
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <label for="off-min-purchase" class="form-label">Minimum Purchase Amount</label>
+                            <input type="number" class="form-control bg-white border " name="minPurchaseAmount"
+                                id="off-min-purchase" value="0" disabled>
+                            <span class="text-danger" style="font-size: smaller;" id="offer-min-purchase-error"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="off-start-date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control bg-white" name="startDate" id="off-start-date">
+                            <span class="text-danger" style="font-size: smaller;" id="offer-startdate-error"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="off-end-date" class="form-label">End Date</label>
+                            <input type="date" class="form-control bg-white" name="endDate" id="off-end-date">
+                            <span class="text-danger" style="font-size: smaller;" id="offer-enddate-error"></span>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end align-items-center">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" name="isActive" type="checkbox" id="off-is-active"
+                                    checked>
+                                <label class="form-check-label" for="off-is-active">
+                                    Is Active
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Offer</button>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <!-- <button type="button" class="btn btn-primary" id="save-products">Save Products</button> -->
+                </form>
+            </section>
+
+            <button type="button" class="btn btn-primary" hidden id="openEditOffer" style="width: 100%;"
+                data-toggle="modal" data-target="#editOfferModal"></button>
+
+
+            <section class="content-main">
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-title card-title">Added Offer Details </h2>
+
                     </div>
+
                 </div>
-            </div>
-        </div>
+                <div class="card mb-4">
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+
+
+                            <table class="table table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Discount</th>
+                                        <th>Applicable On</th>
+
+                                        <th>Min Purchase</th>
+                                        <th>Date Range</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <%for(let i=0 ; i < offers.length ; i++){%>
+
+                                        <tr style="cursor: pointer;"
+                                            onclick="editOfferDetails('<%=offers[i]._id%>','<%=offers[i].applicableOn%>')">
+                                            <td>
+                                                <%=offers[i].title%>
+                                            </td>
+                                            <td>
+                                                <%=offers[i].description%>
+                                            </td>
+                                            <td>
+                                                <div class="discount-info">
+                                                    <% const discountValue=offers[i].discountType==='fixed' ? `₹
+                                                        ${offers[i].discountValue}` : `${offers[i].discountValue} %` %>
+                                                        <span>Type: <span style="font-weight: bold;">
+                                                                <%=offers[i].discountType%>
+                                                            </span></span>
+                                                        <span>Value: <span style="font-weight: bold;">
+                                                                <%=discountValue%>
+                                                            </span></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <%=offers[i].applicableOn%>
+                                            </td>
+
+                                            <td>₹<%=offers[i].minPurchaseAmount%>
+                                            </td>
+                                            <td>
+                                                <div class="discount-info">
+                                                    <span>Start: <span style="font-weight: bold;">
+                                                            <%=new Date(offers[i].startDate).toLocaleDateString('en-US',
+                                                                { year: 'numeric' , month: 'long' , day: 'numeric' })%>
+                                                        </span></span>
+                                                    <span>End: <span style="font-weight: bold;">
+                                                            <%=new Date(offers[i].endDate).toLocaleDateString('en-US', {
+                                                                year: 'numeric' , month: 'long' , day: 'numeric' })%>
+                                                        </span></span>
+                                                </div>
+                                            </td>
+                                            <% const isActive=offers[i].isActive ? 'Active' : 'Inactive' %>
+                                                <td><span
+                                                        class="badge <%= offers[i].isActive ? 'bg-success' : 'bg-danger' %>">
+                                                        <%=isActive%>
+                                                    </span></td>
+                                        </tr>
+
+                                        <%}%>
+
+
+                                </tbody>
+                            </table>
+
+
+                        </div> <!-- table-responsive //end -->
+                    </div> <!-- card-body end// -->
+                </div> <!-- card end// -->
+                <div class="pagination-area mt-15 mb-50">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-start">
 
 
 
-
-    <section class="content-main">
-        <div class="content-header">
-            <div>
-                <h2 class="content-title card-title">Offers</h2>
-                <p>Manage offers.</p>
-            </div>
-        </div>
-    
-        <form id="off-create-form" method="post" action="/admin/offers" >
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="off-title" class="form-label">Title</label>
-                    <input type="text" name="title" class="form-control bg-white" id="off-title" >
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-title-error"></span>
+                            <li class="page-item"><a class="page-link" href="#"><i
+                                        class="material-icons md-chevron_right"></i></a></li>
+                        </ul>
+                    </nav>
                 </div>
-                <div class="col-md-6">
-                    <label for="off-description" class="form-label">Description</label>
-                    <textarea class="form-control bg-white" name="description" id="off-description" rows="1"></textarea>
-                </div>
-                <div class="col-md-6" hidden >
-                    <label for="off-products" class="form-label">Products (if applicable)</label>
-                    <select class="form-select bg-white" name="products" id="off-products" multiple>
-                        
-                        <!-- Add product options dynamically -->
-                    </select>
-                </div>
-
-                <div class="col-md-6 position-relative">
-                    <label for="offStProductSearch" class="form-label">Add Products (if applicable)</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control bg-white border " id="offStProductSearch" placeholder="Search products..." disabled >
-                        <!-- <button class="btn btn-outline-secondary" type="button" id="offStProductAddBtn">Add</button> -->
-                    </div>
-                    <div id="offStProductPopup" class="position-absolute bg-white border rounded p-2 mt-1 w-100" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
-                        <div id="offStProdRecentProducts">
-                            <!-- Recent products will be dynamically added here -->
-                        </div>
-                    </div>
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-add-product-error"></span>
-                </div>
+            </section> <!-- content-main end// -->
 
 
 
-
-                <div class="col-md-6" hidden >
-                    <label for="off-categories" class="form-label">Categories (if applicable)</label>
-                    <select class="form-select bg-white" name="categories" id="off-categories" multiple>
-                        <!-- Add category options dynamically -->
-                    </select>
-                </div>
-
-
-                <div class="col-md-6 position-relative">
-                    <label for="offStCategorySearch" class="form-label">Add Categories (if applicable)</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control bg-white border " id="offStCategorySearch" placeholder="Search categories..." disabled >
-                        <!-- <button class="btn btn-outline-secondary" type="button" id="offStCategoryAddBtn">Add</button> -->
-                    </div>
-                    <div id="offStCategoryPopup" class="position-absolute bg-white border rounded p-2 mt-1 w-100" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
-                        <div id="offStCatRecentProducts">
-                            <!-- Recent products will be dynamically added here -->
-
-                        </div>
-                    </div>
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-add-category-error"></span>
-                </div>
-
-
-                <div class="col-md-4">
-                    <label for="off-discount-type" class="form-label">Discount Type</label>
-                    <select class="form-select bg-white" name="discountType" id="off-discount-type" >
-                        <option disabled selected value="">Choose...</option>
-                        <option value="percentage">Percentage</option>
-                        <option value="fixed">Fixed</option>
-                    </select>
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-discount-error"></span>
-                </div>
-                
-                <div class="col-md-4">
-                    <label for="off-discount-value" class="form-label">Discount Value</label>
-                    <input type="number" class="form-control bg-white" name="discountValue" id="off-discount-value" >
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-disvalue-error"></span>
-                </div>
-                <div class="col-md-4">
-                    <label for="off-applicable-on" class="form-label ">Applicable On</label>
-                    <select class="form-select bg-white border border-danger " name="applicableOn" id="off-applicable-on" >
-                        <option disabled selected value="">Choose...</option>
-                        <option value="product">Product</option>
-                        <option value="category">Category</option>
-                        <option value="cart" disabled >Cart</option>
-                    </select>
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-applicable-error"></span>
-                </div>
-                
-                <div class="col-md-4">
-                    <label for="off-min-purchase" class="form-label">Minimum Purchase Amount</label>
-                    <input type="number" class="form-control bg-white border " name="minPurchaseAmount" id="off-min-purchase" value="0" disabled >
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-min-purchase-error"></span>
-                </div>
-                <div class="col-md-4">
-                    <label for="off-start-date" class="form-label">Start Date</label>
-                    <input type="date" class="form-control bg-white" name="startDate" id="off-start-date" >
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-startdate-error"></span>
-                </div>
-                <div class="col-md-4">
-                    <label for="off-end-date" class="form-label">End Date</label>
-                    <input type="date" class="form-control bg-white" name="endDate" id="off-end-date" >
-                    <span  class="text-danger" style="font-size: smaller;" id="offer-enddate-error"></span>
-                </div>
-                <div class="col-12 d-flex justify-content-end align-items-center">
-                    <div class="form-check me-3">
-                        <input class="form-check-input" name="isActive" type="checkbox" id="off-is-active" checked>
-                        <label class="form-check-label" for="off-is-active">
-                            Is Active
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Offer</button>
-                </div>
-            </div>  
-        </form>
-    </section>
-
-    <button type="button" class="btn btn-primary" hidden id="openEditOffer" style="width: 100%;" data-toggle="modal" data-target="#editOfferModal"></button>
-
-    
-    <section class="content-main">
-        <div class="content-header">
-            <div>
-                <h2 class="content-title card-title">Added Offer Details </h2>
-            
-            </div>
-         
-        </div>
-        <div class="card mb-4">
-            
-            <div class="card-body">
-                <div class="table-responsive">
-                   
-                
-                    <table class="table table-custom">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Description</th>
-                                <th>Discount</th>
-                                <th>Applicable On</th>
-                               
-                                <th>Min Purchase</th>
-                                <th>Date Range</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            <%for(let i = 0 ; i < offers.length ; i++){%>
-
-                                <tr style="cursor: pointer;" onclick="editOfferDetails('<%=offers[i]._id%>','<%=offers[i].applicableOn%>')" >
-                                    <td><%=offers[i].title%></td>
-                                    <td><%=offers[i].description%></td>
-                                    <td>
-                                        <div class="discount-info">
-                                            <% const discountValue = offers[i].discountType === 'fixed' ? `₹ ${offers[i].discountValue}` : `${offers[i].discountValue} %` %>
-                                            <span>Type: <span style="font-weight: bold;" ><%=offers[i].discountType%></span></span>
-                                            <span>Value: <span style="font-weight: bold;" ><%=discountValue%></span></span>
-                                        </div>
-                                    </td>
-                                    <td><%=offers[i].applicableOn%></td>
-                                    
-                                    <td>₹<%=offers[i].minPurchaseAmount%></td>
-                                    <td>
-                                        <div class="discount-info">
-                                            <span>Start: <span style="font-weight: bold;" >
-                                                <%=new Date(offers[i].startDate).toLocaleDateString('en-US', { 
-                                                    year: 'numeric', month: 'long', day: 'numeric' })%>
-                                            </span></span>
-                                            <span>End: <span style="font-weight: bold;" >
-                                                <%=new Date(offers[i].endDate).toLocaleDateString('en-US', { 
-                                                    year: 'numeric', month: 'long', day: 'numeric' })%>
-                                            </span></span>
-                                        </div>
-                                    </td>
-                                    <% const isActive = offers[i].isActive ? 'Active' : 'Inactive' %>
-                                    <td><span class="badge <%= offers[i].isActive ? 'bg-success' : 'bg-danger' %>"><%=isActive%></span></td>
-                                </tr>
-
-                            <%}%>
-
-                            
-                        </tbody>
-                    </table>
-
-
-                </div> <!-- table-responsive //end -->
-            </div> <!-- card-body end// -->
-        </div> <!-- card end// -->
-        <div class="pagination-area mt-15 mb-50">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-start">
-                    
-
-
-                    <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
-                </ul>
-            </nav>
-        </div>
-    </section> <!-- content-main end// -->
-  
-
-
-<%- include("../layouts/adminFooter.ejs")  %>
+            <%- include("../layouts/adminFooter.ejs") %>

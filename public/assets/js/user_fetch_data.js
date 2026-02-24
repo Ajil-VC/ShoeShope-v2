@@ -200,13 +200,17 @@ function passwordValidation(password) {
         validatedPassword.status = false;
         return validatedPassword;
 
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        validatedPassword.message = "Password should contain a special character";
+        validatedPassword.status = false;
+        return validatedPassword;
     } else if (!/^.{5,}$/.test(password)) {
 
         validatedPassword.message = "Password Should Contain 5 charecters minimum";
         validatedPassword.status = false;
         return validatedPassword;
 
-    } else if (/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(password)) {
+    } else if (/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{5,}$/.test(password)) {
 
         validatedPassword.message = "";
         validatedPassword.status = true;
