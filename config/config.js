@@ -11,7 +11,10 @@ const config = {
      Key_id : process.env.RazorPay_Key_Id,
      Key_Secret : process.env.RazorPay_Key_Secret,
      webhookSecret : process.env.Webhook_Secret,
-     MONGO_URI : process.env.MONGO_URI
+     MONGO_URI : process.env.MONGO_URI,
+     CLOUDINARY_CLOUD_NAME : process.env.CLOUDINARY_CLOUD_NAME,
+     CLOUDINARY_API_KEY : process.env.CLOUDINARY_API_KEY,
+     CLOUDINARY_API_SECRET : process.env.CLOUDINARY_API_SECRET
 }
 
 module.exports = config;

@@ -71,7 +71,7 @@
                             
                                 <input type="checkbox" data-product-id="<%=cartItemsArray[i].productId._id%>"  class="cart-item-checkbox "  <% if(cartItemsArray[i].isSelected){ %>checked<% } %> >
                            
-                            <img src="/ProductImage/<%=cartItemsArray[i].productId.image[0]%>" alt="/ProductImage/<%=cartItemsArray[i].productId.image[1]%>" class="cart-item-image">
+                            <img src="<%=productImageUrl(cartItemsArray[i].productId.image[0])%>" alt="" class="cart-item-image">
         
                             <div class="cart-item-details">
                                 <h3><%=cartItemsArray[i].productId.ProductName%></h3>

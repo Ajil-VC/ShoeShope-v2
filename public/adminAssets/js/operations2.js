@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             baseAmntCell.innerText = `₹${rowData.baseAmount}`;
             topProdCell.innerHTML = `<a class="itemside" href="#">
                                                 <div class="left">
-                                                    <img src="/ProductImage/${rowData.bestSellingProduct.productImage[0]}" class="img-sm img-thumbnail" alt="Item">
+                                                    <img src="${productImageUrl(rowData.bestSellingProduct.productImage[0])}" class="img-sm img-thumbnail" alt="Item">
                                                 </div>
                                                 <div class="info">
                                                     <h6 class="mb-0"> ${rowData.bestSellingProduct.productName} (${rowData.bestSellingProduct.totalUnitsSold} pcs) </h6>
@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             baseAmntCell.innerText = `₹${rowData.baseAmount}`;
             topProdCell.innerHTML = `<a class="itemside" href="#">
                                                 <div class="left">
-                                                    <img src="/ProductImage/${rowData.bestSellingProduct.productImage[0]}" class="img-sm img-thumbnail" alt="Item">
+                                                    <img src="${productImageUrl(rowData.bestSellingProduct.productImage[0])}" class="img-sm img-thumbnail" alt="Item">
                                                 </div>
                                                 <div class="info">
                                                     <h6 class="mb-0"> ${rowData.bestSellingProduct.productName} (${rowData.bestSellingProduct.totalUnitsSold} pcs) </h6>
@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             productCell.innerHTML = `<a class="itemside" href="#">
                                                 <div class="left">
-                                                    <img src="/ProductImage/${rowData.productImage[0]}" class="img-sm img-thumbnail" alt="Item">
+                                                    <img src="${productImageUrl(rowData.productImage[0])}" class="img-sm img-thumbnail" alt="Item">
                                                 </div>
                                                 <div class="info">
                                                     <h6 class="mb-0"> ${rowData.productName} </h6>
@@ -651,6 +651,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 });
-
 
 

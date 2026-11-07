@@ -289,7 +289,7 @@
                                         <button class="adImRemoveBtn"
                                             onclick="rmImageFromEditPage('<%=product._id%>','<%=product.image[i]%>')"
                                             style="background-color: brown; color: white;">Remove</button>
-                                        <img src="/ProductImage/<%=product.image[i]%>" alt="Product 2"
+                                        <img src="<%=productImageUrl(product.image[i])%>" alt="Product 2"
                                             class="editim-product-preview-image adImPreviewImage">
                                     </div>
                                     <% } %>

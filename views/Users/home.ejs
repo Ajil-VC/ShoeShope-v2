@@ -164,9 +164,9 @@
                                                         <a href="/product_details/?product_id=<%=products[i]._id%>">
 
                                                             <img class="default-img"
-                                                                src="/ProductImage/<%=products[i].image[0]%>" alt="">
+                                                                src="<%=productImageUrl(products[i].image[0])%>" alt="">
                                                             <img class="hover-img"
-                                                                src="/ProductImage/<%=products[i].image[1]%>" alt="">
+                                                                src="<%=productImageUrl(products[i].image[1])%>" alt="">
                                                         </a>
                                                     </div>
 

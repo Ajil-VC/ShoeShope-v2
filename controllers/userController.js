@@ -1316,7 +1316,7 @@ const changeQuantity = async (req, res) => {
         } else if (newQuantity > 4) {
             return res.json({ status: false, message: "Max 4 items per product" });
         }
-   
+
 
         await Cart.findOneAndUpdate(
             { userId: userID, 'items.productId': productId },
@@ -1609,7 +1609,6 @@ const validateCart = async (req, res) => {
     try {
 
         const { cartItemsArray, totalSelectedItems } = await cartItemsFindFn(userID, selectedCoupon);
-
         if (totalSelectedItems < 1) {
             return res.json({ status: false, message: "Need atleast 1 item selected to checkout" })
         }
@@ -1618,7 +1617,14 @@ const validateCart = async (req, res) => {
             if ((cartItemsArray[i].productId.isActive === 0) && cartItemsArray[i].isSelected) {
                 return res.json({ status: false, message: "Some Products are unavailable." });
             } if (cartItemsArray[i].isSelected) {
-                if (cartItemsArray[i].productId.stockQuantity < cartItemsArray[i].quantity) {
+
+                let size = false;
+                if (Array.isArray(cartItemsArray[i].productId.sizes) && cartItemsArray[i].productId.sizes.length > 0) {
+                    size = cartItemsArray[i].productId.sizes.find(s => s.size === cartItemsArray[i].size);
+                }
+                if (!size) {
+                    return res.json({ status: false, message: "Can't checkout now. Some of the selected products having some issues." })
+                } else if (size.quantity < cartItemsArray[i].quantity) {
                     return res.json({ status: false, message: "Stock limit exceeded for some products. Please revise your selection." });
                 }
             }

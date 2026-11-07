@@ -436,11 +436,11 @@
 
                                                                 <tr class="odsIdUnifiedRow" data-id="<%=orders[i]._id%>" >
                                                                     <td>
-                                                                        <img src="/ProductImage/<%=orders[i]?.items[0]?.product?.images[0]%>" alt="Order preview" class="ods-order-preview">
+                                                                        <img src="<%=productImageUrl(orders[i]?.items[0]?.product?.images[0])%>" alt="Order preview" class="ods-order-preview">
                                                                         <% if(orders[i]?.items[1]){ %>
-                                                                            <img src="/ProductImage/<%=orders[i]?.items[1]?.product?.images[0]%>" alt="Order preview" class="ods-order-preview">
+                                                                            <img src="<%=productImageUrl(orders[i]?.items[1]?.product?.images[0])%>" alt="Order preview" class="ods-order-preview">
                                                                         <% }else{ %>
-                                                                            <img src="/ProductImage/<%=orders[i]?.items[0]?.product?.images[1]%>" alt="Order preview" class="ods-order-preview">
+                                                                            <img src="<%=productImageUrl(orders[i]?.items[0]?.product?.images[1])%>" alt="Order preview" class="ods-order-preview">
                                                                         <% } %>
                                                                         <div class="odsIdOrderId">Order ID: <%=orders[i]?._id%></div>
                                                                         <div>Date: <%=new Date(orders[i]?.orderDate).toLocaleDateString('en-US', { 

@@ -201,7 +201,7 @@ async function rmImageFromEditPage(productId, image){
 
         if(confirm('Are you sure you want to remove this image from product?')){
 
-            const response = await fetch(`/admin/productslist/edit_product?productid=${productId}&image=${image}`,{method : 'delete'});
+            const response = await fetch(`/admin/productslist/edit_product?productid=${productId}&image=${encodeURIComponent(image)}`,{method : 'delete'});
             if(!response.ok){
                 throw new Error("Network response was not ok while trying to remove the image");
             }

@@ -10,7 +10,6 @@ userRouter.use(authenticate.badgeCount);
 
 const userController = require('../controllers/userController');
 
-
 //Registration
 userRouter.get('/signup', userController.loadRegister);
 userRouter.post('/signup', userController.gen_otp);
