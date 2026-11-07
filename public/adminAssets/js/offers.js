@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <a class="itemside pb-1 ${prodIsSelected} " id="pro-${product._id}" href="#">
                 
                     <div class="left">
-                        <img src="/ProductImage/${product.image[0]}" class="img-sm img-thumbnail" alt="Item">
+                        <img src="${productImageUrl(product.image[0])}" class="img-sm img-thumbnail" alt="Item">
                     </div>
                     <div class="info">
                         <h6 class="mb-0"> ${product.ProductName} </h6>
@@ -569,7 +569,7 @@ function listProductsWithOffer(products) {
                 <a class="itemside pb-1  " id="pro-${product._id}" href="#">
                 
                     <div class="left">
-                        <img src="/ProductImage/${product.image[0]}" class="img-sm img-thumbnail" alt="Item">
+                        <img src="${productImageUrl(product.image[0])}" class="img-sm img-thumbnail" alt="Item">
                     </div>
                     <div class="info">
                         <h6 class="mb-0"> ${product.ProductName} </h6>

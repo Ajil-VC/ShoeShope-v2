@@ -42,10 +42,10 @@
 
                                                             <figure class="border-radius-10"
                                                                 style="border-radius: 10px; overflow: hidden;">
-                                                                <img src="/ProductImage/<%=product_details.image[i]%>"
+                                                                <img src="<%=productImageUrl(product_details.image[i])%>"
                                                                     alt="product image"
                                                                     style="width: 100%; height: auto;"
-                                                                    data-zoom-image="/ProductImage/<%=product_details.image[i]%>"
+                                                                    data-zoom-image="<%=productImageUrl(product_details.image[i])%>"
                                                                     class="zoom_image">
 
                                                             </figure>
@@ -267,10 +267,10 @@
                                                                     <a href="/product_details/?product_id=<%=related_products[i]._id%>"
                                                                         tabindex="0">
                                                                         <img class="default-img"
-                                                                            src="/ProductImage/<%=related_products[i].image[0]%>"
+                                                                            src="<%=productImageUrl(related_products[i].image[0])%>"
                                                                             alt="">
                                                                         <img class="hover-img"
-                                                                            src="/ProductImage/<%=related_products[i].image[1]%>"
+                                                                            src="<%=productImageUrl(related_products[i].image[1])%>"
                                                                             alt="">
                                                                     </a>
                                                                 </div>

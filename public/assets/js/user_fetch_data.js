@@ -1449,7 +1449,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <!-- Image, Product Name, and Brand -->
                 <div class="col-md-6 bot-image-product-section">
                 <div class="d-flex align-items-center">
-                    <img src="/ProductImage/${products?.product?.images[0]}" alt="Product preview" class="bot-product-image mr-3">
+                    <img src="${productImageUrl(products?.product?.images[0])}" alt="Product preview" class="bot-product-image mr-3">
                     <div class="brand-size-align" >
                     <h6 class="bot-product-name ">${products?.product?.name}</h6>
                     <span class="bot-brand  ">${products?.product?.Brand}</span>

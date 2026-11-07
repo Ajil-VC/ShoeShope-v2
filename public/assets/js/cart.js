@@ -23,7 +23,7 @@ document.addEventListener('change', function (e) {
     if (Number(qtyInput.value) > qtyInput.max) {
         qtyInput.value = qtyInput.max;
     }
-
+    
     stockInfo.textContent = stock > 0
         ? `${stock} left`
         : 'Out of stock';
@@ -55,11 +55,13 @@ function updateCartItem(select) {
         qtyInput.disabled = false;
 
         if (Number(qtyInput.value) < 1) {
-            qtyInput.value = 1;
+            qtyInput.value = 0;
+            console.log(qtyInput.value, '<1 ithu workaavund??')
         }
 
         if (Number(qtyInput.value) > maxQty) {
             qtyInput.value = maxQty;
+            console.log(qtyInput.value, 'maxQty');
         }
 
         stockInfo.textContent = `${stock} left`;
@@ -232,7 +234,7 @@ function updateStockAndQty(select) {
     } else {
         qtyInput.disabled = false;
 
-        if (qtyInput.value < 1) qtyInput.value = 1;
+        if (qtyInput.value < 1) qtyInput.value = 0;
         if (qtyInput.value > maxQty) qtyInput.value = maxQty;
 
         stockInfo.textContent = `${stock} left`;

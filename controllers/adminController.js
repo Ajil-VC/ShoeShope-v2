@@ -1,4 +1,5 @@
 const { User, Category, Brand, Product, Order, returnItem, transaction, coupon, wallet, Offer } = require('../models/models')
+const { uploadImages } = require('../utils/cloudinary');
 
 const mongoose = require('mongoose');
 const { format, setDate, endOfWeek } = require('date-fns');
@@ -830,6 +831,7 @@ const addNewProduct = async (req, res) => {
             }
         });
 
+        const imageUrls = await uploadImages(req.files || []);
         const newProduct = new Product({
             ProductName: productName,
             Description: description,
@@ -837,7 +839,7 @@ const addNewProduct = async (req, res) => {
             salePrice: salePrice,
             Category: category,
             Brand: brand,
-            image: req.files.map(file => file.filename),
+            image: imageUrls,
             targetGroup: targetGroup,
             sizes: variants
         });
@@ -922,7 +924,7 @@ const updateProduct = async (req, res) => {
         
         let newImages = null;
         if (req.files && req.files.length > 0) {
-            newImages = req.files.map(file => file.filename)
+            newImages = await uploadImages(req.files);
 
         }
         if (newImages) {

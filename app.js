@@ -54,6 +54,15 @@ app.set('view engine', 'ejs')
 
 app.use((req, res, next) => {
     res.locals.req = req;
+    res.locals.productImageUrl = image => {
+        if (!image) {
+            return '';
+        }
+
+        return /^https?:\/\//i.test(image)
+            ? image
+            : `/ProductImage/${encodeURIComponent(image)}`;
+    };
     next();
 });
 

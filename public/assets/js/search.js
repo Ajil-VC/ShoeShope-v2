@@ -74,8 +74,8 @@ document.addEventListener('DOMContentLoaded',function() {
                     <div class="product-img-action-wrap">
                         <div class="product-img product-img-zoom">
                             <a href="/product_details/?product_id=${product._id}">
-                                <img class="default-img" src="/ProductImage/${product.image[0]}" alt="">
-                                <img class="hover-img" src="/ProductImage/${product.image[1]}" alt="">
+                                <img class="default-img" src="${productImageUrl(product.image[0])}" alt="">
+                                <img class="hover-img" src="${productImageUrl(product.image[1])}" alt="">
                             </a>
                         </div>
                                                 
